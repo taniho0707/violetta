@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# STM32CubeMX生成ファイルは除外 (共有サーバからダウンロード)
+Generate/*
+
+# arm-none-eabiは除外 (共有サーバ、または公式からダウンロード)
+gcc-arm-11.2-2022.02-x86_64-arm-none-eabi.tar.xz
+
+# 生成物は除外
+build/*
+
+# IntelliSense用キャッシュファイルは除外
+.includes/*

@@ -1,0 +1,20 @@
+{
+  "C_Cpp.vcFormat.newLine.beforeCatch": false,
+  "C_Cpp.vcFormat.newLine.beforeElse": false,
+  "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyFunction": true,
+  "C_Cpp.vcFormat.newLine.closeBraceSameLine.emptyType": true,
+  "editor.formatOnSave": true,
+  "C_Cpp.clang_format_style": "{BasedOnStyle: Google, IndentWidth: 4}",
+  "C_Cpp.default.systemIncludePath": [
+    "./.includes/arm-none-eabi/include",
+    "./.includes/lib/gcc/arm-none-eabi/11.2.1/include",
+    "./.includes/**",
+  ],
+  "C_Cpp.default.includePath": [
+    "./.includes/arm-none-eabi/include",
+    "./.includes/lib/gcc/arm-none-eabi/11.2.1/include",
+    "./.includes/**",
+    ".",
+  ],
+  "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
+}

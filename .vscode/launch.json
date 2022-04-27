@@ -1,0 +1,42 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "preLaunchTask": "Build",
+            "name": "OpenOCD Debug | Program1",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": ".outs/program1.elf",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "/${workspaceFolderBasename}",
+            "environment": [],
+            "externalConsole": false,
+            "sourceFileMap": {
+                "/${workspaceFolderBasename}": "${workspaceFolder}",
+            },
+            "pipeTransport": {
+                "pipeCwd": "",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-w", "/${workspaceFolderBasename}",
+                    "-i", "${workspaceFolderBasename}",
+                    "sh", "-c",
+                ],
+                "debuggerPath": "arm-none-eabi-gdb"
+            },
+            "MIMode": "gdb",
+            "setupCommands": [
+                { "text": "target remote host.docker.internal:3333" },
+                { "text": "monitor reset halt" },
+                { "text": "monitor adapter_khz 4000" },
+                { "text": "load .outs/program1.elf" },
+                { "text": "monitor.adapter_khz 4000" },
+            ],
+        },
+    ],
+}
