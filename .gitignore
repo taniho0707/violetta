@@ -36,6 +36,7 @@ Generate/*
 
 # arm-none-eabiは除外 (共有サーバ、または公式からダウンロード)
 gcc-arm-11.2-2022.02-x86_64-arm-none-eabi.tar.xz
+gcc-arm-none-eabi-*/
 
 # 生成物は除外
 build/*

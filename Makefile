@@ -57,7 +57,6 @@ Generate/Core/Src/dma.c \
 Generate/Core/Src/spi.c \
 Generate/Core/Src/tim.c \
 Generate/Core/Src/usart.c \
-Generate/Core/Src/stm32l4xx_it.c \
 Generate/Core/Src/stm32l4xx_hal_msp.c \
 Generate/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_utils.c \
 Generate/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_exti.c \
@@ -168,7 +167,8 @@ C_DEFS =  \
 -DUSE_FULL_LL_DRIVER \
 -DUSE_HAL_DRIVER \
 -DSTM32L4P5xx \
--DARM_MATH_CM4
+-DARM_MATH_CM4 \
+-DMOUSE_VIOLETTA
 #-D__FPU_PRESENT
 
 
@@ -196,8 +196,8 @@ CFLAGS += -g -gdwarf-2
 endif
 
 ifeq ($(TOOLCHAIN),clang)
-    CFLAGS += --target=thumbv7em-unknown-none-eabihf
-    CFLAGS += -Wno-keyword-macro
+	CFLAGS += --target=thumbv7em-unknown-none-eabihf
+	CFLAGS += -Wno-keyword-macro
 endif
 
 # Generate dependency information
@@ -231,8 +231,8 @@ SRCDIR_REKO_LIST := $(shell find $(C_SOURCE_REKO_DIR) -type d)
 # SRC_STM32HAL_LIST = $(foreach srcdir, $(SRCDIR_STM32HAL_LIST), $(wildcard $(srcdir)/*.c))
 # SRC_ASM_STM32HAL_LIST = $(foreach srcdir, $(SRCDIR_STM32HAL_LIST), $(wildcard $(srcdir)/*.s))
 SRC_LIB_LIST = $(foreach srcdir, $(SRCDIR_LIB_LIST), $(wildcard $(srcdir)/*.cpp))
-SRC_TANIHO_LIST = $(foreach srcdir, $(SRCDIR_TANIHO_LIST), $(wildcard $(srcdir)/*.cpp))
-SRC_REKO_LIST = $(foreach srcdir, $(SRCDIR_REKO_LIST), $(wildcard $(srcdir)/*.cpp))
+SRC_TANIHO_LIST = $(foreach srcdir, $(SRCDIR_TANIHO_LIST), $(wildcard $(srcdir)/*.cpp $(srcdir)/*.c))
+SRC_REKO_LIST = $(foreach srcdir, $(SRCDIR_REKO_LIST), $(wildcard $(srcdir)/*.cpp $(srcdir)/*.c))
 
 # 3. トリミング
 CUT_SRC_STM32HAL_LIST = $(subst $(C_SOURCE_STM32HAL_DIR),.,$(C_SOURCE_STM32HAL_LIST))
@@ -261,8 +261,8 @@ REKO_OBJ_DIR_LIST = $(addprefix $(DEBUG_OBJECT_REKO_DIR)/, $(SRCDIR_REKO_LIST))
 
 
 # 7. 各種ビルドターゲット設定
-FORCE:
-.PHONY: all tanihobuild rekobuild libtest tanihotest rekotest clean FORCE
+.PHONY: tanihotest rekotest clean
+
 all: clean tanihobuild rekobuild
 
 tanihobuild: $(DEBUG_TARGETS_TANIHO).hex $(DEBUG_TARGETS_TANIHO).bin
@@ -293,18 +293,18 @@ $(DEBUG_TARGETS_TANIHO).elf: $(TANIHO_OBJ_LIST) $(LIB_OBJ_LIST) $(STM32HAL_OBJ_L
 	rm -f $(GITHASH_HEADER) $(DEBUG_OBJECT_GITHASH)
 	$(SZ) $(DEBUG_TARGET_TANIHO_DIR)/$@
 
-$(DEBUG_TARGETS_REKO).hex: $(DEBUG_TARGET_REKO_DIR)/$(DEBUG_TARGETS_REKO).elf
-	$(HEX) $< $(DEBUG_TARGET_REKO_DIR)/$@
+$(DEBUG_TARGETS_REKO).hex: $(DEBUG_TARGETS_REKO).elf
+	$(HEX) $(DEBUG_TARGET_REKO_DIR)/$< $(DEBUG_TARGET_REKO_DIR)/$@
 
-$(DEBUG_TARGETS_REKO).bin: $(DEBUG_TARGET_REKO_DIR)/$(DEBUG_TARGETS_REKO).elf
-	$(BIN) $< $(DEBUG_TARGET_REKO_DIR)/$@
+$(DEBUG_TARGETS_REKO).bin: $(DEBUG_TARGETS_REKO).elf
+	$(BIN) $(DEBUG_TARGET_REKO_DIR)/$< $(DEBUG_TARGET_REKO_DIR)/$@
 
-$(DEBUG_TARGETS_REKO).elf: $(REKO_OBJ_LIST) $(LIB_OBJ_LIST) $(STM32HAL_OBJ_LIST) $(DEBUG_OBJECT_GITHASH)
+$(DEBUG_TARGETS_REKO).elf: $(REKO_OBJ_LIST) $(LIB_OBJ_LIST) $(STM32HAL_OBJ_LIST) $(STM32HAL_OBJ_ASM_LIST)
 	@echo "$^"
-	@if [ ! -e $(DEBUG_TARGET_REKO_DIR) ]; then mkmdir -p $(DEBUG_TARGET_REKO_DIR); fi
+	@if [ ! -e $(DEBUG_TARGET_REKO_DIR) ]; then mkdir -p $(DEBUG_TARGET_REKO_DIR); fi
 	$(CC) -o $(DEBUG_TARGET_REKO_DIR)/$@ $^ $(LDFLAGS) -Wl,-Map=$(BUILD_DIR)/$@.map,--cref -Wa,-a,-ad,-alms=$(BUILD_DIR)/$@.lst $(LIBS)
-	rm $(DEBUG_OBJECT_GITHASH)
-	$(SZ) $@
+	rm -f $(GITHASH_HEADER) $(DEBUG_OBJECT_GITHASH)
+	$(SZ) $(DEBUG_TARGET_REKO_DIR)/$@
 
 
 # 9. 中間バイナリの生成

@@ -4,26 +4,49 @@
             "name": "Win32",
             "includePath": [
                 "${default}",
-                ".includes/**",
+                ".includes",
                 "Generate/Core/Inc",
                 "Generate/Drivers/STM32L4xx_HAL_Driver/Inc",
                 "Generate/Drivers/CMSIS/Include",
                 "Generate/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
                 "Library/Inc",
                 "Project/taniho/Inc",
-                "Project/reko/Inc"
+                "Project/reko/Inc",
+                "${workspaceFolder}/**"
+            ],
+            "forcedInclude": [
+                ".includes/arm-none-eabi/include/stdint.h"
             ],
             "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
+                "USE_FULL_LL_DRIVER",
+                "USE_HAL_DRIVER",
+                "STM32L4P5xx",
+                "MOUSE_VIOLETTA"
             ],
             "windowsSdkVersion": "10.0.19041.0",
-            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30037/bin/Hostx64/x64/cl.exe",
-            "cStandard": "c17",
+//            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30037/bin/Hostx64/x64/cl.exe",
+            "compilerPath": "${workspaceFolder}/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-g++.exe",
+            "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "windows-msvc-x64",
-            "configurationProvider": "ms-vscode.makefile-tools"
+//            "intelliSenseMode": "windows-msvc-x64",
+            "intelliSenseMode": "gcc-arm",
+            "configurationProvider": "ms-vscode.makefile-tools",
+            "browse": {
+                "path": [
+                    "${default}",
+                    ".includes",
+                    "Generate/Core/Inc",
+                    "Generate/Drivers/STM32L4xx_HAL_Driver/Inc",
+                    "Generate/Drivers/CMSIS/Include",
+                    "Generate/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
+                    "Library/Inc",
+                    "Project/taniho/Inc",
+                    "Project/reko/Inc",
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
         }
     ],
     "version": 4

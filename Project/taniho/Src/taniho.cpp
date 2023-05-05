@@ -1,14 +1,29 @@
 #include "taniho.h"
 
+// HAL and LL Library
+#include "stm32l4xx_hal.h"
+#include "stm32l4xx_ll_adc.h"
+#include "stm32l4xx_ll_bus.h"
+#include "stm32l4xx_ll_cortex.h"
+#include "stm32l4xx_ll_crs.h"
+#include "stm32l4xx_ll_dma.h"
+#include "stm32l4xx_ll_dmamux.h"
+#include "stm32l4xx_ll_exti.h"
+#include "stm32l4xx_ll_gpio.h"
+#include "stm32l4xx_ll_pwr.h"
+#include "stm32l4xx_ll_rcc.h"
+#include "stm32l4xx_ll_spi.h"
+#include "stm32l4xx_ll_system.h"
+#include "stm32l4xx_ll_tim.h"
+#include "stm32l4xx_ll_utils.h"
+
+// STM32CubeAPI
 #include "adc.h"
 #include "dma.h"
 #include "gpio.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
-
-void SystemClock_Config(void);
-void PeriphCommonClock_Config(void);
 
 int main(void) {
     /* Reset of all peripherals, Initializes the Flash interface and the
@@ -32,6 +47,14 @@ int main(void) {
     MX_DMA_Init();
     MX_USART1_UART_Init();
     MX_TIM17_Init();
+
+    // 各モジュールの初期化
+
+    // 各モジュールをタイマーイベントに登録
+
+    // 起動音再生
+
+    // アクティビティの開始
 
     while (1) {
     }
