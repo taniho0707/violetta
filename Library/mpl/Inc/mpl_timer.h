@@ -5,16 +5,22 @@
 //******************************************************************************
 #pragma once
 
+#ifdef STM32L4P5xx
 // STM32HAL/LL
 #include "stm32l4xx_hal.h"
 #include "stm32l4xx_ll_tim.h"
+#endif // ifdef STM32L4P5xx
+
+#ifdef LINUX
+#include <cstdint>
+#endif
 
 #define TIMER_COUNT_INTERVAL 250
 
 class Timer {
    private:
     // 4294秒程度でオーバーフローする点に注意
-    static __IO uint32_t total;
+    static volatile uint32_t total;
 
     // 制御周期 1ms のうち何回目の割り込みかを示す変数
     static uint8_t tick_count;

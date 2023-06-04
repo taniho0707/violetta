@@ -5,14 +5,17 @@
 //******************************************************************************
 #include "mpl_timer.h"
 
+#ifdef STM32L4P5xx
 #include "stm32l4xx_ll_bus.h"
 #include "stm32l4xx_ll_tim.h"
+#endif // ifdef STM32L4P5xx
 
-__IO uint32_t Timer::total = 0;
+volatile uint32_t Timer::total = 0;
 uint8_t Timer::tick_count = 0;
 uint32_t Timer::last_reference_us = 0;
 
 Timer::Timer() {
+#ifdef STM32L4P5xx
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
 
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM6);
@@ -31,9 +34,17 @@ Timer::Timer() {
 
     LL_TIM_EnableIT_UPDATE(TIM6);
     LL_TIM_EnableCounter(TIM6);
+#endif // ifdef STM32L4P5xx
+/// TODO: プラットフォーム依存のコードを排除する
 }
 
-uint16_t Timer::getInternalCounter() { return LL_TIM_GetCounter(TIM6); }
+uint16_t Timer::getInternalCounter() {
+#ifdef STM32L4P5xx
+    return LL_TIM_GetCounter(TIM6);
+#else
+    return 0;
+#endif // ifdef STM32L4P5xx
+}
 
 uint32_t Timer::getMicroTime() { return total; }
 

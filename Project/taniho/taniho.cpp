@@ -1,5 +1,6 @@
 #include "taniho.h"
 
+#ifdef STM32L4P5xx
 // HAL and LL Library
 #include "stm32l4xx_hal.h"
 #include "stm32l4xx_ll_adc.h"
@@ -24,8 +25,10 @@
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
+#endif // ifdef STM32L4P5xx
 
 int main(void) {
+#ifdef STM32L4P5xx
     /* Reset of all peripherals, Initializes the Flash interface and the
      * Systick. */
     HAL_Init();
@@ -47,6 +50,7 @@ int main(void) {
     MX_DMA_Init();
     MX_USART1_UART_Init();
     MX_TIM17_Init();
+#endif // ifdef STM32L4P5xx
 
     // 各モジュールの初期化
 
@@ -60,6 +64,7 @@ int main(void) {
     }
 }
 
+#ifdef STM32L4P5xx
 /**
  * @brief System Clock Configuration
  * @retval None
@@ -164,3 +169,4 @@ void assert_failed(uint8_t *file, uint32_t line) {
     /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+#endif // ifdef STM32L4P5xx

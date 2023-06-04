@@ -8,6 +8,7 @@
 #include "mpl_timer.h"
 
 Led::Led() {
+#ifdef STM32L4P5xx
     gpio_port = GPIOB;
     gpio_channel = GPIO_PIN_8;
 
@@ -26,9 +27,11 @@ Led::Led() {
     GPIO_InitStructure.Pull = GPIO_NOPULL;
     GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_LOW;
     LL_GPIO_Init(GPIOH, &GPIO_InitStructure);
+#endif // ifdef STM32L4P5xx
 }
 
 void Led::initPort(LedNumbers num) {
+#ifdef STM32L4P5xx
     LL_GPIO_InitTypeDef GPIO_InitStructure;
     switch (num) {
         case LedNumbers::FRONT1:
@@ -50,9 +53,11 @@ void Led::initPort(LedNumbers num) {
             LL_GPIO_Init(GPIOA, &GPIO_InitStructure);
             break;
     }
+#endif // ifdef STM32L4P5xx
 }
 
 void Led::deinitPort(LedNumbers num) {
+#ifdef STM32L4P5xx
     switch (num) {
         case LedNumbers::FRONT1:
             break;
@@ -65,9 +70,11 @@ void Led::deinitPort(LedNumbers num) {
             HAL_GPIO_DeInit(GPIOA, GPIO_PIN_9);
             break;
     }
+#endif // ifdef STM32L4P5xx
 }
 
 void Led::setType(LedNumbers num) {
+#ifdef STM32L4P5xx
     switch (num) {
         case LedNumbers::FRONT1:
             gpio_port = GPIOB;
@@ -86,16 +93,23 @@ void Led::setType(LedNumbers num) {
             gpio_channel = GPIO_PIN_9;
             break;
     }
+#endif // ifdef STM32L4P5xx
 }
 
 void Led::on(LedNumbers num) {
     setType(num);
+
+#ifdef STM32L4P5xx
     HAL_GPIO_WritePin(gpio_port, gpio_channel, GPIO_PIN_SET);
+#endif // ifdef STM32L4P5xx
 }
 
 void Led::off(LedNumbers num) {
     setType(num);
+
+#ifdef STM32L4P5xx
     HAL_GPIO_WritePin(gpio_port, gpio_channel, GPIO_PIN_RESET);
+#endif // ifdef STM32L4P5xx
 }
 
 bool Led::isFlicking(LedNumbers num) {

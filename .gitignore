@@ -40,6 +40,19 @@ gcc-arm-none-eabi-*/
 
 # 生成物は除外
 build/*
+debug_taniho
+debug_taniho.hex
+debug_taniho.elf
+debug_reko
+debug_reko.hex
+debug_reko.elf
 
 # IntelliSense用キャッシュファイルは除外
 .includes/*
+
+# cmake の一時ファイルは除外
+**/cmake_install.cmake
+CMakeCache.txt
+**/CMakeFiles/
+**/githash.h
+Makefile

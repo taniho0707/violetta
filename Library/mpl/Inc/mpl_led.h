@@ -8,9 +8,15 @@
 // STL
 #include <array>
 
+#ifdef STM32L4P5xx
 // STM32HAL/LL
 #include "stm32l4xx_hal.h"
 #include "stm32l4xx_ll_gpio.h"
+#endif // ifdef STM32L4P5xx
+
+#ifdef LINUX
+#include <cstdint>
+#endif
 
 #ifdef MOUSE_VIOLETTA
 #define LED_NUMS 4
@@ -30,7 +36,11 @@ struct LedFlickParams {
 
 class Led {
    private:
+
+#ifdef STM32L4P5xx
     GPIO_TypeDef* gpio_port;
+#endif // ifdef STM32L4P5xx
+
     uint16_t gpio_channel;
     std::array<LedFlickParams, LED_NUMS> flick_params;
 

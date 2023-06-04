@@ -1,0 +1,180 @@
+@startuml violetta
+
+set namespaceSeparator ::
+
+mpl::MotorDriver --* hal::Gpio
+mpl::MotorDriver --* hal::Timer
+mpl::Encoder --* hal::Gpio
+mpl::Encoder --* hal::Timer
+mpl::WallSensor --* hal::Gpio
+mpl::WallSensor --* hal::Adc
+mpl::Button --* hal::Gpio
+mpl::SixAxis --* hal::Gpio
+mpl::SixAxis --* hal::Spi
+mpl::Led --* hal::Gpio
+mpl::Speaker --* hal::Gpio
+mpl::Speaker --* hal::Timer
+mpl::Battery --* hal::Gpio
+mpl::Battery --* hal::Adc
+mpl::Fram --* hal::Gpio
+mpl::Fram --* hal::Spi
+mpl::ComPc --* hal::Gpio
+mpl::ComPc --* hal::Uart
+mpl::Timer --* hal::Timer
+
+msg::MessageQueue --- mpl::MotorDriver
+msg::MessageQueue --- mpl::Encoder
+msg::MessageQueue --- mpl::WallSensor
+msg::MessageQueue --- mpl::Button
+msg::MessageQueue --- mpl::SixAxis
+msg::MessageQueue --- mpl::Led
+msg::MessageQueue --- mll::MotorControl
+msg::MessageQueue --- mll::Localization
+msg::MessageQueue --- mll::PathGenerator
+msg::MessageQueue --- Ui
+msg::MessageQueue --- UnitTest
+msg::MessageQueue --- IntegrationTest
+
+mll::Localization ...> mpl::Encoder
+mll::Localization ...> mpl::WallSensor
+mll::Localization ...> mpl::SixAxis
+mll::Localization ...> mll::MotorControl
+
+mll::MotorControl ...> mll::Localization
+mll::DataLogger --* hal::Flash
+
+act::ActivityBase <|--- act::ActivityExplore
+
+'MeSsaGe名前空間
+namespace msg {
+    class MessageQueue {
+
+    }
+}
+
+'HardwareAbstractionLayer名前空間
+namespace hal {
+    class Spi {
+
+    }
+
+    class Uart {
+
+    }
+
+    class Gpio {
+
+    }
+
+    class Timer {
+
+    }
+
+    class Adc {
+
+    }
+
+    class Flash {
+        void readByte()
+    }
+}
+
+'MousePeripheralLibrary名前空間
+namespace mpl {
+    class Battery {
+
+    }
+
+    class MotorDriver {
+        void setDuty()
+    }
+
+    class Encoder {
+        int getPulse()
+    }
+
+    class WallSensor {
+        int getValue()
+    }
+
+    class Button {
+        bool getValue()
+    }
+
+    class SixAxis {
+        float getGyroYaw()
+    }
+
+    class Led {
+        void setValue()
+    }
+
+    class Speaker {
+
+    }
+
+    class Fram {
+        void readByte()
+    }
+
+    class ComPc {
+        uint16_t printf(const char *fmt, ...)
+    }
+
+    class Timer {
+        {static} uint32_t getMicroTime()
+        {static} uint32_t getMilliTime()
+    }
+}
+
+'MouseLogicLibrary名前空間
+namespace mll {
+    class MotorControl {
+
+    }
+
+    class Localization {
+
+    }
+
+    class PathGenerator {
+
+    }
+}
+
+'ACTivity名前空間
+namespace act {
+    class ActivityBase {
+
+    }
+
+    class ActivityExplore {
+
+    }
+}
+
+class DataLogger {
+
+}
+
+class Ui {
+
+}
+
+class Maze {
+
+}
+
+class IntegrationTest {
+
+}
+
+class UnitTest {
+
+}
+
+class RingBuffer {
+
+}
+
+@enduml
