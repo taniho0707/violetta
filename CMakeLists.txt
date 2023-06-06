@@ -59,3 +59,24 @@ target_link_libraries(debug_taniho
     taniho
     GitHash
 )
+
+
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/06f44bc951046150f1348598854b211afdcf37fc.zip
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+add_executable(test_taniho
+    Test/mpl/test_led.cpp
+)
+target_link_libraries(test_taniho
+    gtest_main
+)
+add_test(
+    NAME example_test
+    COMMAND test_taniho
+)
+enable_testing()
