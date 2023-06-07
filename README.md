@@ -18,3 +18,12 @@
 - STM32CubeMX_Generate_20220405.zip
   Generate ディレクトリ以下に展開する
   共有サーバにあり
+
+## ビルド
+
+- taniho を Linux 向けにビルド
+
+```
+cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=Linux
+make
+```

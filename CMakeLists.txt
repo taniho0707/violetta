@@ -2,9 +2,25 @@ cmake_minimum_required(VERSION 3.4)
 
 project("violetta")
 
+# プラットフォーム分岐
+if(${PLATFORM} STREQUAL Linux)
+    message("[BUILD PLATFORM] Linux")
+    include_directories(Platform/Linux/Inc)
+    add_definitions(-DLINUX)
+elseif(${PLATFORM} STREQUAL STM32)
+    message("[BUILD PLATFORM] STM32")
+    include_directories(Platform/STM32/Inc)
+    add_definitions(-DSTM32)
+else()
+    message(FATAL_ERROR "[BUILD PLATFORM] Invalid or unspecified platform. Please specify it as -DPLATFORM=[Linux,STM32]")
+endif()
+
+########################
+### General Settings ###
+########################
+
 include_directories(.
     Project/taniho/Inc
-    Platform/Linux/Inc
     Library/act/Inc
     Library/hal/Inc
     Library/misc/Inc
@@ -12,11 +28,12 @@ include_directories(.
     Library/mpl/Inc
     Library/msg/Inc
 )
-add_definitions(-DLINUX
+add_definitions(
     -DMOUSE_VIOLETTA
     -D_USE_MATH_DEFINES
 )
-add_compile_options(-Wall
+add_compile_options(
+    -Wall
     -fmessage-length=0
     -fexceptions
     -funsigned-char
@@ -32,23 +49,32 @@ add_subdirectory(Platform)
 add_subdirectory(Project)
 add_subdirectory(Tool)
 
-add_executable(debug_taniho
+
+########################
+### Project Settings ###
+########################
+
+add_custom_target(debug_taniho)
+add_dependencies(debug_taniho debug_taniho_binary)
+
+add_executable(debug_taniho_binary
     Project/taniho/taniho_linux.cpp
 )
 
-# add_custom_command(
-#     OUTPUT githash.h
-#     PRE_BUILD
-#     COMMAND "sh" "${CMAKE_SOURCE_DIR}/Script/githash.sh" ">" "${CMAKE_SOURCE_DIR}/githash.h"
-# )
+add_custom_target(test_taniho)
+add_dependencies(test_taniho test_taniho_binary)
 
-# add_custom_command(
-#     TARGET debug_taniho
-#     POST_BUILD
-#     COMMAND "rm" "${CMAKE_SOURCE_DIR}/githash.h"
-# )
+add_executable(test_taniho_binary
+    Test/mpl/test_led.cpp
+)
 
-target_link_libraries(debug_taniho
+add_test(
+    NAME example_test
+    COMMAND test_taniho_binary
+)
+
+
+target_link_libraries(debug_taniho_binary
     # act
     # hal
     # misc
@@ -60,6 +86,14 @@ target_link_libraries(debug_taniho
     GitHash
 )
 
+target_link_libraries(test_taniho_binary
+    gtest_main
+)
+
+
+##################
+### GoogleTest ###
+##################
 
 include(FetchContent)
 FetchContent_Declare(
@@ -69,14 +103,4 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(test_taniho
-    Test/mpl/test_led.cpp
-)
-target_link_libraries(test_taniho
-    gtest_main
-)
-add_test(
-    NAME example_test
-    COMMAND test_taniho
-)
 enable_testing()
