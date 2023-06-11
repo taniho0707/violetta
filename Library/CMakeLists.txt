@@ -5,3 +5,8 @@ add_subdirectory(misc)
 add_subdirectory(mll)
 add_subdirectory(mpl)
 add_subdirectory(msg)
+
+add_library(Library SHARED
+    $<TARGET_OBJECTS:hal>
+    $<TARGET_OBJECTS:mpl>
+)

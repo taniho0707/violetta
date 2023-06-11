@@ -8,25 +8,9 @@
 // STL
 #include <array>
 
-#ifdef STM32L4P5xx
-// STM32HAL/LL
-#include "stm32l4xx_hal.h"
-#include "stm32l4xx_ll_gpio.h"
-#endif // ifdef STM32L4P5xx
+#include "hal_led.h"
 
-#ifdef LINUX
-#include <cstdint>
-#endif
-
-#ifdef MOUSE_VIOLETTA
-#define LED_NUMS 4
-enum class LedNumbers : uint8_t {
-    FRONT1,
-    FRONT2,
-    TOP1,
-    TOP2,
-};
-#endif
+namespace mpl {
 
 struct LedFlickParams {
     uint32_t start_time = 0;
@@ -36,33 +20,27 @@ struct LedFlickParams {
 
 class Led {
    private:
-
-#ifdef STM32L4P5xx
-    GPIO_TypeDef* gpio_port;
-#endif // ifdef STM32L4P5xx
-
-    uint16_t gpio_channel;
     std::array<LedFlickParams, LED_NUMS> flick_params;
 
     Led();
 
-    void setType(LedNumbers num);
-
    public:
-    void initPort(LedNumbers num);
-    void deinitPort(LedNumbers num);
+    void initPort(hal::LedNumbers num);
+    void deinitPort(hal::LedNumbers num);
 
-    void on(LedNumbers num);
-    void off(LedNumbers num);
+    bool isFlicking(hal::LedNumbers num);
 
-    bool isFlicking(LedNumbers num);
+    void on(hal::LedNumbers num);
+    void off(hal::LedNumbers num);
 
     /// @params time. 0 to infinite
-    void flickSync(LedNumbers num, float freq, uint16_t time);
-    void flickAsync(LedNumbers num, float freq, uint16_t time);
-    void flickStop(LedNumbers num);
+    void flickSync(hal::LedNumbers num, float freq, uint16_t time);
+    void flickAsync(hal::LedNumbers num, float freq, uint16_t time);
+    void flickStop(hal::LedNumbers num);
 
     void interrupt();
 
     static Led* getInstance();
 };
+
+}  // namespace mpl

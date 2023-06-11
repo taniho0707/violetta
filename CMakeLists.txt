@@ -42,6 +42,7 @@ add_compile_options(
     -Wno-narrowing
     -g
     -gdwarf-2
+    -fPIC
 )
 
 add_subdirectory(Library)
@@ -75,12 +76,7 @@ add_test(
 
 
 target_link_libraries(debug_taniho_binary
-    # act
-    # hal
-    # misc
-    # mll
-    mpl
-    # msg
+    Library
     # Linux
     taniho
     GitHash
