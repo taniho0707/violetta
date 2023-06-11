@@ -14,7 +14,7 @@ class MessageServer {
    public:
     MSGSVR_RESULT sendMessage(MsgFormat format);
 
-    MSGSVR_RESULT receiveMessage(MsgFormat& format);
+    MSGSVR_RESULT receiveMessage(ModuleId id, MsgFormat& format);
 
     MessageServer& getInstance();
 };

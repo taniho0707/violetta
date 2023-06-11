@@ -9,11 +9,14 @@
 // STM32HAL/LL
 #include "stm32l4xx_hal.h"
 #include "stm32l4xx_ll_tim.h"
-#endif // ifdef STM32L4P5xx
+#endif  // ifdef STM32L4P5xx
 
 #ifdef LINUX
+#include <chrono>
 #include <cstdint>
 #endif
+
+namespace mpl {
 
 #define TIMER_COUNT_INTERVAL 250
 
@@ -27,7 +30,9 @@ class Timer {
 
     static uint32_t last_reference_us;
 
-    Timer();
+#ifdef LINUX
+    static std::chrono::system_clock::time_point _observe_last_time;
+#endif
 
     // TIMER_COUNT_INTERVAL毎に行う処理
     // 各自で定義
@@ -40,6 +45,8 @@ class Timer {
     static uint16_t getInternalCounter();
 
    public:
+    static void init();
+
     static uint32_t getMilliTime();
     static uint32_t getMicroTime();
 
@@ -52,3 +59,5 @@ class Timer {
      */
     static void interrupt();
 };
+
+}  // namespace mpl
