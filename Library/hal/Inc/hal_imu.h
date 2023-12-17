@@ -20,9 +20,31 @@
 
 namespace hal {
 
+#ifdef MOUSE_VIOLETTA
+enum class GyroAxises : uint8_t {
+    YAW = 0,
+    ROLL,
+    PITCH,
+};
+#endif  // ifdef MOUSE_VIOLETTA
+
+struct ImuData {
+    uint16_t OUT_TEMP;
+    uint16_t OUT_X_G;
+    uint16_t OUT_Y_G;
+    uint16_t OUT_Z_G;
+    uint16_t OUT_X_A;
+    uint16_t OUT_Y_A;
+    uint16_t OUT_Z_A;
+};
+
 HalStatus initImuPort();
 HalStatus deinitImuPort();
 
-HalStatus getData();
+HalStatus whoamiImu();
+
+HalStatus getImuDataSync(ImuData& data);
+// HalStatus getImuDataAsync();
+// HalStatus getImuDataDma();
 
 }  // namespace hal

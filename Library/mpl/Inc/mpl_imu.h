@@ -9,46 +9,53 @@
 #include <array>
 
 #include "hal_imu.h"
+#include "mpl_conf.h"
 
 namespace mpl {
-
-struct LedFlickParams {
-    uint32_t start_time = 0;
-    float freq = 0;
-    uint32_t time = 0;
-};
 
 class Imu {
    private:
     Imu();
 
+    hal::ImuData last;
+
    public:
-    void init();
+    MplStatus init();
     void deinit();
 
-    bool whoami();
+    MplStatus whoami();
 
-    int16_t readGyroX();
-    int16_t readGyroY();
-    int16_t readGyroZ();
-    int16_t readAccelX();
-    int16_t readAccelY();
-    int16_t readAccelZ();
+    MplStatus scanAllSync(hal::ImuData& data);
+    // MplStatus scanAllAsync();
+    // MplStatus doneScanAsync();
+    // MplStatus scanAllDma();
+    // MplStatus doneScanDma();
 
-    void readAccelFront();
-    void readGyroYaw();
+    hal::ImuData data();
 
-    void resetCalibration();
+    // int16_t readGyroX();
+    // int16_t readGyroY();
+    // int16_t readGyroZ();
+    // int16_t readAccelX();
+    // int16_t readAccelY();
+    // int16_t readAccelZ();
 
-    float getAccelFront();
+    // void readAccelFront();
+    // void readGyroYaw();
 
-    // returns [degree/sec] in float
-    float getGyroYaw();
+    // void resetCalibration();
 
-    float getTotalAngle();
-    void resetTotalAngle();
+    // float getAccelFront();
 
-    void interrupt();
+    // // returns [degree/sec] in float
+    // float getGyroYaw();
+
+    // float getTotalAngle();
+    // void resetTotalAngle();
+
+    void interruptPeriodic();
+    // void interruptAsync();
+    // void interruptDma();
 
     static Imu* getInstance();
 };

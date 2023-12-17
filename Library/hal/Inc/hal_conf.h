@@ -23,12 +23,6 @@ enum class LedNumbers : uint8_t {
     TOP2,
     ALL = 255,
 };
-
-enum class GyroAxises : uint8_t {
-    YAW = 0,
-    ROLL,
-    PITCH,
-};
 #endif  // ifdef MOUSE_VIOLETTA
 
 }  // namespace hal
