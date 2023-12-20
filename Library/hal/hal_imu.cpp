@@ -42,7 +42,10 @@ hal::HalStatus hal::getImuDataSync(ImuData& data) {
 #endif  // ifdef STM32L4P5xx
 
 #ifdef LINUX
-    data = ImuData{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    return hal::HalStatus::SUCCESS;
+    if (plt::Observer::getInstance()->getImuData(data)) {
+        return hal::HalStatus::SUCCESS;
+    } else {
+        return hal::HalStatus::ERROR;
+    }
 #endif  // ifdef LINUX
 }

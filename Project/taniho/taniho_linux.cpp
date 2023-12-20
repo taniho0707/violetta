@@ -3,6 +3,7 @@
 #include "mpl_imu.h"
 #include "mpl_led.h"
 #include "mpl_timer.h"
+#include "observer.h"
 #include "taniho.h"
 
 // githash.cpp
@@ -21,20 +22,27 @@ int main(void) {
     getGithash(hash);
     printf("%s\n", hash);
 
-    auto led = mpl::Led::getInstance();
-    led->initPort(hal::LedNumbers::ALL);
+    // auto observer = plt::Observer::getInstance();
+    // hal::ImuData imudata;
+    // observer->getImuData(imudata);
+    // printf("TEMP:%x GX:%x GY:%x GZ:%x AX:%x AY:%x AZ:%x\n", imudata.OUT_TEMP,
+    //        imudata.OUT_X_G, imudata.OUT_Y_G, imudata.OUT_Z_G,
+    //        imudata.OUT_X_A, imudata.OUT_Y_A, imudata.OUT_Z_A);
 
-    mpl::Timer::init();
+    // auto led = mpl::Led::getInstance();
+    // led->initPort(hal::LedNumbers::ALL);
+
+    // mpl::Timer::init();
 
     auto imu = mpl::Imu::getInstance();
-    hal::ImuData imudata{};
+    hal::ImuData imudata;
     imu->scanAllSync(imudata);
     printf("TEMP:%x GX:%x GY:%x GZ:%x AX:%x AY:%x AZ:%x\n", imudata.OUT_TEMP,
            imudata.OUT_X_G, imudata.OUT_Y_G, imudata.OUT_Z_G, imudata.OUT_X_A,
            imudata.OUT_Y_A, imudata.OUT_Z_A);
 
-    for (int i = 0; i < 1000; ++i) {
-    }
+    // for (int i = 0; i < 1000; ++i) {
+    // }
 
     return 0;
 }

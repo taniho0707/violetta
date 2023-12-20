@@ -16,6 +16,8 @@
 
 #ifdef LINUX
 #include <cstdint>
+
+#include "observer.h"
 #endif
 
 namespace hal {
@@ -27,16 +29,6 @@ enum class GyroAxises : uint8_t {
     PITCH,
 };
 #endif  // ifdef MOUSE_VIOLETTA
-
-struct ImuData {
-    uint16_t OUT_TEMP;
-    uint16_t OUT_X_G;
-    uint16_t OUT_Y_G;
-    uint16_t OUT_Z_G;
-    uint16_t OUT_X_A;
-    uint16_t OUT_Y_A;
-    uint16_t OUT_Z_A;
-};
 
 HalStatus initImuPort();
 HalStatus deinitImuPort();

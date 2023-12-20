@@ -77,7 +77,7 @@ add_test(
 
 target_link_libraries(debug_taniho_binary
     Library
-    # Linux
+    Linux
     taniho
     GitHash
 )

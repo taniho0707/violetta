@@ -25,4 +25,14 @@ enum class LedNumbers : uint8_t {
 };
 #endif  // ifdef MOUSE_VIOLETTA
 
+struct ImuData {
+    int16_t OUT_TEMP;
+    int16_t OUT_X_G;
+    int16_t OUT_Y_G;
+    int16_t OUT_Z_G;
+    int16_t OUT_X_A;
+    int16_t OUT_Y_A;
+    int16_t OUT_Z_A;
+};
+
 }  // namespace hal
