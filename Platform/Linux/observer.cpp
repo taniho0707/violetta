@@ -17,6 +17,10 @@ bool plt::Observer::getImuData(hal::ImuData& data) {
     return tcp->getImuData(data);
 }
 
+bool plt::Observer::getBatteryVoltage(float& voltage) {
+    return tcp->getBatteryVoltage(voltage);
+}
+
 plt::Observer* plt::Observer::getInstance() {
     static plt::Observer instance;
     return &instance;

@@ -23,6 +23,8 @@ enum class LedNumbers : uint8_t {
     TOP2,
     ALL = 255,
 };
+
+const float BATTERY_RATIO = 1.5f;
 #endif  // ifdef MOUSE_VIOLETTA
 
 struct ImuData {

@@ -3,4 +3,5 @@ add_library(hal STATIC
     hal_led.cpp
     hal_timer.cpp
     hal_imu.cpp
+    hal_battery.cpp
 )

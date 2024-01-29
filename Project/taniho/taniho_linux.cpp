@@ -1,5 +1,6 @@
 #include <cstdio>
 
+#include "mpl_battery.h"
 #include "mpl_imu.h"
 #include "mpl_led.h"
 #include "mpl_timer.h"
@@ -34,12 +35,17 @@ int main(void) {
 
     // mpl::Timer::init();
 
-    auto imu = mpl::Imu::getInstance();
-    hal::ImuData imudata;
-    imu->scanAllSync(imudata);
-    printf("TEMP:%x GX:%x GY:%x GZ:%x AX:%x AY:%x AZ:%x\n", imudata.OUT_TEMP,
-           imudata.OUT_X_G, imudata.OUT_Y_G, imudata.OUT_Z_G, imudata.OUT_X_A,
-           imudata.OUT_Y_A, imudata.OUT_Z_A);
+    // auto imu = mpl::Imu::getInstance();
+    // hal::ImuData imudata;
+    // imu->scanAllSync(imudata);
+    // printf("TEMP:%x GX:%x GY:%x GZ:%x AX:%x AY:%x AZ:%x\n", imudata.OUT_TEMP,
+    //        imudata.OUT_X_G, imudata.OUT_Y_G, imudata.OUT_Z_G,
+    //        imudata.OUT_X_A, imudata.OUT_Y_A, imudata.OUT_Z_A);
+
+    auto battery = mpl::Battery::getInstance();
+    float battery_voltage;
+    battery->scanSync(battery_voltage);
+    printf("BATTERY:%f\n", battery_voltage);
 
     // for (int i = 0; i < 1000; ++i) {
     // }

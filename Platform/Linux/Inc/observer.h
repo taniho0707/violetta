@@ -19,6 +19,8 @@ class Observer {
 
     bool getImuData(hal::ImuData& data);
 
+    bool getBatteryVoltage(float& voltage);
+
     static Observer* getInstance();
 };
 

@@ -40,7 +40,7 @@ bool plt::TcpClient::disconnectServer() {
 }
 
 bool plt::TcpClient::getImuData(hal::ImuData& data) {
-    char send_data[] = {0x00, 0x00, 0x00, 0x01, 0x40};
+    char send_data[] = {0x00, 0x00, 0x00, 0x01, 0x41};
     ssize_t bytes_sent = send(client_socket, send_data, sizeof(send_data), 0);
     if (bytes_sent == -1) {
         perror("Error at sending IMU data request\n");
@@ -77,6 +77,39 @@ bool plt::TcpClient::getImuData(hal::ImuData& data) {
             (static_cast<uint16_t>(recv_data[10]) << 8) | recv_data[11]);
         data.OUT_Z_A = static_cast<int16_t>(
             (static_cast<uint16_t>(recv_data[12]) << 8) | recv_data[13]);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool plt::TcpClient::getBatteryVoltage(float& voltage) {
+    char send_data[] = {0x00, 0x00, 0x00, 0x01, 0x42};
+    ssize_t bytes_sent = send(client_socket, send_data, sizeof(send_data), 0);
+    if (bytes_sent == -1) {
+        perror("Error at sending IMU data request\n");
+        close(client_socket);
+        return false;
+    } else if (bytes_sent != sizeof(send_data)) {
+        perror("Error at sending IMU data request in the middle\n");
+        close(client_socket);
+        return false;
+    }
+
+    char recv_data[128] = {0};
+    ssize_t bytes_recv = recv(client_socket, recv_data, sizeof(recv_data), 0);
+    if (bytes_recv == -1) {
+        perror("Error at receiving IMU data\n");
+        close(client_socket);
+        return false;
+    }
+
+    printf("%ld bytes received from Battery\n", bytes_recv);
+
+    if (bytes_recv == 5) {
+        voltage = static_cast<float>(static_cast<uint32_t>(recv_data[0] << 24) |
+                                     (recv_data[1] << 16) |
+                                     (recv_data[2] << 8) | recv_data[3]);
         return true;
     } else {
         return false;

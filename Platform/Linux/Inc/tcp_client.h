@@ -33,6 +33,9 @@ class TcpClient {
     // IMU
     bool getImuData(hal::ImuData& data);
 
+    // Battery
+    bool getBatteryVoltage(float& voltage);
+
     static TcpClient* getInstance();
 };
 
