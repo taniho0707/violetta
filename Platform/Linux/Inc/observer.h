@@ -21,6 +21,8 @@ class Observer {
 
     bool getBatteryVoltage(float& voltage);
 
+    bool getWallSensorData(uint16_t* data);
+
     static Observer* getInstance();
 };
 

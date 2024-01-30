@@ -21,6 +21,10 @@ bool plt::Observer::getBatteryVoltage(float& voltage) {
     return tcp->getBatteryVoltage(voltage);
 }
 
+bool plt::Observer::getWallSensorData(uint16_t* data) {
+    return tcp->getWallSensorData(data);
+}
+
 plt::Observer* plt::Observer::getInstance() {
     static plt::Observer instance;
     return &instance;

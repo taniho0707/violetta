@@ -4,6 +4,7 @@
 #include "mpl_imu.h"
 #include "mpl_led.h"
 #include "mpl_timer.h"
+#include "mpl_wallsensor.h"
 #include "observer.h"
 #include "taniho.h"
 

@@ -36,6 +36,9 @@ class TcpClient {
     // Battery
     bool getBatteryVoltage(float& voltage);
 
+    // WallSensor
+    bool getWallSensorData(uint16_t* data);
+
     static TcpClient* getInstance();
 };
 

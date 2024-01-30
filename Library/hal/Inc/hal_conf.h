@@ -25,6 +25,24 @@ enum class LedNumbers : uint8_t {
 };
 
 const float BATTERY_RATIO = 1.5f;
+
+#define WALLSENSOR_NUMS 5
+enum class WallSensorNumbers : uint8_t {
+    FRONTLEFT = 0,
+    LEFT,
+    FRONT,
+    RIGHT,
+    FRONTRIGHT,
+    ALL = 255,
+};
+
+struct WallSensorData {
+    uint16_t FRONTLEFT;
+    uint16_t LEFT;
+    uint16_t FRONT;
+    uint16_t RIGHT;
+    uint16_t FRONTRIGHT;
+};
 #endif  // ifdef MOUSE_VIOLETTA
 
 struct ImuData {
