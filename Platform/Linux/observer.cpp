@@ -25,6 +25,10 @@ bool plt::Observer::getWallSensorData(uint16_t* data) {
     return tcp->getWallSensorData(data);
 }
 
+bool plt::Observer::getEncoder(hal::EncoderData& data) {
+    return tcp->getEncoder(data);
+}
+
 plt::Observer* plt::Observer::getInstance() {
     static plt::Observer instance;
     return &instance;

@@ -39,6 +39,9 @@ class TcpClient {
     // WallSensor
     bool getWallSensorData(uint16_t* data);
 
+    // Encoder
+    bool getEncoder(hal::EncoderData& data);
+
     static TcpClient* getInstance();
 };
 

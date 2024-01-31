@@ -23,6 +23,8 @@ class Observer {
 
     bool getWallSensorData(uint16_t* data);
 
+    bool getEncoder(hal::EncoderData& data);
+
     static Observer* getInstance();
 };
 

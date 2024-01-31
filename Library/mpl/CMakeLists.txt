@@ -5,4 +5,5 @@ add_library(mpl STATIC
     mpl_imu.cpp
     mpl_battery.cpp
     mpl_wallsensor.cpp
+    mpl_encoder.cpp
 )

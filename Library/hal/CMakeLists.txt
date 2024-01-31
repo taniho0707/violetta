@@ -5,4 +5,5 @@ add_library(hal STATIC
     hal_imu.cpp
     hal_battery.cpp
     hal_wallsensor.cpp
+    hal_encoder.cpp
 )

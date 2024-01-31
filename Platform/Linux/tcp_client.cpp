@@ -152,6 +152,41 @@ bool plt::TcpClient::getWallSensorData(uint16_t* data) {
     }
 }
 
+bool plt::TcpClient::getEncoder(hal::EncoderData& data) {
+    char send_data[] = {0x00, 0x00, 0x00, 0x01, 0x43};
+    ssize_t bytes_sent = send(client_socket, send_data, sizeof(send_data), 0);
+    if (bytes_sent == -1) {
+        perror("Error at sending Encoder data request\n");
+        close(client_socket);
+        return false;
+    } else if (bytes_sent != sizeof(send_data)) {
+        perror("Error at sending Encoder data request in the middle\n");
+        close(client_socket);
+        return false;
+    }
+
+    char recv_data[128] = {0};
+    ssize_t bytes_recv = recv(client_socket, recv_data, sizeof(recv_data), 0);
+    if (bytes_recv == -1) {
+        perror("Error at receiving Encoder data\n");
+        close(client_socket);
+        return false;
+    }
+
+    printf("%ld bytes received from Encoder\n", bytes_recv);
+
+    if (bytes_recv == 5) {
+        if (recv_data[0] != 0x43) return false;
+        data.LEFT = static_cast<uint16_t>(
+            static_cast<uint16_t>(recv_data[1] << 8) | recv_data[2]);
+        data.RIGHT = static_cast<uint16_t>(
+            static_cast<uint16_t>(recv_data[3] << 8) | recv_data[4]);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 plt::TcpClient* plt::TcpClient::getInstance() {
     static plt::TcpClient instance;
     return &instance;

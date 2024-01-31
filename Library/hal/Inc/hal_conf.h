@@ -55,4 +55,9 @@ struct ImuData {
     int16_t OUT_Z_A;
 };
 
+struct EncoderData {
+    int16_t LEFT;
+    int16_t RIGHT;
+};
+
 }  // namespace hal

@@ -1,6 +1,7 @@
 #include <cstdio>
 
 #include "mpl_battery.h"
+#include "mpl_encoder.h"
 #include "mpl_imu.h"
 #include "mpl_led.h"
 #include "mpl_timer.h"
