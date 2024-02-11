@@ -11,6 +11,10 @@ hal::HalStatus hal::initImuPort() {
     return HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
     return HalStatus::SUCCESS;
 #endif  // ifdef LINUX
@@ -20,6 +24,10 @@ hal::HalStatus hal::deinitImuPort() {
 #ifdef STM32L4P5xx
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
 
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
@@ -31,6 +39,10 @@ hal::HalStatus hal::whoamiImu() {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef LINUX
@@ -40,6 +52,10 @@ hal::HalStatus hal::getImuDataSync(ImuData& data) {
 #ifdef STM32L4P5xx
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
 
 #ifdef LINUX
     if (plt::Observer::getInstance()->getImuData(data)) {

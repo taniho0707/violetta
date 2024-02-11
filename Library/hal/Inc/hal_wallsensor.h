@@ -13,6 +13,12 @@
 #include "stm32l4xx_ll_adc.h"
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+#include "stm32f4xx_ll_adc.h"
+#include "stm32f4xx_ll_dma.h"
+#include "stm32f4xx_ll_gpio.h"
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
 #include <cstdint>
 

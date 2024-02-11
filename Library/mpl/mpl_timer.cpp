@@ -18,16 +18,25 @@
 volatile uint32_t mpl::Timer::total = 0;
 uint8_t mpl::Timer::tick_count = 0;
 uint32_t mpl::Timer::last_reference_us = 0;
+
+#ifdef LINUX
 std::chrono::system_clock::time_point mpl::Timer::_observe_last_time = {};
+#endif
 
 void mpl::Timer::init() { hal::initTimer(); }
 
 uint16_t mpl::Timer::getInternalCounter() {
 #ifdef STM32L4P5xx
     return LL_TIM_GetCounter(TIM6);
-#else
-    return 0;
 #endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+    return 0;
+#endif  // ifdef STM32F411xE
+
+#ifdef LINUX
+    return 0
+#endif  // ifdef LINUX
 }
 
 uint32_t mpl::Timer::getMicroTime() { return total; }

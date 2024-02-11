@@ -28,6 +28,10 @@ hal::HalStatus hal::initTimer() {
     LL_TIM_EnableCounter(TIM6);
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
     return HalStatus::SUCCESS;
 #endif
@@ -38,6 +42,10 @@ uint32_t hal::getMilliTimeByTim() {
     return 0;
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+    return 0;
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
     return 0;
 #endif
@@ -47,6 +55,10 @@ uint32_t hal::getMicroTimeByTim() {
 #ifdef STM32L4P5xx
     return 0;
 #endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+    return 0;
+#endif  // ifdef STM32F411xE
 
 #ifdef LINUX
     return 0;

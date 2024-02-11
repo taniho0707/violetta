@@ -11,6 +11,10 @@ hal::HalStatus hal::initBatteryPort() {
     return HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
     return HalStatus::SUCCESS;
 #endif  // ifdef LINUX
@@ -21,6 +25,10 @@ hal::HalStatus hal::deinitBatteryPort() {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef LINUX
@@ -30,6 +38,10 @@ hal::HalStatus hal::getBatteryVoltageSync(float& voltage) {
 #ifdef STM32L4P5xx
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
 
 #ifdef LINUX
     if (plt::Observer::getInstance()->getBatteryVoltage(voltage)) {

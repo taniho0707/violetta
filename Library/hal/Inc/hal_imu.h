@@ -14,6 +14,11 @@
 #include "stm32l4xx_ll_spi.h"
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+#include "stm32f4xx_ll_gpio.h"
+#include "stm32f4xx_ll_spi.h"
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
 #include <cstdint>
 
@@ -29,6 +34,14 @@ enum class GyroAxises : uint8_t {
     PITCH,
 };
 #endif  // ifdef MOUSE_VIOLETTA
+
+#ifdef MOUSE_ZIRCONIA2KAI
+enum class GyroAxises : uint8_t {
+    YAW = 0,
+    ROLL,
+    PITCH,
+};
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 HalStatus initImuPort();
 HalStatus deinitImuPort();

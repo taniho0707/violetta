@@ -11,6 +11,10 @@ hal::HalStatus hal::initWallSensorPort() {
     return HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
     return HalStatus::SUCCESS;
 #endif  // ifdef LINUX
@@ -21,6 +25,10 @@ hal::HalStatus hal::deinitWallSensorPort() {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef LINUX
@@ -30,6 +38,10 @@ hal::HalStatus hal::getWallSensorAllSync(uint16_t* data) {
 #ifdef STM32L4P5xx
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
 
 #ifdef LINUX
     if (plt::Observer::getInstance()->getWallSensorData(data)) {

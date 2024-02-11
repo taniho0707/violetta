@@ -24,6 +24,13 @@
 - taniho を Linux 向けにビルド
 
 ```
-cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=Linux
+cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=Linux -DMOUSE=Violetta
 make
+```
+
+- taniho を Zirconia2kai STM32F411xE 向けにビルド
+
+```
+cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=STM32 -DMOUSE=Zirconia2kai -GNinja
+ninja
 ```

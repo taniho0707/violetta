@@ -53,6 +53,41 @@ hal::HalStatus hal::initLedPort(hal::LedNumbers num) {
     return HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+    // LED0: BLUE   PA12
+    // LED1: GREEN  PA11
+    // LED2: YELLOW PH0
+    // LED3: RED    PH1
+
+    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+    ErrorStatus status;
+
+    /* GPIO Ports Clock Enable */
+    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOH);
+    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
+
+    LL_GPIO_ResetOutputPin(GPIOH, LED2_Pin | LED3_Pin);
+    LL_GPIO_ResetOutputPin(GPIOA, LED1_Pin | LED0_Pin);
+
+    GPIO_InitStruct.Pin = LED2_Pin | LED3_Pin;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    status = LL_GPIO_Init(GPIOH, &GPIO_InitStruct);
+    if (status != ErrorStatus::SUCCESS) return hal::HalStatus::ERROR;
+
+    GPIO_InitStruct.Pin = LED1_Pin | LED0_Pin;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    status = LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    if (status != ErrorStatus::SUCCESS) return hal::HalStatus::ERROR;
+
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
     return HalStatus::SUCCESS;
 #endif
@@ -74,6 +109,10 @@ hal::HalStatus hal::deinitLedPort(hal::LedNumbers num) {
     }
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef STM32F411xE
 
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
@@ -106,6 +145,30 @@ hal::HalStatus hal::onLed(hal::LedNumbers num) {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+    switch (num) {
+        case hal::LedNumbers::RED:
+            LL_GPIO_SetOutputPin(LED3_GPIO_Port, LED3_Pin);
+            break;
+        case hal::LedNumbers::YELLOW:
+            LL_GPIO_SetOutputPin(LED2_GPIO_Port, LED2_Pin);
+            break;
+        case hal::LedNumbers::GREEN:
+            LL_GPIO_SetOutputPin(LED1_GPIO_Port, LED1_Pin);
+            break;
+        case hal::LedNumbers::BLUE:
+            LL_GPIO_SetOutputPin(LED0_GPIO_Port, LED0_Pin);
+            break;
+        case hal::LedNumbers::ALL:
+            hal::onLed(hal::LedNumbers::RED);
+            hal::onLed(hal::LedNumbers::YELLOW);
+            hal::onLed(hal::LedNumbers::GREEN);
+            hal::onLed(hal::LedNumbers::BLUE);
+            break;
+    }
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
+
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
 #endif
@@ -136,6 +199,30 @@ hal::HalStatus hal::offLed(hal::LedNumbers num) {
     HAL_GPIO_WritePin(gpio_port, gpio_channel, GPIO_PIN_RESET);
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+    switch (num) {
+        case hal::LedNumbers::RED:
+            LL_GPIO_ResetOutputPin(LED3_GPIO_Port, LED3_Pin);
+            break;
+        case hal::LedNumbers::YELLOW:
+            LL_GPIO_ResetOutputPin(LED2_GPIO_Port, LED2_Pin);
+            break;
+        case hal::LedNumbers::GREEN:
+            LL_GPIO_ResetOutputPin(LED1_GPIO_Port, LED1_Pin);
+            break;
+        case hal::LedNumbers::BLUE:
+            LL_GPIO_ResetOutputPin(LED0_GPIO_Port, LED0_Pin);
+            break;
+        case hal::LedNumbers::ALL:
+            hal::offLed(hal::LedNumbers::RED);
+            hal::offLed(hal::LedNumbers::YELLOW);
+            hal::offLed(hal::LedNumbers::GREEN);
+            hal::offLed(hal::LedNumbers::BLUE);
+            break;
+    }
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
 
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
