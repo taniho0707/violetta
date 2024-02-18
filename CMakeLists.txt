@@ -92,7 +92,8 @@ add_definitions(
 add_compile_options(
     -Wall
     -fmessage-length=0
-    -fexceptions
+    # -fexceptions
+    -fno-exceptions
     -funsigned-char
     # -fpermissive
     -Wno-narrowing
