@@ -5,11 +5,10 @@
             "includePath": [
                 "${default}",
                 ".includes",
-                "Generate/Core/Inc",
-                "Generate/Drivers/STM32L4xx_HAL_Driver/Inc",
-                "Generate/Drivers/CMSIS/Include",
-                "Generate/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
-                "Library/Inc",
+                "Generate/zirconia2kai/Core/Inc",
+                "Generate/zirconia2kai/Drivers/STM32F4xx_HAL_Driver/Inc",
+                "Generate/zirconia2kai/Drivers/CMSIS/Include",
+                "Generate/zirconia2kai/Drivers/CMSIS/Device/ST/STM32F4xx/Include",
                 "Project/taniho/Inc",
                 "Project/reko/Inc",
                 "${workspaceFolder}/**"
@@ -20,8 +19,12 @@
             "defines": [
                 "USE_FULL_LL_DRIVER",
                 "USE_HAL_DRIVER",
-                "STM32L4P5xx",
-                "MOUSE_VIOLETTA"
+                // "STM32L4P5xx",
+                "STM32F411CEU6",
+                "STM32F411xE",
+                // "LINUX",
+                // "MOUSE_VIOLETTA"
+                "MOUSE_ZIRCONIA2KAI"
             ],
             "windowsSdkVersion": "10.0.19041.0",
 //            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30037/bin/Hostx64/x64/cl.exe",
@@ -35,11 +38,10 @@
                 "path": [
                     "${default}",
                     ".includes",
-                    "Generate/Core/Inc",
-                    "Generate/Drivers/STM32L4xx_HAL_Driver/Inc",
-                    "Generate/Drivers/CMSIS/Include",
-                    "Generate/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
-                    "Library/Inc",
+                    "Generate/zirconia2kai/Core/Inc",
+                    "Generate/zirconia2kai/Drivers/STM32F4xx_HAL_Driver/Inc",
+                    "Generate/zirconia2kai/Drivers/CMSIS/Include",
+                    "Generate/zirconia2kai/Drivers/CMSIS/Device/ST/STM32F4xx/Include",
                     "Project/taniho/Inc",
                     "Project/reko/Inc",
                     "${workspaceFolder}/**"

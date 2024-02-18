@@ -18,7 +18,25 @@
   ],
   "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
   "files.associations": {
+    "*.ejs": "html",
     "gpio.h": "c",
-    "stm32l4xx_it.h": "c"
-  }
+    "stm32l4xx_it.h": "c",
+    "ratio": "cpp",
+    "*.tcc": "cpp",
+    "fstream": "cpp",
+    "array": "cpp",
+    "string": "cpp",
+    "string_view": "cpp",
+    "ranges": "cpp",
+    "span": "cpp",
+    "main.h": "c",
+    "stm32f4xx_ll_bus.h": "c",
+    "compare": "cpp",
+    "cstdint": "cpp",
+    "random": "cpp"
+  },
+  "cmake.configureOnOpen": false,
+  "cortex-debug.liveWatchRefreshRate": 300,
+  "cortex-debug.armToolchainPath": "S:/git/violetta/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-arm-none-eabi/bin",
+  "cortex-debug.stm32cubeprogrammer": "C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe"
 }
