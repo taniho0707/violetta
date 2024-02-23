@@ -37,6 +37,6 @@
   },
   "cmake.configureOnOpen": false,
   "cortex-debug.liveWatchRefreshRate": 300,
-  "cortex-debug.armToolchainPath": "S:/git/violetta/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-arm-none-eabi/bin",
-  "cortex-debug.stm32cubeprogrammer": "C:/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe"
+  "cortex-debug.armToolchainPath": "/usr/bin",
+  "cortex-debug.stm32cubeprogrammer": "/home/nonoho/bin/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer.sh"
 }

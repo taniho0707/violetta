@@ -31,6 +31,6 @@ make
 - taniho を Zirconia2kai STM32F411xE 向けにビルド
 
 ```
-cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=STM32 -DMOUSE=Zirconia2kai -GNinja
+cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=STM32 -DMOUSE=Zirconia2kai -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=on
 ninja
 ```

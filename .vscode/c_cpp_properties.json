@@ -19,19 +19,14 @@
             "defines": [
                 "USE_FULL_LL_DRIVER",
                 "USE_HAL_DRIVER",
-                // "STM32L4P5xx",
                 "STM32F411CEU6",
                 "STM32F411xE",
-                // "LINUX",
-                // "MOUSE_VIOLETTA"
                 "MOUSE_ZIRCONIA2KAI"
             ],
             "windowsSdkVersion": "10.0.19041.0",
-//            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30037/bin/Hostx64/x64/cl.exe",
             "compilerPath": "${workspaceFolder}/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-g++.exe",
             "cStandard": "c11",
             "cppStandard": "c++17",
-//            "intelliSenseMode": "windows-msvc-x64",
             "intelliSenseMode": "gcc-arm",
             "configurationProvider": "ms-vscode.makefile-tools",
             "browse": {

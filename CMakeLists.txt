@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.10)
 
 project("violetta")
 
@@ -61,11 +61,13 @@ elseif(${MOUSE} STREQUAL Zirconia2kai)
         -ffunction-sections
         -fdata-sections
         -fstack-usage
+        --specs=nano.specs
     )
     set(CMAKE_C_FLAGS "-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -std=gnu11")
     set(CMAKE_CXX_FLAGS "-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -fno-use-cxa-atexit -std=c++17")
     set(CMAKE_AS_FLAGS "-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -x assembler-with-cpp")
-    set(CMAKE_EXE_LINKER_FLAGS "-mcpu=cortex-m4 -T${CMAKE_CURRENT_SOURCE_DIR}/Platform/STM32F411xE/STM32F411CEUx_FLASH.ld -Wl,-Map=${CMAKE_CURRENT_SOURCE_DIR}/build/${TARGET}.map,--cref -Wl,--gc-sections -static --specs=nano.specs --specs=nosys.specs --specs=rdimon.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lnosys -lc -lm -lstdc++ -lsupc++ -Wl,--end-group -Wl,--no-warn-rwx-segment")
+    set(CMAKE_EXE_LINKER_FLAGS "-mcpu=cortex-m4 -T${CMAKE_CURRENT_SOURCE_DIR}/Platform/STM32F411xE/STM32F411CEUx_FLASH.ld -Wl,-Map=${CMAKE_CURRENT_SOURCE_DIR}/build/${TARGET}.map,--cref -Wl,--gc-sections -static --specs=nano.specs --specs=nosys.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lnosys -lc -lm -lstdc++ -lsupc++ -Wl,--end-group -Wl,--no-warn-rwx-segment")
+    # --specs=rdimon.specs
     enable_language(ASM)
 
     set(STARTUP_ASM_FILE Platform/STM32F411xE/startup_stm32f411xe.s)
@@ -99,7 +101,8 @@ add_compile_options(
     -Wno-narrowing
     -g
     -gdwarf-2
-    -fPIC
+    # -fPIC # こいつがいるとクロック設定を変更できなかった
+    # -O0
 )
 
 add_subdirectory(Library)
@@ -149,13 +152,14 @@ elseif(${PLATFORM} STREQUAL STM32)
     add_executable(${ELF_FILE}
         Project/taniho/taniho.cpp
         ${STARTUP_ASM_FILE}
+        $<TARGET_OBJECTS:STM32F411xE>
     )
     add_dependencies(debug_taniho ${ELF_FILE})
     target_link_libraries(${ELF_FILE}
         taniho
         GitHash
         Library
-        STM32F411xE
+        # STM32F411xE
         STM32HAL
     )
     add_custom_command(TARGET ${ELF_FILE} POST_BUILD

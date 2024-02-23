@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 
 include_directories(
     Drivers/STM32F4xx_HAL_Driver/Inc
