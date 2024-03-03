@@ -7,4 +7,5 @@ add_library(hal STATIC
     hal_wallsensor.cpp
     hal_encoder.cpp
     hal_debug.cpp
+    hal_motor.cpp
 )

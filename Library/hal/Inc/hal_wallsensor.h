@@ -14,9 +14,12 @@
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE
+#include "stm32f411xe.h"
 #include "stm32f4xx_ll_adc.h"
+#include "stm32f4xx_ll_bus.h"
 #include "stm32f4xx_ll_dma.h"
 #include "stm32f4xx_ll_gpio.h"
+#include "stm32f4xx_ll_utils.h"
 #endif  // ifdef STM32F411xE
 
 #ifdef LINUX
@@ -30,7 +33,12 @@ namespace hal {
 HalStatus initWallSensorPort();
 HalStatus deinitWallSensorPort();
 
-HalStatus getWallSensorAllSync(uint16_t* data);
+HalStatus setWallSensorLedOn(WallSensorNumbers n);
+HalStatus setWallSensorLedOff();
+
+HalStatus getWallSensorSingleSync(uint16_t& data, WallSensorNumbers n);
+
+HalStatus getWallSensorAllSync(WallSensorData& data);
 // HalStatus getBatteryVoltageAsync();
 // HalStatus getBatteryVoltageDma();
 

@@ -1,31 +1,33 @@
 //******************************************************************************
 // @addtogroup MPL
-// @file       mpl_wallsensor.h
-// @brief      壁センサー制御
+// @file       mpl_motor.h
+// @brief      モータ制御
 //******************************************************************************
 #pragma once
 
-// STL
-// #include <array>
-
-#include "hal_wallsensor.h"
+#include "hal_motor.h"
 #include "mpl_conf.h"
+#include "stdint.h"
 
 namespace mpl {
 
-class WallSensor {
+class Motor {
    private:
-    WallSensor();
+    Motor();
 
    public:
     void initPort();
     void deinitPort();
 
-    mpl::MplStatus scanAllSync(hal::WallSensorData& data);
+    mpl::MplStatus setFloat();
+
+    mpl::MplStatus setDutyL(float duty);
+    mpl::MplStatus setDutyR(float duty);
+    mpl::MplStatus setDuty(float duty_l, float duty_r);
 
     void interrupt();
 
-    static WallSensor* getInstance();
+    static Motor* getInstance();
 };
 
 }  // namespace mpl

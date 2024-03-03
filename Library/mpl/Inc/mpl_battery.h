@@ -5,9 +5,6 @@
 //******************************************************************************
 #pragma once
 
-// STL
-#include <array>
-
 #include "hal_battery.h"
 #include "mpl_conf.h"
 
@@ -18,7 +15,7 @@ class Battery {
     Battery();
 
    public:
-    void initPort();
+    mpl::MplStatus initPort();
     void deinitPort();
 
     mpl::MplStatus scanSync(float& voltage);

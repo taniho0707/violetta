@@ -16,7 +16,12 @@
 namespace hal {
 
 /// @brief HalStatus
-enum class HalStatus : uint8_t { SUCCESS = 0, NOIMPLEMENT = 1, ERROR = 255 };
+enum class HalStatus : uint8_t {
+    SUCCESS = 0,
+    NOIMPLEMENT = 1,
+    INVALID_PARAMS = 254,
+    ERROR = 255
+};
 
 #ifdef MOUSE_VIOLETTA
 #define LED_NUMS 4

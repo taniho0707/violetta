@@ -5,9 +5,19 @@
 //******************************************************************************
 #include "mpl_battery.h"
 
-mpl::Battery::Battery() { hal::initBatteryPort(); }
+mpl::Battery::Battery() {
+    // hal::initBatteryPort();
+    // FIXME: コンストラクタ内でポートの初期化をするかどうか決定
+}
 
-void mpl::Battery::initPort() { hal::initBatteryPort(); }
+mpl::MplStatus mpl::Battery::initPort() {
+    auto status = hal::initBatteryPort();
+    if (status == hal::HalStatus::SUCCESS) {
+        return mpl::MplStatus::SUCCESS;
+    } else {
+        return mpl::MplStatus::ERROR;
+    }
+}
 
 void mpl::Battery::deinitPort() { hal::deinitBatteryPort(); }
 
