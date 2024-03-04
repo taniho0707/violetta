@@ -54,6 +54,7 @@
 #include "mpl_imu.h"
 #include "mpl_led.h"
 #include "mpl_motor.h"
+#include "mpl_timer.h"
 
 int main(void) {
 #ifdef STM32L4P5xx
@@ -129,13 +130,15 @@ int main(void) {
     auto wallsensor = mpl::WallSensor::getInstance();
     hal::WallSensorData wallsensor_data = {0};
 
-    // Motor Test code
-    auto motor = mpl::Motor::getInstance();
-    debug->printf("Motor: 25%% ON...");
-    motor->setDuty(+0.05, -0.05);
-    LL_mDelay(1000);
-    debug->printf("OFF\n");
-    motor->setFloat();
+    // // Motor Test code
+    // auto motor = mpl::Motor::getInstance();
+    // debug->printf("Motor: 25%% ON...");
+    // motor->setDuty(+0.05, -0.05);
+    // LL_mDelay(1000);
+    // debug->printf("OFF\n");
+    // motor->setFloat();
+
+    mpl::Timer::init();
 
     led->on(hal::LedNumbers::GREEN);
 
@@ -155,9 +158,10 @@ int main(void) {
         encoder->scanEncoderSync(encoder_data);
         wallsensor->scanAllSync(wallsensor_data);
         debug->printf(
-            "B: %1.2f | L: %5d, R: %5d | FL: %4d, L: %4d, R: %4d, FR: %4d\n",
-            battery_data, encoder_data.LEFT, encoder_data.RIGHT,
-            wallsensor_data.FRONTLEFT, wallsensor_data.LEFT,
+            "T: %10d B: %1.2f | L: %5d, R: %5d | FL: %4d, L: %4d, R: %4d, FR: "
+            "%4d\n",
+            mpl::Timer::getMicroTime(), battery_data, encoder_data.LEFT,
+            encoder_data.RIGHT, wallsensor_data.FRONTLEFT, wallsensor_data.LEFT,
             wallsensor_data.RIGHT, wallsensor_data.FRONTRIGHT);
     }
 }

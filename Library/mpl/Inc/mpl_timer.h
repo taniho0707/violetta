@@ -6,6 +6,7 @@
 #pragma once
 
 #include "hal_timer.h"
+#include "mpl_conf.h"
 
 // #ifdef STM32L4P5xx
 // // STM32HAL/LL
@@ -20,11 +21,10 @@
 
 namespace mpl {
 
-#define TIMER_COUNT_INTERVAL 250
-
 class Timer {
    private:
     // 4294秒程度でオーバーフローする点に注意
+    // TIMER_COUNT_INTERVAL [us] ごとに加算される
     static volatile uint32_t total;
 
     // 制御周期 1ms のうち何回目の割り込みかを示す変数
@@ -44,15 +44,17 @@ class Timer {
     static void run4();
 
     // 内部カウンタ値を返す
-    static uint16_t getInternalCounter();
+    static uint32_t getInternalCounter();
 
    public:
-    static void init();
+    static MplStatus init();
 
+    static uint32_t getNanoTimeFromLastInterrupt();
     static uint32_t getMilliTime();
     static uint32_t getMicroTime();
 
     // 前回同じ関数を呼び出してからの時間を [us] で返す
+    // TIMER_COUNT_INTERVAL [us] 単位で記録される
     static uint32_t getTimeFromLastReference();
 
     /**

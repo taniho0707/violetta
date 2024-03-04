@@ -260,6 +260,16 @@ void USART1_IRQHandler(void) {
 }
 
 /**
+ * @brief This function handles TIM5 global interrupt.
+ */
+void TIM5_IRQHandler(void) {
+    if (LL_TIM_IsActiveFlag_UPDATE(TIM5)) {
+        LL_TIM_ClearFlag_UPDATE(TIM5);
+        mpl::Timer::interrupt();
+    }
+}
+
+/**
  * @brief This function handles DMA2 stream0 global interrupt.
  */
 void DMA2_Stream0_IRQHandler(void) {

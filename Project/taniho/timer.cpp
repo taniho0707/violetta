@@ -12,6 +12,8 @@ void mpl::Timer::run1() {}
 
 void mpl::Timer::run2() {}
 
-void mpl::Timer::run3() { mpl::Led::getInstance()->interrupt(); }
+void mpl::Timer::run3() {
+    // mpl::Led::getInstance()->interrupt();
+}
 
 void mpl::Timer::run4() {}

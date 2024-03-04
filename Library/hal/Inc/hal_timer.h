@@ -14,6 +14,7 @@
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE
+#include "stm32f4xx_ll_bus.h"
 #include "stm32f4xx_ll_gpio.h"
 #include "stm32f4xx_ll_tim.h"
 #endif  // ifdef STM32F411xE
@@ -27,8 +28,7 @@ namespace hal {
 
 HalStatus initTimer();
 
-uint32_t getMilliTimeByTim();
-uint32_t getMicroTimeByTim();
+uint32_t getTimerCount();
 
 #ifdef LINUX
 std::chrono::system_clock::time_point getTimeByChrono();

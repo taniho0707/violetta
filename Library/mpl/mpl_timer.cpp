@@ -5,6 +5,12 @@
 //******************************************************************************
 #include "mpl_timer.h"
 
+#include <cstdint>
+
+#include "hal_conf.h"
+#include "hal_timer.h"
+#include "mpl_conf.h"
+
 // #ifdef STM32L4P5xx
 // #include "stm32l4xx_ll_bus.h"
 // #include "stm32l4xx_ll_tim.h"
@@ -23,15 +29,21 @@ uint32_t mpl::Timer::last_reference_us = 0;
 std::chrono::system_clock::time_point mpl::Timer::_observe_last_time = {};
 #endif
 
-void mpl::Timer::init() { hal::initTimer(); }
+mpl::MplStatus mpl::Timer::init() {
+    if (hal::initTimer() != hal::HalStatus::SUCCESS) {
+        return MplStatus::ERROR;
+    } else {
+        return MplStatus::SUCCESS;
+    }
+}
 
-uint16_t mpl::Timer::getInternalCounter() {
+uint32_t mpl::Timer::getInternalCounter() {
 #ifdef STM32L4P5xx
     return LL_TIM_GetCounter(TIM6);
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE
-    return 0;
+    return hal::getTimerCount();
 #endif  // ifdef STM32F411xE
 
 #ifdef LINUX
@@ -39,20 +51,24 @@ uint16_t mpl::Timer::getInternalCounter() {
 #endif  // ifdef LINUX
 }
 
+uint32_t mpl::Timer::getNanoTimeFromLastInterrupt() {
+    return getInternalCounter() * hal::TIMER_COUNT_INTERVAL /
+           hal::TIMER_COUNT_MAX;
+}
+
 uint32_t mpl::Timer::getMicroTime() { return total; }
 
 uint32_t mpl::Timer::getMilliTime() { return total / 1000; }
 
 uint32_t mpl::Timer::getTimeFromLastReference() {
-    uint32_t now;
-    now = total + getInternalCounter() / 120;
+    uint32_t now = getMicroTime();
     uint32_t ret = now - last_reference_us;
     last_reference_us = now;
     return ret;
 }
 
 void mpl::Timer::interrupt() {
-    total += TIMER_COUNT_INTERVAL;
+    total += hal::TIMER_COUNT_INTERVAL;
 
     switch (tick_count) {
         case 0:

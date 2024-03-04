@@ -66,6 +66,9 @@ enum class LedNumbers : uint8_t {
 
 const float BATTERY_RATIO = 2.0f;
 
+const uint32_t TIMER_COUNT_INTERVAL = 250;  // [us]
+const uint32_t TIMER_COUNT_MAX = 12500;  // 1 カウントあたり 0.02 [us] = 20 [ns]
+
 #define WALLSENSOR_NUMS 4
 enum class WallSensorNumbers : uint8_t {
     FRONTLEFT = 0,
