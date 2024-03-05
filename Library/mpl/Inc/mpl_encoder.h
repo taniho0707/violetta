@@ -5,9 +5,6 @@
 //******************************************************************************
 #pragma once
 
-// STL
-#include <array>
-
 #include "hal_encoder.h"
 #include "mpl_conf.h"
 
