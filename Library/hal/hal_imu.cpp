@@ -126,17 +126,13 @@ hal::HalStatus hal::deinitImuPort() {
 #endif  // ifdef LINUX
 }
 
-hal::HalStatus hal::whoamiImu() {
-#ifdef STM32L4P5xx
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
-
-#ifdef STM32F411xE
+hal::HalStatus hal::read8bitImuSync(uint8_t address, uint8_t& data) {
     if (LL_SPI_IsActiveFlag_RXNE(SPI2)) LL_SPI_ReceiveData16(SPI2);
     if (!LL_SPI_IsEnabled(SPI2)) LL_SPI_Enable(SPI2);
 
     LL_GPIO_ResetOutputPin(GPIOB, IMU_CS2_Pin);
-    uint16_t tx_data = 0x0F00 | 0x8000;  // WHO_AM_I
+    uint16_t tx_data = (static_cast<uint16_t>(address) << 8) |
+                       (static_cast<uint16_t>(hal::GYRO_MASK_READ) << 8);
     LL_SPI_TransmitData16(SPI2, tx_data);
     while (LL_SPI_IsActiveFlag_TXE(SPI2) == RESET)
         ;
@@ -145,8 +141,42 @@ hal::HalStatus hal::whoamiImu() {
     uint16_t rx_data = LL_SPI_ReceiveData16(SPI2);
     LL_GPIO_SetOutputPin(GPIOB, IMU_CS2_Pin);
 
-    if ((rx_data & 0xFF) == 0x6B) {
-        return hal::HalStatus::SUCCESS;
+    data = rx_data & 0xFF;
+    return hal::HalStatus::SUCCESS;
+}
+
+hal::HalStatus hal::write8bitImuSync(uint8_t address, uint8_t data) {
+    if (LL_SPI_IsActiveFlag_RXNE(SPI2)) LL_SPI_ReceiveData16(SPI2);
+    if (!LL_SPI_IsEnabled(SPI2)) LL_SPI_Enable(SPI2);
+
+    LL_GPIO_ResetOutputPin(GPIOB, IMU_CS2_Pin);
+    uint16_t tx_data = (static_cast<uint16_t>(address) << 8) |
+                       (static_cast<uint16_t>(hal::GYRO_MASK_WRITE) << 8) |
+                       data;
+    LL_SPI_TransmitData16(SPI2, tx_data);
+    while (LL_SPI_IsActiveFlag_TXE(SPI2) == RESET)
+        ;
+    while (LL_SPI_IsActiveFlag_RXNE(SPI2) == RESET)
+        ;
+    LL_GPIO_SetOutputPin(GPIOB, IMU_CS2_Pin);
+
+    return hal::HalStatus::SUCCESS;
+}
+
+hal::HalStatus hal::whoamiImu() {
+#ifdef STM32L4P5xx
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+    uint8_t rx_data;
+    if (read8bitImuSync(static_cast<uint8_t>(hal::GyroCommands::WHO_AM_I),
+                        rx_data) == hal::HalStatus::SUCCESS) {
+        if (rx_data == 0x6B) {
+            return hal::HalStatus::SUCCESS;
+        } else {
+            return hal::HalStatus::ERROR;
+        }
     } else {
         return hal::HalStatus::ERROR;
     }
@@ -157,12 +187,37 @@ hal::HalStatus hal::whoamiImu() {
 #endif  // ifdef LINUX
 }
 
+hal::HalStatus hal::setImuConfig() {
+#ifdef STM32L4P5xx
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+    // write8bitImuSync(static_cast<uint8_t>(GyroCommands::FUNC_CFG_ACCESS),
+    // 0x40);
+    // TODO: Implement Imu Config function
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef STM32F411xE
+
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+}
+
 hal::HalStatus hal::getImuDataSync(ImuData& data) {
 #ifdef STM32L4P5xx
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE
+    data.OUT_TEMP = 100;
+    data.OUT_X_A = 200;
+    data.OUT_Y_A = 300;
+    data.OUT_Z_A = 400;
+    data.OUT_X_G = 500;
+    data.OUT_Y_G = 600;
+    data.OUT_Z_G = 700;
+    // TODO: Implement getImuDataSync function
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32F411xE
 

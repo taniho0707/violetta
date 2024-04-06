@@ -5,6 +5,9 @@
 //******************************************************************************
 #include "act_debug.h"
 
+#include "msg_format_imu.h"
+#include "msg_server.h"
+
 using namespace act;
 
 void DebugActivity::init() {}
@@ -29,6 +32,7 @@ Status DebugActivity::run() {
     } else {
         debug->printf("IMU WhoAmI: ERROR\n");
     }
+    imu->interruptPeriodic();
 
     // Battery Test code
     auto battery = mpl::Battery::getInstance();
@@ -58,6 +62,26 @@ Status DebugActivity::run() {
     mpl::Timer::init();
 
     led->on(hal::LedNumbers::GREEN);
+
+    auto message = msg::MessageServer::getInstance();
+    msg::MsgFormatImu msg_imu = msg::MsgFormatImu();
+    message->receiveMessage(msg::ModuleId::IMU, ((void*)(&msg_imu)));
+    debug->printf("IMU: %8d, %10d, %f, %f, %f, %f, %f, %f, %f\n",
+                  msg_imu.getCount(), msg_imu.getTime(), msg_imu.gyro_yaw,
+                  msg_imu.gyro_roll, msg_imu.gyro_pitch, msg_imu.acc_x,
+                  msg_imu.acc_y, msg_imu.acc_z, msg_imu.temperature);
+    LL_mDelay(2);
+    message->receiveMessage(msg::ModuleId::IMU, &msg_imu);
+    debug->printf("IMU: %8d, %10d, %f, %f, %f, %f, %f, %f, %f\n",
+                  msg_imu.getCount(), msg_imu.getTime(), msg_imu.gyro_yaw,
+                  msg_imu.gyro_roll, msg_imu.gyro_pitch, msg_imu.acc_x,
+                  msg_imu.acc_y, msg_imu.acc_z, msg_imu.temperature);
+    LL_mDelay(1000);
+    message->receiveMessage(msg::ModuleId::IMU, &msg_imu);
+    debug->printf("IMU: %8d, %10d, %f, %f, %f, %f, %f, %f, %f\n",
+                  msg_imu.getCount(), msg_imu.getTime(), msg_imu.gyro_yaw,
+                  msg_imu.gyro_roll, msg_imu.gyro_pitch, msg_imu.acc_x,
+                  msg_imu.acc_y, msg_imu.acc_z, msg_imu.temperature);
 
     while (1) {
         LL_mDelay(1000);

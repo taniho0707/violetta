@@ -1,7 +1,7 @@
 //******************************************************************************
 // @addtogroup  Message
-// @file        msg_format_imu.h
-// @brief       Message Format for IMU
+// @file        msg_format_encoder.h
+// @brief       Message Format for Encoder
 //******************************************************************************
 #pragma once
 
@@ -9,21 +9,16 @@
 
 namespace msg {
 
-class MsgFormatImu : public MsgFormat {
+class MsgFormatEncoder : public MsgFormat {
    public:
-    MsgFormatImu();
+    MsgFormatEncoder();
 
     void copy(void* target) override;
 
     void update(void* from) override;
 
-    float gyro_yaw;
-    float gyro_roll;
-    float gyro_pitch;
-    float acc_x;
-    float acc_y;
-    float acc_z;
-    float temperature;
+    float left;
+    float right;
 };
 
 }  // namespace msg

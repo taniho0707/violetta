@@ -11,7 +11,9 @@ elseif(${PLATFORM} STREQUAL STM32)
     message("[BUILD PLATFORM] STM32")
     include_directories(
         Platform/STM32/Inc
-        arm-gnu-toolchain-13.2.Rel1-mingw-w64-i686-arm-none-eabi/arm-none-eabi/include
+        arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/arm-none-eabi/include
+        arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/arm-none-eabi/include/c++/13.2.1
+        arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/arm-none-eabi/include/c++/13.2.1/arm-none-eabi
     )
     add_definitions(-DSTM32)
     # add_compile_options(

@@ -7,6 +7,7 @@
 
 #include "hal_imu.h"
 #include "mpl_conf.h"
+#include "msg_format_imu.h"
 
 namespace mpl {
 
@@ -15,6 +16,8 @@ class Imu {
     Imu();
 
     hal::ImuData last;
+
+    msg::MsgFormatImu msg_format;
 
    public:
     MplStatus init();

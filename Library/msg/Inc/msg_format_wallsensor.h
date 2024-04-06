@@ -1,7 +1,7 @@
 //******************************************************************************
 // @addtogroup  Message
-// @file        msg_format_imu.h
-// @brief       Message Format for IMU
+// @file        msg_format_wallsensor.h
+// @brief       Message Format for WallSensor
 //******************************************************************************
 #pragma once
 
@@ -9,21 +9,18 @@
 
 namespace msg {
 
-class MsgFormatImu : public MsgFormat {
+class MsgFormatWallsensor : public MsgFormat {
    public:
-    MsgFormatImu();
+    MsgFormatWallsensor();
 
     void copy(void* target) override;
 
     void update(void* from) override;
 
-    float gyro_yaw;
-    float gyro_roll;
-    float gyro_pitch;
-    float acc_x;
-    float acc_y;
-    float acc_z;
-    float temperature;
+    uint16_t frontleft;
+    uint16_t left;
+    uint16_t right;
+    uint16_t frontright;
 };
 
 }  // namespace msg

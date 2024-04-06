@@ -10,4 +10,5 @@ add_library(Library STATIC
     $<TARGET_OBJECTS:hal>
     $<TARGET_OBJECTS:mpl>
     $<TARGET_OBJECTS:act>
+    $<TARGET_OBJECTS:msg>
 )

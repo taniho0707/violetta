@@ -33,8 +33,15 @@
     "stm32f4xx_ll_bus.h": "c",
     "compare": "cpp",
     "cstdint": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "*.h": "cpp"
   },
+  "clangd.arguments": [
+      "--compile-commands-dir=${workspaceFolder}/build",
+      "--header-insertion=never",
+      "--clang-tidy",
+      "--enable-config"
+  ],
   "cmake.configureOnOpen": false,
   "cortex-debug.liveWatchRefreshRate": 300,
   "cortex-debug.armToolchainPath": "/usr/bin",
