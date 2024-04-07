@@ -31,6 +31,15 @@ mpl::MplStatus mpl::Imu::whoami() {
     }
 }
 
+mpl::MplStatus mpl::Imu::setConfig() {
+    auto status = hal::setImuConfig();
+    if (status == hal::HalStatus::SUCCESS) {
+        return MplStatus::SUCCESS;
+    } else {
+        return MplStatus::ERROR;
+    }
+}
+
 mpl::MplStatus mpl::Imu::scanAllSync(hal::ImuData& data) {
     auto status = hal::getImuDataSync(data);
     if (status == hal::HalStatus::SUCCESS) {
@@ -48,13 +57,13 @@ void mpl::Imu::interruptPeriodic() {
     // update imu data
     scanAllSync(last);
 
-    msg_format.gyro_yaw = (float)last.OUT_Z_G;
-    msg_format.gyro_roll = (float)last.OUT_Y_G;
-    msg_format.gyro_pitch = (float)last.OUT_X_G;
-    msg_format.acc_x = (float)last.OUT_X_A;
-    msg_format.acc_y = (float)last.OUT_Y_A;
-    msg_format.acc_z = (float)last.OUT_Z_A;
-    msg_format.temperature = (float)last.OUT_TEMP;
+    msg_format.gyro_yaw = last.OUT_Z_G;
+    msg_format.gyro_roll = last.OUT_Y_G;
+    msg_format.gyro_pitch = last.OUT_X_G;
+    msg_format.acc_x = last.OUT_X_A;
+    msg_format.acc_y = last.OUT_Y_A;
+    msg_format.acc_z = last.OUT_Z_A;
+    msg_format.temperature = last.OUT_TEMP;
     // end update imu data
     server->sendMessage(msg::ModuleId::IMU, &msg_format);
 }

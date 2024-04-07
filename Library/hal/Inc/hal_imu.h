@@ -44,8 +44,8 @@ enum class GyroAxises : uint8_t {
     PITCH,
 };
 
-const uint16_t GYRO_MASK_READ = 0x80;
-const uint16_t GYRO_MASK_WRITE = 0x00;
+const uint16_t GYRO_MASK_READ = 0x8000;
+const uint16_t GYRO_MASK_WRITE = 0x0000;
 
 enum class GyroCommands : uint8_t {
     FUNC_CFG_ACCESS = 0x01,

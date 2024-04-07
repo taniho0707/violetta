@@ -13,6 +13,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_ll_gpio.h"
 #include "stm32f4xx_ll_spi.h"
+#include "stm32f4xx_ll_utils.h"
 
 hal::HalStatus hal::initImuPort() {
 #ifdef STM32L4P5xx
@@ -86,13 +87,15 @@ hal::HalStatus hal::initImuPort() {
 
     SPI_InitStruct.TransferDirection = LL_SPI_FULL_DUPLEX;
     SPI_InitStruct.Mode = LL_SPI_MODE_MASTER;
-    SPI_InitStruct.DataWidth = LL_SPI_DATAWIDTH_16BIT;
+    SPI_InitStruct.DataWidth = LL_SPI_DATAWIDTH_8BIT;
     SPI_InitStruct.ClockPolarity = LL_SPI_POLARITY_HIGH;
     SPI_InitStruct.ClockPhase = LL_SPI_PHASE_2EDGE;
     // SPI_InitStruct.NSS = LL_SPI_NSS_HARD_OUTPUT;
     SPI_InitStruct.NSS = LL_SPI_NSS_SOFT;
 
     SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV8;
+    // SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV64;  //
+    // 一時的に変更
     SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
     SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
     SPI_InitStruct.CRCPoly = 10;
@@ -127,36 +130,51 @@ hal::HalStatus hal::deinitImuPort() {
 }
 
 hal::HalStatus hal::read8bitImuSync(uint8_t address, uint8_t& data) {
-    if (LL_SPI_IsActiveFlag_RXNE(SPI2)) LL_SPI_ReceiveData16(SPI2);
-    if (!LL_SPI_IsEnabled(SPI2)) LL_SPI_Enable(SPI2);
+    // if (LL_SPI_IsActiveFlag_RXNE(SPI2)) LL_SPI_ReceiveData16(SPI2);
+    // if (!LL_SPI_IsEnabled(SPI2)) LL_SPI_Enable(SPI2);
 
     LL_GPIO_ResetOutputPin(GPIOB, IMU_CS2_Pin);
-    uint16_t tx_data = (static_cast<uint16_t>(address) << 8) |
-                       (static_cast<uint16_t>(hal::GYRO_MASK_READ) << 8);
-    LL_SPI_TransmitData16(SPI2, tx_data);
+    uint8_t tx_data = address | 0x80;
     while (LL_SPI_IsActiveFlag_TXE(SPI2) == RESET)
         ;
+    LL_SPI_TransmitData8(SPI2, tx_data);
     while (LL_SPI_IsActiveFlag_RXNE(SPI2) == RESET)
         ;
-    uint16_t rx_data = LL_SPI_ReceiveData16(SPI2);
+    LL_SPI_ReceiveData8(SPI2);
+    tx_data = 0x00;
+    while (LL_SPI_IsActiveFlag_TXE(SPI2) == RESET)
+        ;
+    LL_SPI_TransmitData8(SPI2, tx_data);
+    while (LL_SPI_IsActiveFlag_RXNE(SPI2) == RESET)
+        ;
+    data = LL_SPI_ReceiveData8(SPI2);
+    while (LL_SPI_IsActiveFlag_BSY(SPI2) == SET)
+        ;
     LL_GPIO_SetOutputPin(GPIOB, IMU_CS2_Pin);
 
-    data = rx_data & 0xFF;
     return hal::HalStatus::SUCCESS;
 }
 
 hal::HalStatus hal::write8bitImuSync(uint8_t address, uint8_t data) {
-    if (LL_SPI_IsActiveFlag_RXNE(SPI2)) LL_SPI_ReceiveData16(SPI2);
-    if (!LL_SPI_IsEnabled(SPI2)) LL_SPI_Enable(SPI2);
+    // if (LL_SPI_IsActiveFlag_RXNE(SPI2)) LL_SPI_ReceiveData16(SPI2);
+    // if (!LL_SPI_IsEnabled(SPI2)) LL_SPI_Enable(SPI2);
 
     LL_GPIO_ResetOutputPin(GPIOB, IMU_CS2_Pin);
-    uint16_t tx_data = (static_cast<uint16_t>(address) << 8) |
-                       (static_cast<uint16_t>(hal::GYRO_MASK_WRITE) << 8) |
-                       data;
-    LL_SPI_TransmitData16(SPI2, tx_data);
+    uint8_t tx_data = address;
     while (LL_SPI_IsActiveFlag_TXE(SPI2) == RESET)
         ;
+    LL_SPI_TransmitData8(SPI2, tx_data);
     while (LL_SPI_IsActiveFlag_RXNE(SPI2) == RESET)
+        ;
+    LL_SPI_ReceiveData8(SPI2);
+    tx_data = data;
+    while (LL_SPI_IsActiveFlag_TXE(SPI2) == RESET)
+        ;
+    LL_SPI_TransmitData8(SPI2, tx_data);
+    while (LL_SPI_IsActiveFlag_RXNE(SPI2) == RESET)
+        ;
+    LL_SPI_ReceiveData8(SPI2);
+    while (LL_SPI_IsActiveFlag_BSY(SPI2) == SET)
         ;
     LL_GPIO_SetOutputPin(GPIOB, IMU_CS2_Pin);
 
@@ -193,9 +211,43 @@ hal::HalStatus hal::setImuConfig() {
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE
-    // write8bitImuSync(static_cast<uint8_t>(GyroCommands::FUNC_CFG_ACCESS),
-    // 0x40);
-    // TODO: Implement Imu Config function
+    write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL3_C),
+                     0x01);  // Software reset
+    LL_mDelay(100);
+    // while (true) {
+    //     uint8_t rx_data;
+    //     read8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL3_C),
+    //     rx_data); if ((rx_data & 0x01) == 0) {
+    //         break;
+    //     }
+    // }
+
+    write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL4_C),
+                     0x06);  // I2C_Disable, GyroLPF1_Enable
+    write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL9_XL),
+                     0xE2);  // I3C Disable
+
+    write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL1_XL),
+                     0xAE);  // KOHIRO: ACC 6.66kHz, +-8g
+    write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL8_XL),
+                     0xC0);  // KOHIRO: ACC LPF 6.66kHz/400
+    write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL2_G),
+                     0xAD);  // KOHIRO: GYRO 6.66kHz, +-4000dps
+
+    // write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL1_XL),
+    //                  0x8C);  // ACC: 1.66kHz, +-8g
+    // write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL2_G),
+    //                  0x8D);  // GYRO: 1.66kHz, +-4000dps
+    // // MEMO: FS_4000 has to be set to 0 when the OIS chain is ON
+    // (inCTRL1_OIS)
+    // write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL5_C),
+    //                  0x00);  // Default
+    // write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL6_C),
+    //                  0x80);  // USR_OFF_W=0, FTYPE=000(GyroLPF1:274Hz)
+    // write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL7_G),
+    //                  0x00);  // GyroHPF Disable
+    // write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL8_XL),
+    //                  0x00);  // AccHPF Disable
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32F411xE
 
@@ -210,14 +262,50 @@ hal::HalStatus hal::getImuDataSync(ImuData& data) {
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE
-    data.OUT_TEMP = 100;
-    data.OUT_X_A = 200;
-    data.OUT_Y_A = 300;
-    data.OUT_Z_A = 400;
-    data.OUT_X_G = 500;
-    data.OUT_Y_G = 600;
-    data.OUT_Z_G = 700;
-    // TODO: Implement getImuDataSync function
+    uint8_t rx_data_l, rx_data_h;
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUT_TEMP_L), rx_data_l);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUT_TEMP_H), rx_data_h);
+    data.OUT_TEMP = (static_cast<float>(static_cast<int16_t>(
+                         (static_cast<uint16_t>(rx_data_h) << 8) |
+                         (static_cast<uint16_t>(rx_data_l) & 0x00FF))) /
+                         IMU_TSEN +
+                     IMU_TOFF);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_L_G), rx_data_l);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_H_G), rx_data_h);
+    data.OUT_X_G = (static_cast<float>(static_cast<int16_t>(
+                        (static_cast<uint16_t>(rx_data_h) << 8) |
+                        (static_cast<uint16_t>(rx_data_l) & 0x00FF))) *
+                    IMU_GSEN);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_L_G), rx_data_l);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_H_G), rx_data_h);
+    data.OUT_Y_G = (static_cast<float>(static_cast<int16_t>(
+                        (static_cast<uint16_t>(rx_data_h) << 8) |
+                        (static_cast<uint16_t>(rx_data_l) & 0x00FF))) *
+                    IMU_GSEN);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_L_G), rx_data_l);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_H_G), rx_data_h);
+    data.OUT_Z_G = (static_cast<float>(static_cast<int16_t>(
+                        (static_cast<uint16_t>(rx_data_h) << 8) |
+                        (static_cast<uint16_t>(rx_data_l) & 0x00FF))) *
+                    IMU_GSEN);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_L_A), rx_data_l);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_H_A), rx_data_h);
+    data.OUT_X_A = (static_cast<float>(static_cast<int16_t>(
+                        (static_cast<uint16_t>(rx_data_h) << 8) |
+                        (static_cast<uint16_t>(rx_data_l) & 0x00FF))) *
+                    IMU_ASEN);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_L_A), rx_data_l);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_H_A), rx_data_h);
+    data.OUT_Y_A = (static_cast<float>(static_cast<int16_t>(
+                        (static_cast<uint16_t>(rx_data_h) << 8) |
+                        (static_cast<uint16_t>(rx_data_l) & 0x00FF))) *
+                    IMU_ASEN);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_L_A), rx_data_l);
+    read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_H_A), rx_data_h);
+    data.OUT_Z_A = (static_cast<float>(static_cast<int16_t>(
+                        (static_cast<uint16_t>(rx_data_h) << 8) |
+                        (static_cast<uint16_t>(rx_data_l) & 0x00FF))) *
+                    IMU_ASEN);
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32F411xE
 

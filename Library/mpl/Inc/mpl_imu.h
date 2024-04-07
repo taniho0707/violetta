@@ -24,6 +24,7 @@ class Imu {
     void deinit();
 
     MplStatus whoami();
+    MplStatus setConfig();
 
     MplStatus scanAllSync(hal::ImuData& data);
     // MplStatus scanAllAsync();

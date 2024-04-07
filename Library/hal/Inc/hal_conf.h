@@ -69,6 +69,11 @@ const float BATTERY_RATIO = 2.0f;
 const uint32_t TIMER_COUNT_INTERVAL = 250;  // [us]
 const uint32_t TIMER_COUNT_MAX = 12500;  // 1 カウントあたり 0.02 [us] = 20 [ns]
 
+const uint16_t IMU_TSEN = 256;    // [LSB/°C]
+const uint16_t IMU_TOFF = 25;     // [°C]
+const float IMU_GSEN = 0.140;     // [dps/LSB]
+const float IMU_ASEN = 0.000244;  // [g/LSB]
+
 #define WALLSENSOR_NUMS 4
 enum class WallSensorNumbers : uint8_t {
     FRONTLEFT = 0,
@@ -162,13 +167,13 @@ struct WallSensorData {
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 struct ImuData {
-    int16_t OUT_TEMP;
-    int16_t OUT_X_G;
-    int16_t OUT_Y_G;
-    int16_t OUT_Z_G;
-    int16_t OUT_X_A;
-    int16_t OUT_Y_A;
-    int16_t OUT_Z_A;
+    float OUT_TEMP;
+    float OUT_X_G;  // Pitch
+    float OUT_Y_G;  // Yaw
+    float OUT_Z_G;  // Roll
+    float OUT_X_A;  // Right
+    float OUT_Y_A;  // Front
+    float OUT_Z_A;  // Up
 };
 
 struct EncoderData {
