@@ -1,7 +1,7 @@
 //******************************************************************************
 // @addtogroup  Message
-// @file        msg_format_encoder.h
-// @brief       Message Format for Encoder
+// @file        msg_format_battery.h
+// @brief       Message Format for Battery
 //******************************************************************************
 #pragma once
 
@@ -9,16 +9,15 @@
 
 namespace msg {
 
-class MsgFormatEncoder : public MsgFormat {
+class MsgFormatBattery : public MsgFormat {
    public:
-    MsgFormatEncoder();
+    MsgFormatBattery();
 
     void copy(void* target) override;
 
     void update(void* from) override;
 
-    uint16_t left;
-    uint16_t right;
+    float battery;
 };
 
 }  // namespace msg

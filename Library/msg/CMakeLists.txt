@@ -5,4 +5,5 @@ add_library(msg OBJECT
     msg_format_imu.cpp
     msg_format_encoder.cpp
     msg_format_wallsensor.cpp
+    msg_format_battery.cpp
 )

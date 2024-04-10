@@ -10,6 +10,7 @@
 #include "hal_conf.h"
 #include "hal_timer.h"
 #include "mpl_conf.h"
+#include "util.h"
 
 // #ifdef STM32L4P5xx
 // #include "stm32l4xx_ll_bus.h"
@@ -65,6 +66,16 @@ uint32_t mpl::Timer::getTimeFromLastReference() {
     uint32_t ret = now - last_reference_us;
     last_reference_us = now;
     return ret;
+}
+
+void mpl::Timer::sleepNs(uint32_t ns) {
+    uint32_t minimum_unit =
+        (1000.f * hal::TIMER_COUNT_INTERVAL / hal::TIMER_COUNT_MAX);  // [ns]
+    uint32_t count_wait = misc::min(getInternalCounter() + ns / minimum_unit,
+                                    hal::TIMER_COUNT_INTERVAL - 2);
+    while (getInternalCounter() < count_wait)
+        ;
+    return;
 }
 
 void mpl::Timer::interrupt() {

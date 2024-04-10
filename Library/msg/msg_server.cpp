@@ -5,6 +5,7 @@
 //******************************************************************************
 #include "msg_server.h"
 
+#include "msg_format_battery.h"
 #include "msg_format_encoder.h"
 #include "msg_format_imu.h"
 #include "msg_format_wallsensor.h"
@@ -17,6 +18,7 @@ MessageServer::MessageServer() {
     messages[static_cast<uint8_t>(ModuleId::WALLSENSOR)] =
         new MsgFormatWallsensor();
     messages[static_cast<uint8_t>(ModuleId::ENCODER)] = new MsgFormatEncoder();
+    messages[static_cast<uint8_t>(ModuleId::BATTERY)] = new MsgFormatBattery();
 }
 
 MsgResult MessageServer::receiveMessage(ModuleId id, void* format) {

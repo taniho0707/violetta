@@ -6,6 +6,8 @@
 
 #include "hal_wallsensor.h"
 
+#include "hal_timer.h"
+
 hal::HalStatus hal::initWallSensorPort() {
 #ifdef STM32L4P5xx
     return HalStatus::SUCCESS;
@@ -213,44 +215,44 @@ hal::HalStatus hal::getWallSensorSingleSync(uint16_t& data,
 #endif  // ifdef LINUX
 }
 
-hal::HalStatus hal::getWallSensorAllSync(hal::WallSensorData& data) {
-#ifdef STM32L4P5xx
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+// hal::HalStatus hal::getWallSensorAllSync(hal::WallSensorData& data) {
+// #ifdef STM32L4P5xx
+//     return hal::HalStatus::SUCCESS;
+// #endif  // ifdef STM32L4P5xx
 
-#ifdef STM32F411xE
-    uint16_t d = 0;
-    hal::setWallSensorLedOn(WallSensorNumbers::FRONTLEFT);
-    LL_mDelay(1);
-    auto e1 = hal::getWallSensorSingleSync(d, WallSensorNumbers::FRONTLEFT);
-    data.FRONTLEFT = d;
-    hal::setWallSensorLedOn(WallSensorNumbers::LEFT);
-    LL_mDelay(1);
-    auto e2 = hal::getWallSensorSingleSync(d, WallSensorNumbers::LEFT);
-    data.LEFT = d;
-    hal::setWallSensorLedOn(WallSensorNumbers::RIGHT);
-    LL_mDelay(1);
-    auto e3 = hal::getWallSensorSingleSync(d, WallSensorNumbers::RIGHT);
-    data.RIGHT = d;
-    hal::setWallSensorLedOn(WallSensorNumbers::FRONTRIGHT);
-    LL_mDelay(1);
-    auto e4 = hal::getWallSensorSingleSync(d, WallSensorNumbers::FRONTRIGHT);
-    data.FRONTRIGHT = d;
-    hal::setWallSensorLedOff();
+// #ifdef STM32F411xE
+//     uint16_t d = 0;
+//     hal::setWallSensorLedOn(WallSensorNumbers::FRONTLEFT);
+//     // Delay for LED stabilization
+//     auto e1 = hal::getWallSensorSingleSync(d, WallSensorNumbers::FRONTLEFT);
+//     data.FRONTLEFT = d;
+//     hal::setWallSensorLedOn(WallSensorNumbers::LEFT);
+//     // Delay for LED stabilization
+//     auto e2 = hal::getWallSensorSingleSync(d, WallSensorNumbers::LEFT);
+//     data.LEFT = d;
+//     hal::setWallSensorLedOn(WallSensorNumbers::RIGHT);
+//     // Delay for LED stabilization
+//     auto e3 = hal::getWallSensorSingleSync(d, WallSensorNumbers::RIGHT);
+//     data.RIGHT = d;
+//     hal::setWallSensorLedOn(WallSensorNumbers::FRONTRIGHT);
+//     // Delay for LED stabilization
+//     auto e4 = hal::getWallSensorSingleSync(d, WallSensorNumbers::FRONTRIGHT);
+//     data.FRONTRIGHT = d;
+//     hal::setWallSensorLedOff();
 
-    if (e1 == HalStatus::SUCCESS && e2 == HalStatus::SUCCESS &&
-        e3 == HalStatus::SUCCESS && e4 == HalStatus::SUCCESS) {
-        return hal::HalStatus::SUCCESS;
-    } else {
-        return hal::HalStatus::ERROR;
-    }
-#endif  // ifdef STM32F411xE
+//     if (e1 == HalStatus::SUCCESS && e2 == HalStatus::SUCCESS &&
+//         e3 == HalStatus::SUCCESS && e4 == HalStatus::SUCCESS) {
+//         return hal::HalStatus::SUCCESS;
+//     } else {
+//         return hal::HalStatus::ERROR;
+//     }
+// #endif  // ifdef STM32F411xE
 
-#ifdef LINUX
-    if (plt::Observer::getInstance()->getWallSensorData(data)) {
-        return hal::HalStatus::SUCCESS;
-    } else {
-        return hal::HalStatus::ERROR;
-    }
-#endif  // ifdef LINUX
-}
+// #ifdef LINUX
+//     if (plt::Observer::getInstance()->getWallSensorData(data)) {
+//         return hal::HalStatus::SUCCESS;
+//     } else {
+//         return hal::HalStatus::ERROR;
+//     }
+// #endif  // ifdef LINUX
+// }

@@ -38,7 +38,7 @@ HalStatus setWallSensorLedOff();
 
 HalStatus getWallSensorSingleSync(uint16_t& data, WallSensorNumbers n);
 
-HalStatus getWallSensorAllSync(WallSensorData& data);
+// HalStatus getWallSensorAllSync(WallSensorData& data);
 // HalStatus getBatteryVoltageAsync();
 // HalStatus getBatteryVoltageDma();
 

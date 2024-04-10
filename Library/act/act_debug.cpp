@@ -56,22 +56,22 @@ Status DebugActivity::run() {
         debug->printf("IMU WhoAmI: ERROR\n");
     }
 
-    // Battery Test code
-    auto battery = mpl::Battery::getInstance();
-    debug->printf("Battery");
-    if (battery->initPort() != mpl::MplStatus::SUCCESS) {
-        debug->printf(" (Initialize ERROR)");
-    }
-    float battery_data = 0.0f;
-    battery->scanSync(battery_data);
-    debug->printf(": %1.2f\n", battery_data);
+    // // Battery Test code
+    // auto battery = mpl::Battery::getInstance();
+    // debug->printf("Battery");
+    // if (battery->initPort() != mpl::MplStatus::SUCCESS) {
+    //     debug->printf(" (Initialize ERROR)");
+    // }
+    // float battery_data = 0.0f;
+    // battery->scanSync(battery_data);
+    // debug->printf(": %1.2f\n", battery_data);
 
-    auto encoder = mpl::Encoder::getInstance();
-    hal::EncoderData encoder_data = {0};
+    // auto encoder = mpl::Encoder::getInstance();
+    // hal::EncoderData encoder_data = {0};
 
-    // Wallsensor Test code
-    auto wallsensor = mpl::WallSensor::getInstance();
-    hal::WallSensorData wallsensor_data = {0};
+    // // Wallsensor Test code
+    // auto wallsensor = mpl::WallSensor::getInstance();
+    // hal::WallSensorData wallsensor_data = {0};
 
     // // Motor Test code
     // auto motor = mpl::Motor::getInstance();
@@ -86,24 +86,27 @@ Status DebugActivity::run() {
     led->on(hal::LedNumbers::GREEN);
 
     auto message = msg::MessageServer::getInstance();
+    msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
+    msg::MsgFormatEncoder msg_encoder = msg::MsgFormatEncoder();
     msg::MsgFormatImu msg_imu = msg::MsgFormatImu();
+    msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
 
     while (1) {
-        LL_mDelay(1000);
-        battery->scanSync(battery_data);
-        encoder->scanEncoderSync(encoder_data);
-        wallsensor->scanAllSync(wallsensor_data);
+        LL_mDelay(200);
+        message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
+        message->receiveMessage(msg::ModuleId::ENCODER, &msg_encoder);
         message->receiveMessage(msg::ModuleId::IMU, &msg_imu);
+        message->receiveMessage(msg::ModuleId::WALLSENSOR, &msg_wallsensor);
         debug->printf(
             "T: %10d B: %1.2f | L: %5d, R: %5d | FL: %4d, L: %4d, R: %4d, FR: "
             "%4d, IMU: %8d, %10d, % 6.2f, % 6.2f, % 6.2f, % 6.2f, % 6.2f, "
             "% 6.2f, %4.2f\n",
-            mpl::Timer::getMicroTime(), battery_data, encoder_data.LEFT,
-            encoder_data.RIGHT, wallsensor_data.FRONTLEFT, wallsensor_data.LEFT,
-            wallsensor_data.RIGHT, wallsensor_data.FRONTRIGHT,
-            msg_imu.getCount(), msg_imu.getTime(), msg_imu.gyro_yaw,
-            msg_imu.gyro_roll, msg_imu.gyro_pitch, msg_imu.acc_x, msg_imu.acc_y,
-            msg_imu.acc_z, msg_imu.temperature);
+            mpl::Timer::getMicroTime(), msg_battery.battery, msg_encoder.left,
+            msg_encoder.right, msg_wallsensor.frontleft, msg_wallsensor.left,
+            msg_wallsensor.right, msg_wallsensor.frontright, msg_imu.getCount(),
+            msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.gyro_roll,
+            msg_imu.gyro_pitch, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
+            msg_imu.temperature);
     }
 
     return Status::ERROR;

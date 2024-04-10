@@ -55,6 +55,7 @@ hal::ImuData mpl::Imu::data() { return last; }
 void mpl::Imu::interruptPeriodic() {
     static auto server = msg::MessageServer::getInstance();
     // update imu data
+    // TODO: DMA対応
     scanAllSync(last);
 
     msg_format.gyro_yaw = last.OUT_Z_G;

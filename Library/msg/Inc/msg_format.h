@@ -20,7 +20,8 @@ enum class ModuleId : uint8_t {
     IMU = 0,
     WALLSENSOR = 1,
     ENCODER = 2,
-    LENGTH = 3
+    BATTERY = 3,
+    LENGTH = 4
 };
 
 class MsgFormat {

@@ -57,6 +57,14 @@ class Timer {
     // TIMER_COUNT_INTERVAL [us] 単位で記録される
     static uint32_t getTimeFromLastReference();
 
+    // 指定時間待機する
+    // ※ Timer::interrupt() 内で使われることを前提としている
+    // 最低単位は 20 [ns] = 0.02 [us] のため、
+    // 20 [ns]で除した余りは切り捨てられる
+    // 精度は + 0 [ns] / - 20 [ns]
+    // 新しく<TIMER_COUNT_INTERVAL>割り込みが発生すると即座に返される
+    static void sleepNs(uint32_t ns);
+
     /**
      * @brief タイマーの加算を行う。<br>
      * 正確に<TIMER_COUNT_INTERVAL>[us]ごとに呼ばれる必要がある。
