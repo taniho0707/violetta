@@ -39,17 +39,11 @@ mpl::MplStatus mpl::Timer::init() {
 }
 
 uint32_t mpl::Timer::getInternalCounter() {
-#ifdef STM32L4P5xx
-    return LL_TIM_GetCounter(TIM6);
-#endif  // ifdef STM32L4P5xx
-
-#ifdef STM32F411xE
-    return hal::getTimerCount();
-#endif  // ifdef STM32F411xE
-
 #ifdef LINUX
     return 0
-#endif  // ifdef LINUX
+#else
+    return hal::getTimerCount();
+#endif
 }
 
 uint32_t mpl::Timer::getNanoTimeFromLastInterrupt() {
@@ -73,8 +67,13 @@ void mpl::Timer::sleepNs(uint32_t ns) {
         (1000.f * hal::TIMER_COUNT_INTERVAL / hal::TIMER_COUNT_MAX);  // [ns]
     uint32_t count_wait = misc::min(getInternalCounter() + ns / minimum_unit,
                                     hal::TIMER_COUNT_INTERVAL - 2);
-    while (getInternalCounter() < count_wait)
-        ;
+    while (getInternalCounter() < count_wait);
+    return;
+}
+
+void mpl::Timer::sleepMs(uint32_t ms) {
+    uint32_t end_time = getMicroTime() + ms * 1000;
+    while (getMicroTime() < end_time);
     return;
 }
 

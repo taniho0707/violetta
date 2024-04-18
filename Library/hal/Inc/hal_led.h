@@ -8,8 +8,7 @@
 #include "hal_conf.h"
 
 #ifdef STM32L4P5xx
-// STM32HAL/LL
-#include "stm32l4xx_hal.h"
+// STM32LL
 #include "stm32l4xx_ll_gpio.h"
 #endif  // ifdef STM32L4P5xx
 

@@ -6,14 +6,25 @@
 
 #include "hal_motor.h"
 
-#include "stm32f4xx_ll_tim.h"
-
-hal::HalStatus hal::initMotorPort() {
 #ifdef STM32L4P5xx
-    return hal::HalStatus::SUCCESS;
+#include "stm32l4xx_ll_tim.h"
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE
+#include "stm32f4xx_ll_tim.h"
+#endif  // ifdef STM32F411xE
+
+hal::HalStatus hal::initMotorPort() {
+#ifdef MOUSE_VIOLETTA
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_VIOLETTA
+
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+    // FIXME: Implement Motor initialization for Lazuli
+#endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -84,7 +95,7 @@ hal::HalStatus hal::initMotorPort() {
     LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
@@ -92,9 +103,13 @@ hal::HalStatus hal::initMotorPort() {
 }
 
 hal::HalStatus hal::deinitMotorPort() {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
+
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
 
 #ifdef STM32F411xE
     return hal::HalStatus::NOIMPLEMENT;
@@ -106,11 +121,15 @@ hal::HalStatus hal::deinitMotorPort() {
 }
 
 hal::HalStatus hal::setMotorDutyR(float duty) {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
 
-#ifdef STM32F411xE
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
     if (duty >= 0.f && duty <= 1.f) {
         // TODO: 計算式の65535を外部パラメータから読むようにする
         LL_TIM_OC_SetCompareCH4(TIM4, (uint32_t)(65535.f * (1.f - duty)));
@@ -122,7 +141,7 @@ hal::HalStatus hal::setMotorDutyR(float duty) {
         return hal::HalStatus::INVALID_PARAMS;
     }
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
@@ -130,11 +149,15 @@ hal::HalStatus hal::setMotorDutyR(float duty) {
 }
 
 hal::HalStatus hal::setMotorDutyL(float duty) {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
 
-#ifdef STM32F411xE
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
     if (duty >= 0.f && duty <= 1.f) {
         // TODO: 計算式の65535を外部パラメータから読むようにする
         LL_TIM_OC_SetCompareCH1(TIM4, (uint32_t)(65535.f * (1.f - duty)));
@@ -146,7 +169,7 @@ hal::HalStatus hal::setMotorDutyL(float duty) {
         return hal::HalStatus::INVALID_PARAMS;
     }
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
@@ -154,17 +177,21 @@ hal::HalStatus hal::setMotorDutyL(float duty) {
 }
 
 hal::HalStatus hal::setMotorFloat() {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
 
-#ifdef STM32F411xE
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
     LL_TIM_OC_SetCompareCH1(TIM4, 0);
     LL_TIM_OC_SetCompareCH2(TIM4, 0);
     LL_TIM_OC_SetCompareCH3(TIM4, 0);
     LL_TIM_OC_SetCompareCH4(TIM4, 0);
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;

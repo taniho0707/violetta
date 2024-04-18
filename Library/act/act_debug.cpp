@@ -43,7 +43,6 @@ Status DebugActivity::run() {
     // led->on(hal::LedNumbers::BLUE);
 
     auto debug = mpl::Debug::getInstance();
-    debug->printf("H");  // なぜかはじめの1文字目が送信できない…
     debug->printf("Hello Zirconia2kai!\n");
 
     auto imu = mpl::Imu::getInstance();
@@ -51,20 +50,20 @@ Status DebugActivity::run() {
     auto result = imu->whoami();
     if (result == mpl::MplStatus::SUCCESS) {
         debug->printf("IMU WhoAmI: SUCCESS\n");
-        led->on(hal::LedNumbers::BLUE);
+        // led->on(hal::LedNumbers::BLUE);
     } else {
         debug->printf("IMU WhoAmI: ERROR\n");
     }
 
-    // // Battery Test code
-    // auto battery = mpl::Battery::getInstance();
-    // debug->printf("Battery");
-    // if (battery->initPort() != mpl::MplStatus::SUCCESS) {
-    //     debug->printf(" (Initialize ERROR)");
-    // }
-    // float battery_data = 0.0f;
-    // battery->scanSync(battery_data);
-    // debug->printf(": %1.2f\n", battery_data);
+    // Battery Test code
+    auto battery = mpl::Battery::getInstance();
+    debug->printf("Battery");
+    if (battery->initPort() != mpl::MplStatus::SUCCESS) {
+        debug->printf(" (Initialize ERROR)");
+    }
+    float battery_data = 0.0f;
+    battery->scanSync(battery_data);
+    debug->printf(": %1.2f\n", battery_data);
 
     // auto encoder = mpl::Encoder::getInstance();
     // hal::EncoderData encoder_data = {0};
@@ -83,7 +82,7 @@ Status DebugActivity::run() {
 
     mpl::Timer::init();
 
-    led->on(hal::LedNumbers::GREEN);
+    // led->on(hal::LedNumbers::GREEN);
 
     auto message = msg::MessageServer::getInstance();
     msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
@@ -92,15 +91,15 @@ Status DebugActivity::run() {
     msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
 
     while (1) {
-        LL_mDelay(200);
+        mpl::Timer::sleepMs(500);
         message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
         message->receiveMessage(msg::ModuleId::ENCODER, &msg_encoder);
         message->receiveMessage(msg::ModuleId::IMU, &msg_imu);
         message->receiveMessage(msg::ModuleId::WALLSENSOR, &msg_wallsensor);
         debug->printf(
             "T: %10d B: %1.2f | L: %5d, R: %5d | FL: %4d, L: %4d, R: %4d, FR: "
-            "%4d, IMU: %8d, %10d, % 6.2f, % 6.2f, % 6.2f, % 6.2f, % 6.2f, "
-            "% 6.2f, %4.2f\n",
+            "%4d, IMU: %8d, %10d, % 6d, % 6d, % 6d, % 6d, % 6d, "
+            "% 6d, %d\n",
             mpl::Timer::getMicroTime(), msg_battery.battery, msg_encoder.left,
             msg_encoder.right, msg_wallsensor.frontleft, msg_wallsensor.left,
             msg_wallsensor.right, msg_wallsensor.frontright, msg_imu.getCount(),

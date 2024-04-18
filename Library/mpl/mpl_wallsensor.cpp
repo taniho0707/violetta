@@ -49,6 +49,12 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
         data.RIGHT = buffer[3];
         data.FRONTRIGHT = buffer[4];
 #endif
+#ifdef MOUSE_LAZULI
+        data.FRONTLEFT = buffer_bundle.FRONTLEFT;
+        data.LEFT = buffer_bundle.LEFT;
+        data.RIGHT = buffer_bundle.RIGHT;
+        data.FRONTRIGHT = buffer_bundle.FRONTRIGHT;
+#endif
 #ifdef MOUSE_ZIRCONIA2KAI
         data.FRONTLEFT = buffer_bundle.FRONTLEFT;
         data.LEFT = buffer_bundle.LEFT;

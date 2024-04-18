@@ -30,6 +30,8 @@ class Debug {
     // MplStatus scanAllDma();
     // MplStatus doneScanDma();
 
+    // TODO: 入力に対応する
+
     // void interruptPeriodic();
     // void interruptAsync();
     // void interruptDma();

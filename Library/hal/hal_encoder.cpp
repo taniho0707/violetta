@@ -6,9 +6,15 @@
 
 #include "hal_encoder.h"
 
+#ifdef STM32L4P5xx
+#include "stm32l4xx_ll_tim.h"
+#endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
 #include "stm32f411xe.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_ll_tim.h"
+#endif  // ifdef STM32F411xE
 
 hal::HalStatus hal::initEncoderPort() {
 #ifdef STM32L4P5xx

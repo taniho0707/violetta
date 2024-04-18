@@ -1,0 +1,49 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${default}",
+                ".includes",
+                "Generate/zirconia2kai/Core/Inc",
+                "Generate/zirconia2kai/Drivers/STM32F4xx_HAL_Driver/Inc",
+                "Generate/zirconia2kai/Drivers/CMSIS/Include",
+                "Generate/zirconia2kai/Drivers/CMSIS/Device/ST/STM32F4xx/Include",
+                "Project/taniho/Inc",
+                "Project/reko/Inc",
+                "${workspaceFolder}/**"
+            ],
+            "forcedInclude": [
+                ".includes/arm-none-eabi/include/stdint.h"
+            ],
+            "defines": [
+                "USE_FULL_LL_DRIVER",
+                "STM32F411CEU6",
+                "STM32F411xE",
+                "MOUSE_ZIRCONIA2KAI"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "${workspaceFolder}/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-g++.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm",
+            "configurationProvider": "ms-vscode.makefile-tools",
+            "browse": {
+                "path": [
+                    "${default}",
+                    ".includes",
+                    "Generate/zirconia2kai/Core/Inc",
+                    "Generate/zirconia2kai/Drivers/STM32F4xx_HAL_Driver/Inc",
+                    "Generate/zirconia2kai/Drivers/CMSIS/Include",
+                    "Generate/zirconia2kai/Drivers/CMSIS/Device/ST/STM32F4xx/Include",
+                    "Project/taniho/Inc",
+                    "Project/reko/Inc",
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 4
+}

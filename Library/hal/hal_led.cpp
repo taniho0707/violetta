@@ -7,7 +7,7 @@
 #include "hal_led.h"
 
 hal::HalStatus hal::initLedPort(hal::LedNumbers num) {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     GPIO_TypeDef* gpio_port;
     uint16_t gpio_channel;
 
@@ -51,7 +51,18 @@ hal::HalStatus hal::initLedPort(hal::LedNumbers num) {
             break;
     }
     return HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
+
+#ifdef MOUSE_LAZULI
+    // LED0: BLUE   PA12
+    // LED1: GREEN  PA11
+    // LED2: YELLOW PH0
+    // LED3: RED    PH1
+
+    // FIXME: Implement Led Initialization for Lazulil
+
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
 
 #ifdef STM32F411xE
     // LED0: BLUE   PA12
@@ -94,7 +105,7 @@ hal::HalStatus hal::initLedPort(hal::LedNumbers num) {
 }
 
 hal::HalStatus hal::deinitLedPort(hal::LedNumbers num) {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     switch (num) {
         case LedNumbers::FRONT1:
             break;
@@ -108,7 +119,11 @@ hal::HalStatus hal::deinitLedPort(hal::LedNumbers num) {
             break;
     }
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
+
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
 
 #ifdef STM32F411xE
     return hal::HalStatus::NOIMPLEMENT;
@@ -120,7 +135,7 @@ hal::HalStatus hal::deinitLedPort(hal::LedNumbers num) {
 }
 
 hal::HalStatus hal::onLed(hal::LedNumbers num) {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     GPIO_TypeDef* gpio_port;
     uint16_t gpio_channel;
     switch (num) {
@@ -143,7 +158,11 @@ hal::HalStatus hal::onLed(hal::LedNumbers num) {
     }
     HAL_GPIO_WritePin(gpio_port, gpio_channel, GPIO_PIN_SET);
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
+
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
 
 #ifdef STM32F411xE
     switch (num) {
@@ -175,7 +194,7 @@ hal::HalStatus hal::onLed(hal::LedNumbers num) {
 }
 
 hal::HalStatus hal::offLed(hal::LedNumbers num) {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     GPIO_TypeDef* gpio_port;
     uint16_t gpio_channel;
     switch (num) {
@@ -198,7 +217,11 @@ hal::HalStatus hal::offLed(hal::LedNumbers num) {
     }
     HAL_GPIO_WritePin(gpio_port, gpio_channel, GPIO_PIN_RESET);
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
+
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
 
 #ifdef STM32F411xE
     switch (num) {

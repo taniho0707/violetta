@@ -21,7 +21,14 @@ enum class ModuleId : uint8_t {
     WALLSENSOR = 1,
     ENCODER = 2,
     BATTERY = 3,
-    LENGTH = 4
+    MOTOR = 4,
+    PRESSURE = 5,
+    LED = 6,
+    SPEAKER = 7,
+    SWITCH = 8,
+    MOTORCURRENT = 9,
+    UI = 10,
+    LENGTH = 11
 };
 
 class MsgFormat {

@@ -65,6 +65,10 @@ class Timer {
     // 新しく<TIMER_COUNT_INTERVAL>割り込みが発生すると即座に返される
     static void sleepNs(uint32_t ns);
 
+    // 指定時間待機する
+    // 精度は + 0 [ms] / - 250 [us]
+    static void sleepMs(uint32_t ms);
+
     /**
      * @brief タイマーの加算を行う。<br>
      * 正確に<TIMER_COUNT_INTERVAL>[us]ごとに呼ばれる必要がある。

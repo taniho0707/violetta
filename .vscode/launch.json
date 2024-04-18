@@ -59,20 +59,16 @@
             // "servertype": "stlink",
             "servertype": "openocd",
             "configFiles": [
-                "interface/stlink.cfg",
-                "target/stm32f4x.cfg"
+                "interface/cmsis-dap.cfg",
+                // "target/stm32f4x.cfg"
+                "target/stm32l4x.cfg"
             ],
-            "device": "STM32F411CE",
+            "openOCDLaunchCommands": [
+                "cmsis_dap_backend hid"
+            ],
+            // "device": "STM32F411CE",
+            "device": "STM32L4P5",
             "interface": "swd",
-            // "runToEntryPoint": "MX_FREERTOS_Init",
-            // "setupCommands": [
-            //     {
-            //         "description": "Enable pretty-printing for gdb",
-            //         "text": "-enable-pretty-printing",
-            //         "ignoreFailures": true
-            //     },
-            //     { "text": "set output-radix 16" }
-            // ]
         },
     ],
 }

@@ -9,11 +9,16 @@
 #include "hal_timer.h"
 
 hal::HalStatus hal::initWallSensorPort() {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     return HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
 
-#ifdef STM32F411xE
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+    // FIXME: Implement WallSensor initialization for Lazuli
+#endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
     LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
 
@@ -94,7 +99,7 @@ hal::HalStatus hal::initWallSensorPort() {
     LL_ADC_Enable(ADC1);
 
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     return HalStatus::SUCCESS;
@@ -102,13 +107,17 @@ hal::HalStatus hal::initWallSensorPort() {
 }
 
 hal::HalStatus hal::deinitWallSensorPort() {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
 
-#ifdef STM32F411xE
+#ifdef MOUSE_LAZULI
     return hal::HalStatus::NOIMPLEMENT;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
@@ -116,11 +125,15 @@ hal::HalStatus hal::deinitWallSensorPort() {
 }
 
 hal::HalStatus hal::setWallSensorLedOn(WallSensorNumbers n) {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
 
-#ifdef STM32F411xE
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
     switch (n) {
         case WallSensorNumbers::FRONTLEFT:
             LL_GPIO_ResetOutputPin(GPIOA, LED_A2_Pin | LED_A1_Pin);
@@ -141,7 +154,7 @@ hal::HalStatus hal::setWallSensorLedOn(WallSensorNumbers n) {
     }
     LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_7);
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     if (plt::Observer::getInstance()->getWallSensorData(data)) {
@@ -153,14 +166,18 @@ hal::HalStatus hal::setWallSensorLedOn(WallSensorNumbers n) {
 }
 
 hal::HalStatus hal::setWallSensorLedOff() {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
 
-#ifdef STM32F411xE
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
     LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_7);
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     if (plt::Observer::getInstance()->getWallSensorData(data)) {
@@ -173,11 +190,15 @@ hal::HalStatus hal::setWallSensorLedOff() {
 
 hal::HalStatus hal::getWallSensorSingleSync(uint16_t& data,
                                             WallSensorNumbers n) {
-#ifdef STM32L4P5xx
+#ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32L4P5xx
+#endif  // ifdef MOUSE_VIOLETTA
 
-#ifdef STM32F411xE
+#ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
     switch (n) {
         case WallSensorNumbers::FRONTLEFT:
             LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1,
@@ -204,7 +225,7 @@ hal::HalStatus hal::getWallSensorSingleSync(uint16_t& data,
     LL_ADC_ClearFlag_EOCS(ADC1);
     data = LL_ADC_REG_ReadConversionData12(ADC1);
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     if (plt::Observer::getInstance()->getWallSensorData(data)) {

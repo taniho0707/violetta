@@ -8,8 +8,6 @@
 #include "hal_conf.h"
 
 #ifdef STM32L4P5xx
-// STM32HAL/LL
-#include "stm32l4xx_hal.h"
 #include "stm32l4xx_ll_tim.h"
 #endif  // ifdef STM32L4P5xx
 
