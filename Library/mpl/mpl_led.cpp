@@ -7,9 +7,16 @@
 
 #include "mpl_timer.h"
 
-mpl::Led::Led() { hal::initLedPort(hal::LedNumbers::ALL); }
+mpl::Led::Led() {}
 
-void mpl::Led::initPort(hal::LedNumbers num) { hal::initLedPort(num); }
+mpl::MplStatus mpl::Led::initPort(hal::LedNumbers num) {
+    auto status = hal::initLedPort(num);
+    if (status != hal::HalStatus::SUCCESS) {
+        return mpl::MplStatus::ERROR;
+    } else {
+        return mpl::MplStatus::SUCCESS;
+    }
+}
 
 void mpl::Led::deinitPort(hal::LedNumbers num) { hal::deinitLedPort(num); }
 
@@ -26,8 +33,7 @@ void mpl::Led::off(hal::LedNumbers num) { hal::offLed(num); }
 
 void mpl::Led::flickSync(hal::LedNumbers num, float freq, uint16_t time) {
     flickAsync(num, freq, time);
-    while (isFlicking(num))
-        ;
+    while (isFlicking(num));
 }
 
 void mpl::Led::flickAsync(hal::LedNumbers num, float freq, uint16_t time) {

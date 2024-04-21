@@ -5,12 +5,16 @@
 //******************************************************************************
 #pragma once
 
+#include "stdint.h"
+
 namespace mpl {
 
 enum class MplStatus : uint8_t {
     SUCCESS = 0,
     DONE = 1,
     PROCESSING = 2,
+    NO_IMPLEMENT = 253,
+    INVALID_PARAMS = 254,
     ERROR = 255
 };
 

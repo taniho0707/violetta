@@ -18,7 +18,32 @@
   ],
   "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
   "files.associations": {
+    "*.ejs": "html",
     "gpio.h": "c",
-    "stm32l4xx_it.h": "c"
-  }
+    "stm32l4xx_it.h": "c",
+    "ratio": "cpp",
+    "*.tcc": "cpp",
+    "fstream": "cpp",
+    "array": "cpp",
+    "string": "cpp",
+    "string_view": "cpp",
+    "ranges": "cpp",
+    "span": "cpp",
+    "main.h": "c",
+    "stm32f4xx_ll_bus.h": "c",
+    "compare": "cpp",
+    "cstdint": "cpp",
+    "random": "cpp",
+    "*.h": "cpp"
+  },
+  "clangd.arguments": [
+      "--compile-commands-dir=${workspaceFolder}/build",
+      "--header-insertion=never",
+      "--clang-tidy",
+      "--enable-config"
+  ],
+  "cmake.configureOnOpen": false,
+  "cortex-debug.liveWatchRefreshRate": 300,
+  "cortex-debug.armToolchainPath": "/usr/bin",
+  "cortex-debug.stm32cubeprogrammer": "/home/nonoho/bin/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer.sh"
 }

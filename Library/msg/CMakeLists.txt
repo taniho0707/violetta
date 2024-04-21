@@ -1,4 +1,9 @@
-cmake_minimum_required(VERSION 3.0)
-# add_library(msg STATIC
-#   func1.cpp
-# )
+cmake_minimum_required(VERSION 3.10)
+add_library(msg OBJECT
+    msg_server.cpp
+    msg_format.cpp
+    msg_format_imu.cpp
+    msg_format_encoder.cpp
+    msg_format_wallsensor.cpp
+    msg_format_battery.cpp
+)

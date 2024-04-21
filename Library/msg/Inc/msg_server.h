@@ -5,16 +5,20 @@
 //******************************************************************************
 #include "msg_format.h"
 
-enum class MSGSVR_RESULT : uint8_t { SUCCESS = 0, FAILED = 1 };
+namespace msg {
 
 class MessageServer {
    private:
     MessageServer();
 
+    MsgFormat* messages[static_cast<uint8_t>(ModuleId::LENGTH)];
+
    public:
-    MSGSVR_RESULT sendMessage(MsgFormat format);
+    MsgResult sendMessage(ModuleId id, void* format);
 
-    MSGSVR_RESULT receiveMessage(ModuleId id, MsgFormat& format);
+    MsgResult receiveMessage(ModuleId id, void* format);
 
-    MessageServer& getInstance();
+    static MessageServer* getInstance();
 };
+
+}  // namespace msg

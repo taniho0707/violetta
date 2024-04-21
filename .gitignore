@@ -35,11 +35,19 @@
 *.log
 
 # STM32CubeMX生成ファイルは除外 (共有サーバからダウンロード)
-Generate/*
+Generate/violetta/*
+Generate/zirconia2kai/*
+Generate/Lazuli/*
+# ただし CMakeLists.txt は含む
+!Generate/violetta/CMakeLists.txt
+!Generate/zirconia2kai/CMakeLists.txt
+!Generate/Lazuli/CMakeLists.txt
 
 # arm-none-eabiは除外 (共有サーバ、または公式からダウンロード)
 gcc-arm-11.2-2022.02-x86_64-arm-none-eabi.tar.xz
+arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
 gcc-arm-none-eabi-*/
+arm-gnu-toolchain-*/
 
 # 生成物は除外
 build/*
@@ -53,12 +61,17 @@ debug_reko.elf
 # IntelliSense用キャッシュファイルは除外
 .includes/*
 
+# clangd用キャッシュファイルは除外
+.cache/*
+compile_commands.json
+
 # cmake の一時ファイルは除外
 **/cmake_install.cmake
 CMakeCache.txt
 **/CMakeFiles/
 **/githash.h
 Makefile
+*.map
 
 # Google test
 _deps/

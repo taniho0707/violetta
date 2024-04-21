@@ -8,16 +8,28 @@
 #include "hal_conf.h"
 
 #ifdef STM32L4P5xx
-// STM32HAL/LL
-#include "stm32l4xx_hal.h"
 #include "stm32l4xx_ll_adc.h"
 #endif  // ifdef STM32L4P5xx
+
+#ifdef STM32F411xE
+#include "stm32f4xx_ll_adc.h"
+#include "stm32f4xx_ll_bus.h"
+#include "stm32f4xx_ll_gpio.h"
+#endif  // ifdef STM32F411xE
 
 #ifdef LINUX
 #include <cstdint>
 
 #include "observer.h"
-#endif
+#endif  // ifdef LINUX
+
+#ifdef MOUSE_VIOLETTA
+
+#endif  // ifdef MOUSE_VIOLETTA
+
+#ifdef MOUSE_ZIRCONIA2KAI
+
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 namespace hal {
 
