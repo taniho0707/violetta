@@ -8,4 +8,5 @@ add_library(mpl STATIC
     mpl_encoder.cpp
     mpl_debug.cpp
     mpl_motor.cpp
+    mpl_speaker.cpp
 )

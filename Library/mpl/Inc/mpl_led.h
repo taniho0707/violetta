@@ -9,6 +9,7 @@
 #include <array>
 
 #include "hal_led.h"
+#include "mpl_conf.h"
 
 namespace mpl {
 
@@ -25,7 +26,7 @@ class Led {
     Led();
 
    public:
-    void initPort(hal::LedNumbers num);
+    mpl::MplStatus initPort(hal::LedNumbers num);
     void deinitPort(hal::LedNumbers num);
 
     bool isFlicking(hal::LedNumbers num);

@@ -10,6 +10,7 @@
 #include "mpl_encoder.h"
 #include "mpl_imu.h"
 #include "mpl_led.h"
+#include "mpl_speaker.h"
 #include "mpl_wallsensor.h"
 
 void mpl::Timer::run1() {
@@ -27,6 +28,8 @@ void mpl::Timer::run2() {
 
 void mpl::Timer::run3() {
     // mpl::Led::getInstance()->interrupt();
+    static auto speaker = mpl::Speaker::getInstance();
+    speaker->interruptPeriodic();
 
     static auto battery = mpl::Battery::getInstance();
     battery->interruptPeriodic();

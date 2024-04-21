@@ -5,6 +5,7 @@
 //******************************************************************************
 #include "act_debug.h"
 
+#include "mpl_speaker.h"
 #include "msg_format_imu.h"
 #include "msg_server.h"
 
@@ -35,15 +36,25 @@ void DebugActivity::init() {}
 // }
 
 Status DebugActivity::run() {
-    auto led = mpl::Led::getInstance();
-    // led->initPort(hal::LedNumbers::ALL);
-    // led->on(hal::LedNumbers::RED);
-    // led->on(hal::LedNumbers::YELLOW);
-    // led->on(hal::LedNumbers::GREEN);
-    // led->on(hal::LedNumbers::BLUE);
-
     auto debug = mpl::Debug::getInstance();
     debug->printf("Hello Zirconia2kai!\n");
+
+    auto led = mpl::Led::getInstance();
+    auto mplstatus = led->initPort(hal::LedNumbers::ALL);
+    if (mplstatus == mpl::MplStatus::SUCCESS) {
+        debug->printf("LED: Initialization SUCCESS\n");
+        led->on(hal::LedNumbers::LEFT);
+        led->on(hal::LedNumbers::RIGHT);
+        led->on(hal::LedNumbers::FRONTL);
+        led->on(hal::LedNumbers::FRONTR);
+        led->on(hal::LedNumbers::MIDDLE1);
+        led->on(hal::LedNumbers::MIDDLE2);
+        led->on(hal::LedNumbers::MIDDLE3);
+        led->on(hal::LedNumbers::MIDDLE4);
+        led->on(hal::LedNumbers::MIDDLE5);
+    } else {
+        while (true);
+    }
 
     auto imu = mpl::Imu::getInstance();
     imu->setConfig();
@@ -83,6 +94,10 @@ Status DebugActivity::run() {
     mpl::Timer::init();
 
     // led->on(hal::LedNumbers::GREEN);
+    auto speaker = mpl::Speaker::getInstance();
+    speaker->initPort();
+    speaker->playToneSync(mpl::MusicTone::A5, 200);
+    speaker->playToneSync(mpl::MusicTone::D6, 400);
 
     auto message = msg::MessageServer::getInstance();
     msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();

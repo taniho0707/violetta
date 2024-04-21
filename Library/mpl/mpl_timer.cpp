@@ -31,6 +31,31 @@ std::chrono::system_clock::time_point mpl::Timer::_observe_last_time = {};
 #endif
 
 mpl::MplStatus mpl::Timer::init() {
+#ifdef ENABLE_TIMER_STATISTICS
+    for (uint16_t i = 0; i < LENGTH_TIMER_STATISTICS; i++) {
+        history_count1[i] = 0;
+        history_count2[i] = 0;
+        history_count3[i] = 0;
+        history_count4[i] = 0;
+    }
+    ite_count1 = LENGTH_TIMER_STATISTICS - 1;
+    ite_count2 = LENGTH_TIMER_STATISTICS - 1;
+    ite_count3 = LENGTH_TIMER_STATISTICS - 1;
+    ite_count4 = LENGTH_TIMER_STATISTICS - 1;
+    Timer::statistics.count1_max = 0;
+    Timer::statistics.count2_max = 0;
+    Timer::statistics.count3_max = 0;
+    Timer::statistics.count4_max = 0;
+    Timer::statistics.count1_min = hal::TIMER_COUNT_MAX;
+    Timer::statistics.count2_min = hal::TIMER_COUNT_MAX;
+    Timer::statistics.count3_min = hal::TIMER_COUNT_MAX;
+    Timer::statistics.count4_min = hal::TIMER_COUNT_MAX;
+    Timer::statistics.count1_avg = 0;
+    Timer::statistics.count2_avg = 0;
+    Timer::statistics.count3_avg = 0;
+    Timer::statistics.count4_avg = 0;
+#endif  // ENABLE_TIMER_STATISTICS
+
     if (hal::initTimer() != hal::HalStatus::SUCCESS) {
         return MplStatus::ERROR;
     } else {
@@ -77,25 +102,86 @@ void mpl::Timer::sleepMs(uint32_t ms) {
     return;
 }
 
+mpl::MplStatus mpl::Timer::getStatistics(TimerStatistics &statistics) {
+#ifdef ENABLE_TIMER_STATISTICS
+    statistics = Timer::statistics;
+    return MplStatus::SUCCESS;
+#else
+    return MplStatus::NO_IMPLEMENT;
+#endif  // ENABLE_TIMER_STATISTICS
+}
+
 void mpl::Timer::interrupt() {
     total += hal::TIMER_COUNT_INTERVAL;
+
+#ifdef ENABLE_TIMER_STATISTICS
+    uint16_t next_ite;
+#endif  // ENABLE_TIMER_STATISTICS
 
     switch (tick_count) {
         case 0:
             run1();
             tick_count = 1;
+#ifdef ENABLE_TIMER_STATISTICS
+            next_ite = ite_count1 + 1;
+            if (next_ite >= LENGTH_TIMER_STATISTICS) {
+                next_ite = 0;
+            }
+            Timer::statistics.count1_avg =
+                Timer::statistics.count1_avg +
+                ((history_count1[ite_count1] - history_count1[next_ite]) /
+                 LENGTH_TIMER_STATISTICS);
+            ite_count1 = next_ite;
+            history_count1[ite_count1] = getInternalCounter();
+#endif  // ENABLE_TIMER_STATISTICS
             break;
         case 1:
             run2();
             tick_count = 2;
+#ifdef ENABLE_TIMER_STATISTICS
+            next_ite = ite_count2 + 1;
+            if (next_ite >= LENGTH_TIMER_STATISTICS) {
+                next_ite = 0;
+            }
+            Timer::statistics.count2_avg =
+                Timer::statistics.count2_avg +
+                ((history_count2[ite_count2] - history_count2[next_ite]) /
+                 LENGTH_TIMER_STATISTICS);
+            ite_count2 = next_ite;
+            history_count2[ite_count2] = getInternalCounter();
+#endif  // ENABLE_TIMER_STATISTICS
             break;
         case 2:
             run3();
             tick_count = 3;
+#ifdef ENABLE_TIMER_STATISTICS
+            next_ite = ite_count3 + 1;
+            if (next_ite >= LENGTH_TIMER_STATISTICS) {
+                next_ite = 0;
+            }
+            Timer::statistics.count3_avg =
+                Timer::statistics.count3_avg +
+                ((history_count3[ite_count3] - history_count3[next_ite]) /
+                 LENGTH_TIMER_STATISTICS);
+            ite_count3 = next_ite;
+            history_count3[ite_count3] = getInternalCounter();
+#endif  // ENABLE_TIMER_STATISTICS
             break;
         case 3:
             run4();
             tick_count = 0;
+#ifdef ENABLE_TIMER_STATISTICS
+            next_ite = ite_count4 + 1;
+            if (next_ite >= LENGTH_TIMER_STATISTICS) {
+                next_ite = 0;
+            }
+            Timer::statistics.count4_avg =
+                Timer::statistics.count4_avg +
+                ((history_count4[ite_count4] - history_count4[next_ite]) /
+                 LENGTH_TIMER_STATISTICS);
+            ite_count4 = next_ite;
+            history_count4[ite_count4] = getInternalCounter();
+#endif  // ENABLE_TIMER_STATISTICS
             break;
         default:
             tick_count = 0;

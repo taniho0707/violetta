@@ -5,12 +5,11 @@
             "includePath": [
                 "${default}",
                 ".includes",
-                "Generate/zirconia2kai/Core/Inc",
-                "Generate/zirconia2kai/Drivers/STM32F4xx_HAL_Driver/Inc",
-                "Generate/zirconia2kai/Drivers/CMSIS/Include",
-                "Generate/zirconia2kai/Drivers/CMSIS/Device/ST/STM32F4xx/Include",
+                "Generate/Lazuli/Core/Inc",
+                "Generate/Lazuli/Drivers/STM32L4xx_HAL_Driver/Inc",
+                "Generate/Lazuli/Drivers/CMSIS/Include",
+                "Generate/Lazuli/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
                 "Project/taniho/Inc",
-                "Project/reko/Inc",
                 "${workspaceFolder}/**"
             ],
             "forcedInclude": [
@@ -18,10 +17,9 @@
             ],
             "defines": [
                 "USE_FULL_LL_DRIVER",
-                "USE_HAL_DRIVER",
-                "STM32F411CEU6",
-                "STM32F411xE",
-                "MOUSE_ZIRCONIA2KAI"
+                "STM32L4P5CET6",
+                "STM32L4P5xx",
+                "MOUSE_LAZULI"
             ],
             "windowsSdkVersion": "10.0.19041.0",
             "compilerPath": "${workspaceFolder}/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-g++.exe",
@@ -33,12 +31,11 @@
                 "path": [
                     "${default}",
                     ".includes",
-                    "Generate/zirconia2kai/Core/Inc",
-                    "Generate/zirconia2kai/Drivers/STM32F4xx_HAL_Driver/Inc",
-                    "Generate/zirconia2kai/Drivers/CMSIS/Include",
-                    "Generate/zirconia2kai/Drivers/CMSIS/Device/ST/STM32F4xx/Include",
+                    "Generate/Lazuli/Core/Inc",
+                    "Generate/Lazuli/Drivers/STM32L4xx_HAL_Driver/Inc",
+                    "Generate/Lazuli/Drivers/CMSIS/Include",
+                    "Generate/Lazuli/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
                     "Project/taniho/Inc",
-                    "Project/reko/Inc",
                     "${workspaceFolder}/**"
                 ],
                 "limitSymbolsToIncludedHeaders": true,

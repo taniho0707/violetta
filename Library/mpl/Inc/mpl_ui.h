@@ -1,21 +1,23 @@
 //******************************************************************************
 // @addtogroup MPL
-// @file       mpl_conf.h
-// @brief      MPL関係の定義
+// @file       mpl_ui.h
+// @brief      UI統括制御
 //******************************************************************************
 #pragma once
 
-#include "stdint.h"
-
 namespace mpl {
 
-enum class MplStatus : uint8_t {
-    SUCCESS = 0,
-    DONE = 1,
-    PROCESSING = 2,
-    NO_IMPLEMENT = 253,
-    INVALID_PARAMS = 254,
-    ERROR = 255
+class Ui {
+   private:
+    Ui();
+
+   public:
+    void initPort();
+    void deinitPort();
+
+    void interrupt();
+
+    static Ui* getInstance();
 };
 
 }  // namespace mpl
