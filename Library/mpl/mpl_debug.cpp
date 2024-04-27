@@ -5,45 +5,78 @@
 //******************************************************************************
 #include "mpl_debug.h"
 
-mpl::Debug::Debug() { init(); }
+#include "cmd_server.h"
 
-mpl::MplStatus mpl::Debug::init() {
-    auto status = hal::initUartDebugPort();
+using namespace mpl;
+
+mpl::Debug::Debug() {
+    dmaTxState = DmaState::UNINITIALIZED;
+    dmaRxState = DmaState::UNINITIALIZED;
+}
+
+mpl::MplStatus mpl::Debug::init(hal::InitializeType type) {
+    auto status = hal::initUartDebugPort(type);
     if (status == hal::HalStatus::SUCCESS) {
+        dmaTxState = DmaState::IDLE;
+        dmaRxState = DmaState::IDLE;
         return MplStatus::SUCCESS;
     } else {
         return MplStatus::ERROR;
     }
 }
 
-void mpl::Debug::deinit() { hal::deinitUartDebugPort(); }
-
-uint16_t mpl::Debug::printf(const char *fmt, ...) {
-    char buffer[300];
-    int len;
-
-    va_list ap;
-    va_start(ap, fmt);
-
-    len = vsprintf(buffer, fmt, ap);
-    hal::sendUartDebugNByte(buffer, len);
-    va_end(ap);
-    return static_cast<uint16_t>(len);
+void mpl::Debug::deinit() {
+    dmaTxState = DmaState::UNINITIALIZED;
+    dmaRxState = DmaState::UNINITIALIZED;
+    hal::deinitUartDebugPort();
 }
 
-uint16_t mpl::Debug::println(const char *fmt, ...) {
-    char buffer[300];
-    int len;
+mpl::MplStatus mpl::Debug::sendSync(const char *fmt, uint16_t len) {
+    if (hal::sendUartDebugNByte(fmt, len) == hal::HalStatus::SUCCESS) {
+        return MplStatus::SUCCESS;
+    } else {
+        return MplStatus::ERROR;
+    }
+}
 
-    va_list ap;
-    va_start(ap, fmt);
+mpl::MplStatus mpl::Debug::sendDma(const char *fmt, uint16_t len) {
+    if (hal::sendUartDebugDmaNByte(fmt, len) == hal::HalStatus::SUCCESS) {
+        return MplStatus::SUCCESS;
+    } else {
+        return MplStatus::ERROR;
+    }
+}
 
-    len = vsprintf(buffer, fmt, ap);
-    hal::sendUartDebugNByte(buffer, len);
-    va_end(ap);
+void mpl::Debug::interruptPeriodic() {
+    static auto cmdsrv = cmd::CommandServer::getInstance();
 
-    hal::sendUartDebug1Byte((uint8_t)('\n'));
-    return static_cast<uint16_t>(len + 1);
+    // DEBUG_TX: Mouse -> PC
+    if (cmdsrv->length(cmd::CommandId::DEBUG_TX) > 0) {
+        if (dmaTxState != DmaState::IDLE) {
+            return;
+        }
+        dmaTxState = DmaState::RUNNING;
+        auto format = cmd::CommandFormatDebugTx{0};
+        cmdsrv->pop(cmd::CommandId::DEBUG_TX, &format);
+        // sendfSync(format.message);
+        sendDma(format.message, format.len);
+    }
+}
+
+void mpl::Debug::interruptTxComplete() {
+    dmaTxState = DmaState::IDLE;
+}
+
+void mpl::Debug::interruptTxError() {
+    dmaTxState = DmaState::ERROR;
+}
+
+void mpl::Debug::interruptRxComplete() {
+    dmaRxState = DmaState::IDLE;
+}
+
+void mpl::Debug::interruptRxError() {
+    dmaRxState = DmaState::ERROR;
 }
 
 mpl::Debug *mpl::Debug::getInstance() {

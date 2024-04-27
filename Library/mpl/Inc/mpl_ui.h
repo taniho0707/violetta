@@ -21,3 +21,12 @@ class Ui {
 };
 
 }  // namespace mpl
+
+// MEMO
+// - struct Command {
+//     Type type
+//     union {
+//       struct LedParam {}
+//       struct SpeakerParam {}
+//     }
+//   }

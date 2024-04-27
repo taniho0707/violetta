@@ -122,6 +122,7 @@ endif()
 include_directories(.
     Project/taniho/Inc
     Library/act/Inc
+    Library/cmd/Inc
     Library/hal/Inc
     Library/misc/Inc
     Library/mll/Inc

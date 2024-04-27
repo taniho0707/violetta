@@ -18,4 +18,11 @@ enum class MplStatus : uint8_t {
     ERROR = 255
 };
 
+enum class DmaState : uint8_t {
+    IDLE = 0,
+    RUNNING = 1,
+    UNINITIALIZED = 254,
+    ERROR = 255,
+};
+
 }  // namespace mpl

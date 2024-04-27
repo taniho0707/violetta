@@ -25,19 +25,20 @@
 
 namespace hal {
 
+constexpr uint16_t DEBUG_DMA_TX_BUFFER_SIZE = 300;
+
 #ifdef MOUSE_VIOLETTA
 #endif  // ifdef MOUSE_VIOLETTA
 
 #ifdef MOUSE_ZIRCONIA2KAI
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
 
-HalStatus initUartDebugPort();
+HalStatus initUartDebugPort(InitializeType type = InitializeType::Sync);
 HalStatus deinitUartDebugPort();
 
 HalStatus sendUartDebug1Byte(uint8_t data);
-HalStatus sendUartDebugNByte(uint8_t *data, const int len);
-HalStatus sendUartDebugNByte(char *data, const int len);
-// HalStatus getImuDataAsync();
-// HalStatus getImuDataDma();
+HalStatus sendUartDebugNByte(const char *data, const int len);
+
+HalStatus sendUartDebugDmaNByte(const char *data, const int len);
 
 }  // namespace hal

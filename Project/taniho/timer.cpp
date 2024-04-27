@@ -7,6 +7,7 @@
 
 // 追加で必要なライブラリ
 #include "mpl_battery.h"
+#include "mpl_debug.h"
 #include "mpl_encoder.h"
 #include "mpl_imu.h"
 #include "mpl_led.h"
@@ -35,4 +36,7 @@ void mpl::Timer::run3() {
     battery->interruptPeriodic();
 }
 
-void mpl::Timer::run4() {}
+void mpl::Timer::run4() {
+    static auto debug = mpl::Debug::getInstance();
+    debug->interruptPeriodic();
+}

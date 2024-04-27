@@ -6,35 +6,52 @@
 #pragma once
 
 // STL
-#include <cstdarg>
 #include <cstdio>
-#include <string>
 
 #include "hal_debug.h"
 #include "mpl_conf.h"
+#include "util.h"
 
 namespace mpl {
+
+constexpr uint16_t SNPRINTF_BUFFER_SIZE = hal::DEBUG_DMA_TX_BUFFER_SIZE;
 
 class Debug {
    private:
     Debug();
 
    public:
-    MplStatus init();
+    DmaState dmaTxState;
+    DmaState dmaRxState;
+
+    MplStatus init(hal::InitializeType type = hal::InitializeType::Sync);
     void deinit();
 
-    uint16_t printf(const char *fmt, ...);
-    uint16_t println(const char *fmt, ...);
-    // MplStatus scanAllAsync();
-    // MplStatus doneScanAsync();
-    // MplStatus scanAllDma();
-    // MplStatus doneScanDma();
+    template <typename... Args>
+    uint16_t format(char *buffer,
+                    const char *fmt, Args const &...args) {
+        // FIXME: 入力が0文字の場合は0を返して何もしないようにする
+        uint16_t len;
+        len = snprintf(buffer, SNPRINTF_BUFFER_SIZE, fmt, args...);
+        return misc::min(len, static_cast<uint16_t>(SNPRINTF_BUFFER_SIZE - 1));
+    }
+
+    // template <typename... Args>
+    // MplStatus sendfSync(const char *fmt, Args const &...args) {
+    //     printf(hal::sendUartDebugNByte, fmt, args...);
+    //     return MplStatus::SUCCESS;
+    // }
+
+    MplStatus sendSync(const char *fmt, uint16_t len);
+    MplStatus sendDma(const char *fmt, uint16_t len);
 
     // TODO: 入力に対応する
 
-    // void interruptPeriodic();
-    // void interruptAsync();
-    // void interruptDma();
+    void interruptPeriodic();
+    void interruptTxComplete();
+    void interruptTxError();
+    void interruptRxComplete();
+    void interruptRxError();
 
     static Debug *getInstance();
 };
