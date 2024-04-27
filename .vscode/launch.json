@@ -69,6 +69,9 @@
             // "device": "STM32F411CE",
             "device": "STM32L4P5",
             "interface": "swd",
+
+            // for Peripheral Viewer extension
+            "svdFile": "${workspaceRoot}/Platform/STM32L4P5CETx/STM32L4x5.svd",
         },
     ],
 }

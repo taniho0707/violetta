@@ -1,3 +1,26 @@
 ---
 BasedOnStyle: Google
 IndentWidth: 4
+
+# No column limit
+ColumnLimit: 0
+
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments: None
+AlignConsecutiveBitFields: AcrossComments
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: AcrossComments
+AlignEscapedNewlines: Left
+AlignOperands: AlignAfterOperator
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLambdasOnASingleLine: Empty
+AllowShortLoopsOnASingleLine: true
+AlwaysBreakTemplateDeclarations: Yes
+IncludeBlocks: Regroup
