@@ -464,6 +464,7 @@ hal::HalStatus hal::receiveLedI2cCommand(hal::LedDriverCommands cmd,
     return hal::HalStatus::SUCCESS;
 }
 
+// TODO: LedクラスをDMAに対応させる
 hal::HalStatus hal::setLedDma(LedNumbers* nums, uint8_t size) {
 #ifdef MOUSE_LAZULI
     uint8_t current_en;
