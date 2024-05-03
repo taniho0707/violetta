@@ -8,6 +8,7 @@
 // STL
 #include <array>
 
+#include "hal_conf.h"
 #include "hal_led.h"
 #include "mpl_conf.h"
 
@@ -25,9 +26,11 @@ class Led {
 
     Led();
 
+    I2cAsyncState i2c_state;
+
    public:
-    mpl::MplStatus initPort(hal::LedNumbers num);
-    void deinitPort(hal::LedNumbers num);
+    mpl::MplStatus initPort(hal::InitializeType type = hal::InitializeType::Sync);
+    void deinitPort();
 
     bool isFlicking(hal::LedNumbers num);
 
@@ -39,7 +42,11 @@ class Led {
     void flickAsync(hal::LedNumbers num, float freq, uint16_t time);
     void flickStop(hal::LedNumbers num);
 
-    void interrupt();
+    void interruptPeriodic();
+    void interruptI2cRxComplete();
+    void interruptI2cTxComplete();
+    void interruptDmaTxComplete();
+    void interruptDmaTxError();
 
     static Led* getInstance();
 };

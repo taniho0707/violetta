@@ -55,13 +55,19 @@ enum class LedDriverCommands : uint8_t {
 const uint8_t LED_DRIVER_ADDR = 0x00;
 #endif  // ifdef MOUSE_LAZULI
 
-HalStatus initLedPort(LedNumbers num);
-HalStatus deinitLedPort(LedNumbers num);
+HalStatus initLedPort(InitializeType type = InitializeType::Sync);
+HalStatus deinitLedPort();
 
 HalStatus transmitLedI2cData(uint8_t device_id, uint8_t* pdata, uint8_t size);
 HalStatus receiveLedI2cData(uint8_t device_id, uint8_t* pdata, uint8_t size);
+
+HalStatus transmitLedI2cDataDma(uint8_t device_id, uint8_t* pdata, uint8_t size);
+HalStatus receiveLedI2cDataDma(uint8_t device_id, uint8_t* pdata, uint8_t size);
+
 HalStatus transmitLedI2cCommand(LedDriverCommands cmd, uint8_t data);
 HalStatus receiveLedI2cCommand(LedDriverCommands cmd, uint8_t* data);
+
+HalStatus setLedDma(LedNumbers* nums, uint8_t size);
 
 HalStatus onLed(LedNumbers num);
 HalStatus offLed(LedNumbers num);

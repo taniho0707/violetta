@@ -5,6 +5,8 @@
 //******************************************************************************
 #pragma once
 
+#include "mpl_conf.h"
+
 namespace mpl {
 
 class Ui {
@@ -12,10 +14,10 @@ class Ui {
     Ui();
 
    public:
-    void initPort();
+    mpl::MplStatus initPort();
     void deinitPort();
 
-    void interrupt();
+    void interruptPeriodic();
 
     static Ui* getInstance();
 };

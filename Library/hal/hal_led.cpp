@@ -19,7 +19,7 @@
 #include "stm32f4xx_ll_rcc.h"
 #endif  // ifdef STM32F411xE
 
-hal::HalStatus hal::initLedPort(hal::LedNumbers num) {
+hal::HalStatus hal::initLedPort(InitializeType type) {
 #ifdef MOUSE_VIOLETTA
     GPIO_TypeDef* gpio_port;
     uint16_t gpio_channel;
@@ -73,80 +73,217 @@ hal::HalStatus hal::initLedPort(hal::LedNumbers num) {
     LL_RCC_SetI2CClockSource(LL_RCC_I2C1_CLKSOURCE_PCLK1);
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
+    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
+    LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2);
 
-    // I2C1 GPIO Configuration
-    // PB8   ------> I2C1_SCL
-    // PB9   ------> I2C1_SDA
-    GPIO_InitStruct.Pin = PRESSURE_SCL_Pin | PRESSURE_SDA_Pin;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
-    LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    if (type == InitializeType::Sync) {
+        // I2C1 GPIO Configuration
+        // PB8   ------> I2C1_SCL
+        // PB9   ------> I2C1_SDA
+        GPIO_InitStruct.Pin = PRESSURE_SCL_Pin | PRESSURE_SDA_Pin;
+        GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+        GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+        GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+        GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
+        LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    // LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_7, LL_DMAMUX_REQ_I2C1_RX);
-    // LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_7,
-    //                                 LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-    // LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_7,
-    // LL_DMA_PRIORITY_LOW); LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_7,
-    // LL_DMA_MODE_NORMAL); LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_7,
-    // LL_DMA_PERIPH_NOINCREMENT); LL_DMA_SetMemoryIncMode(DMA1,
-    // LL_DMA_CHANNEL_7, LL_DMA_MEMORY_INCREMENT); LL_DMA_SetPeriphSize(DMA1,
-    // LL_DMA_CHANNEL_7, LL_DMA_PDATAALIGN_BYTE); LL_DMA_SetMemorySize(DMA1,
-    // LL_DMA_CHANNEL_7, LL_DMA_MDATAALIGN_BYTE);
+        LL_I2C_EnableAutoEndMode(I2C1);
+        LL_I2C_DisableOwnAddress2(I2C1);
+        LL_I2C_DisableGeneralCall(I2C1);
+        LL_I2C_EnableClockStretching(I2C1);
+        I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
+        I2C_InitStruct.Timing = 0x009034B6;
+        I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
+        I2C_InitStruct.DigitalFilter = 0;
+        I2C_InitStruct.OwnAddress1 = 0;
+        I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
+        I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
+        LL_I2C_Init(I2C1, &I2C_InitStruct);
+        LL_I2C_SetOwnAddress2(I2C1, 0, LL_I2C_OWNADDRESS2_NOMASK);
 
-    // LL_DMA_SetPeriphRequest(DMA2, LL_DMA_CHANNEL_1, LL_DMAMUX_REQ_I2C1_TX);
-    // LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_CHANNEL_1,
-    //                                 LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
-    // LL_DMA_SetChannelPriorityLevel(DMA2, LL_DMA_CHANNEL_1,
-    // LL_DMA_PRIORITY_LOW); LL_DMA_SetMode(DMA2, LL_DMA_CHANNEL_1,
-    // LL_DMA_MODE_NORMAL); LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_CHANNEL_1,
-    // LL_DMA_PERIPH_NOINCREMENT); LL_DMA_SetMemoryIncMode(DMA2,
-    // LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT); LL_DMA_SetPeriphSize(DMA2,
-    // LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_BYTE); LL_DMA_SetMemorySize(DMA2,
-    // LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_BYTE);
+        LL_I2C_Enable(I2C1);
 
-    // NVIC_SetPriority(I2C1_EV_IRQn,
-    //                  NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
-    // NVIC_EnableIRQ(I2C1_EV_IRQn);
-    // NVIC_SetPriority(I2C1_ER_IRQn,
-    //                  NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
-    // NVIC_EnableIRQ(I2C1_ER_IRQn);
+        // read chipid
+        uint8_t chipid;
+        receiveLedI2cCommand(LedDriverCommands::CHIP_ID, &chipid);
+        if (chipid != 0xA9) {
+            return hal::HalStatus::ERROR;
+        }
 
-    LL_I2C_EnableAutoEndMode(I2C1);
-    LL_I2C_DisableOwnAddress2(I2C1);
-    LL_I2C_DisableGeneralCall(I2C1);
-    LL_I2C_EnableClockStretching(I2C1);
-    I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
-    I2C_InitStruct.Timing = 0x009034B6;
-    I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
-    I2C_InitStruct.DigitalFilter = 0;
-    I2C_InitStruct.OwnAddress1 = 0;
-    I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
-    I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
-    LL_I2C_Init(I2C1, &I2C_InitStruct);
-    LL_I2C_SetOwnAddress2(I2C1, 0, LL_I2C_OWNADDRESS2_NOMASK);
+        // configure driver
+        transmitLedI2cCommand(LedDriverCommands::LED1_SET, 0x00);  // 0.5mA
+        transmitLedI2cCommand(LedDriverCommands::LED2_SET, 0x09);  // 5mA
+        transmitLedI2cCommand(LedDriverCommands::LED3_SET, 0x05);  // 3mA
+        transmitLedI2cCommand(LedDriverCommands::LED4_SET, 0x05);  // 3mA
+        transmitLedI2cCommand(LedDriverCommands::LED5_SET, 0x05);  // 3mA
+        transmitLedI2cCommand(LedDriverCommands::LED6_SET, 0x03);  // 2mA
+        transmitLedI2cCommand(LedDriverCommands::LED7_SET, 0x03);  // 2mA
+        transmitLedI2cCommand(LedDriverCommands::LED8_SET, 0x03);  // 2mA
+        transmitLedI2cCommand(LedDriverCommands::LED9_SET, 0x03);  // 2mA
 
-    LL_I2C_Enable(I2C1);
+        return hal::HalStatus::SUCCESS;
+    } else if (type == InitializeType::Async) {
+        // I2C1 GPIO Configuration
+        // PB8   ------> I2C1_SCL
+        // PB9   ------> I2C1_SDA
+        GPIO_InitStruct.Pin = PRESSURE_SCL_Pin | PRESSURE_SDA_Pin;
+        GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+        GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+        GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+        GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
+        LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    // read chipid
-    uint8_t chipid;
-    receiveLedI2cCommand(LedDriverCommands::CHIP_ID, &chipid);
-    if (chipid != 0xA9) {
-        return hal::HalStatus::ERROR;
+        LL_I2C_EnableAutoEndMode(I2C1);
+        LL_I2C_DisableOwnAddress2(I2C1);
+        LL_I2C_DisableGeneralCall(I2C1);
+        LL_I2C_EnableClockStretching(I2C1);
+        I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
+        I2C_InitStruct.Timing = 0x009034B6;
+        I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
+        I2C_InitStruct.DigitalFilter = 0;
+        I2C_InitStruct.OwnAddress1 = 0;
+        I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
+        I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
+        LL_I2C_Init(I2C1, &I2C_InitStruct);
+        LL_I2C_SetOwnAddress2(I2C1, 0, LL_I2C_OWNADDRESS2_NOMASK);
+
+        NVIC_SetPriority(I2C1_EV_IRQn, 6);
+        NVIC_EnableIRQ(I2C1_EV_IRQn);
+        NVIC_SetPriority(I2C1_ER_IRQn, 6);
+        NVIC_EnableIRQ(I2C1_ER_IRQn);
+
+        LL_I2C_EnableIT_RX(I2C1);
+        LL_I2C_EnableIT_NACK(I2C1);
+        LL_I2C_EnableIT_ERR(I2C1);
+        LL_I2C_EnableIT_STOP(I2C1);
+
+        LL_I2C_Enable(I2C1);
+
+        // read chipid
+        uint8_t chipid;
+        receiveLedI2cCommand(LedDriverCommands::CHIP_ID, &chipid);
+        if (chipid != 0xA9) {
+            return hal::HalStatus::ERROR;
+        }
+
+        // configure driver
+        transmitLedI2cCommand(LedDriverCommands::LED1_SET, 0x00);  // 0.5mA
+        transmitLedI2cCommand(LedDriverCommands::LED2_SET, 0x09);  // 5mA
+        transmitLedI2cCommand(LedDriverCommands::LED3_SET, 0x05);  // 3mA
+        transmitLedI2cCommand(LedDriverCommands::LED4_SET, 0x05);  // 3mA
+        transmitLedI2cCommand(LedDriverCommands::LED5_SET, 0x05);  // 3mA
+        transmitLedI2cCommand(LedDriverCommands::LED6_SET, 0x03);  // 2mA
+        transmitLedI2cCommand(LedDriverCommands::LED7_SET, 0x03);  // 2mA
+        transmitLedI2cCommand(LedDriverCommands::LED8_SET, 0x03);  // 2mA
+        transmitLedI2cCommand(LedDriverCommands::LED9_SET, 0x03);  // 2mA
+
+        return hal::HalStatus::SUCCESS;
+    } else if (type == InitializeType::Dma) {
+        LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_7, LL_DMAMUX_REQ_I2C1_RX);
+        LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_7,
+                                        LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+        LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_7,
+                                       LL_DMA_PRIORITY_LOW);
+        LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_7,
+                       LL_DMA_MODE_NORMAL);
+        LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_7,
+                                LL_DMA_PERIPH_NOINCREMENT);
+        LL_DMA_SetMemoryIncMode(DMA1,
+                                LL_DMA_CHANNEL_7, LL_DMA_MEMORY_INCREMENT);
+        LL_DMA_SetPeriphSize(DMA1,
+                             LL_DMA_CHANNEL_7, LL_DMA_PDATAALIGN_BYTE);
+        LL_DMA_SetMemorySize(DMA1,
+                             LL_DMA_CHANNEL_7, LL_DMA_MDATAALIGN_BYTE);
+
+        LL_DMA_SetPeriphRequest(DMA2, LL_DMA_CHANNEL_1, LL_DMAMUX_REQ_I2C1_TX);
+        LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_CHANNEL_1,
+                                        LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+        LL_DMA_SetChannelPriorityLevel(DMA2, LL_DMA_CHANNEL_1,
+                                       LL_DMA_PRIORITY_LOW);
+        LL_DMA_SetMode(DMA2, LL_DMA_CHANNEL_1,
+                       LL_DMA_MODE_NORMAL);
+        LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_CHANNEL_1,
+                                LL_DMA_PERIPH_NOINCREMENT);
+        LL_DMA_SetMemoryIncMode(DMA2,
+                                LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT);
+        LL_DMA_SetPeriphSize(DMA2,
+                             LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_BYTE);
+        LL_DMA_SetMemorySize(DMA2,
+                             LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_BYTE);
+
+        NVIC_SetPriority(DMA1_Channel7_IRQn, 7);
+        NVIC_EnableIRQ(DMA1_Channel7_IRQn);
+        NVIC_SetPriority(DMA2_Channel1_IRQn, 7);
+        NVIC_EnableIRQ(DMA2_Channel1_IRQn);
+        LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_7);
+        LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_7);
+        LL_DMA_EnableIT_TC(DMA2, LL_DMA_CHANNEL_1);
+        LL_DMA_EnableIT_TE(DMA2, LL_DMA_CHANNEL_1);
+
+        LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_7);
+        LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_1);
+
+        NVIC_SetPriority(I2C1_EV_IRQn,
+                         NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
+        NVIC_EnableIRQ(I2C1_EV_IRQn);
+        NVIC_SetPriority(I2C1_ER_IRQn,
+                         NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
+        NVIC_EnableIRQ(I2C1_ER_IRQn);
+
+        // I2C1 GPIO Configuration
+        // PB8   ------> I2C1_SCL
+        // PB9   ------> I2C1_SDA
+        GPIO_InitStruct.Pin = PRESSURE_SCL_Pin | PRESSURE_SDA_Pin;
+        GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+        GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+        GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+        GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
+        LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+        LL_I2C_EnableAutoEndMode(I2C1);
+        LL_I2C_DisableOwnAddress2(I2C1);
+        LL_I2C_DisableGeneralCall(I2C1);
+        LL_I2C_EnableClockStretching(I2C1);
+        I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
+        I2C_InitStruct.Timing = 0x009034B6;
+        I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
+        I2C_InitStruct.DigitalFilter = 0;
+        I2C_InitStruct.OwnAddress1 = 0;
+        I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
+        I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
+        LL_I2C_Init(I2C1, &I2C_InitStruct);
+        LL_I2C_SetOwnAddress2(I2C1, 0, LL_I2C_OWNADDRESS2_NOMASK);
+
+        // read chipid
+        uint8_t chipid;
+        receiveLedI2cCommand(LedDriverCommands::CHIP_ID, &chipid);
+        if (chipid != 0xA9) {
+            return hal::HalStatus::ERROR;
+        }
+
+        // configure driver
+        transmitLedI2cCommand(LedDriverCommands::LED1_SET, 0x00);  // 0.5mA
+        transmitLedI2cCommand(LedDriverCommands::LED2_SET, 0x09);  // 5mA
+        transmitLedI2cCommand(LedDriverCommands::LED3_SET, 0x05);  // 3mA
+        transmitLedI2cCommand(LedDriverCommands::LED4_SET, 0x05);  // 3mA
+        transmitLedI2cCommand(LedDriverCommands::LED5_SET, 0x05);  // 3mA
+        transmitLedI2cCommand(LedDriverCommands::LED6_SET, 0x03);  // 2mA
+        transmitLedI2cCommand(LedDriverCommands::LED7_SET, 0x03);  // 2mA
+        transmitLedI2cCommand(LedDriverCommands::LED8_SET, 0x03);  // 2mA
+        transmitLedI2cCommand(LedDriverCommands::LED9_SET, 0x03);  // 2mA
+
+        LL_I2C_Disable(I2C1);
+        LL_I2C_EnableIT_STOP(I2C1);
+        LL_I2C_EnableIT_RX(I2C1);
+        LL_I2C_Enable(I2C1);
+
+        return hal::HalStatus::SUCCESS;
+    } else {
+        return hal::HalStatus::INVALID_PARAMS;
     }
-
-    // configure driver
-    transmitLedI2cCommand(LedDriverCommands::LED1_SET, 0x00);  // 0.5mA
-    transmitLedI2cCommand(LedDriverCommands::LED2_SET, 0x09);  // 5mA
-    transmitLedI2cCommand(LedDriverCommands::LED3_SET, 0x05);  // 3mA
-    transmitLedI2cCommand(LedDriverCommands::LED4_SET, 0x05);  // 3mA
-    transmitLedI2cCommand(LedDriverCommands::LED5_SET, 0x05);  // 3mA
-    transmitLedI2cCommand(LedDriverCommands::LED6_SET, 0x03);  // 2mA
-    transmitLedI2cCommand(LedDriverCommands::LED7_SET, 0x03);  // 2mA
-    transmitLedI2cCommand(LedDriverCommands::LED8_SET, 0x03);  // 2mA
-    transmitLedI2cCommand(LedDriverCommands::LED9_SET, 0x03);  // 2mA
 
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
@@ -191,7 +328,7 @@ hal::HalStatus hal::initLedPort(hal::LedNumbers num) {
 #endif
 }
 
-hal::HalStatus hal::deinitLedPort(hal::LedNumbers num) {
+hal::HalStatus hal::deinitLedPort() {
 #ifdef MOUSE_VIOLETTA
     switch (num) {
         case LedNumbers::FRONT1:
@@ -275,6 +412,41 @@ hal::HalStatus hal::receiveLedI2cData(uint8_t device_id, uint8_t* pdata,
     return hal::HalStatus::NOIMPLEMENT;
 }
 
+hal::HalStatus hal::transmitLedI2cDataDma(uint8_t device_id, uint8_t* pdata,
+                                          uint8_t size) {
+#ifdef MOUSE_LAZULI
+    static uint8_t transmit_buffer[10];  // FIXME: バッファーサイズを適切に設定する
+    for (uint8_t i = 0; i < size; i++) {
+        transmit_buffer[i] = pdata[i];
+    }
+
+    while (LL_I2C_IsActiveFlag_BUSY(I2C1) == SET);
+
+    LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_1);
+    LL_I2C_HandleTransfer(I2C1, device_id, LL_I2C_ADDRSLAVE_7BIT, size,
+                          LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
+    LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_1, size);
+    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_1, (uint32_t)pdata,
+                           (uint32_t)LL_I2C_DMA_GetRegAddr(I2C1, LL_I2C_DMA_REG_DATA_TRANSMIT),
+                           LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_7));
+    LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_1, size);
+    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_1, (uint32_t)transmit_buffer, (uint32_t)LL_I2C_DMA_GetRegAddr(I2C1, LL_I2C_DMA_REG_DATA_TRANSMIT), LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_CHANNEL_1));
+
+    LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_1);
+    LL_I2C_EnableDMAReq_TX(I2C1);
+
+    // while (LL_DMA_IsActiveFlag_TC1(DMA2) == RESET);
+    // LL_DMA_ClearFlag_TC1(DMA2);
+
+    // while (LL_I2C_IsActiveFlag_STOP(I2C1) == RESET);
+    // LL_I2C_ClearFlag_STOP(I2C1);
+
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_LAZULI
+
+    return hal::HalStatus::NOIMPLEMENT;
+}
+
 hal::HalStatus hal::transmitLedI2cCommand(hal::LedDriverCommands cmd,
                                           uint8_t data) {
     uint8_t tx_buffer[2];
@@ -290,6 +462,59 @@ hal::HalStatus hal::receiveLedI2cCommand(hal::LedDriverCommands cmd,
     transmitLedI2cData(LED_DRIVER_ADDR, &tx_buffer, 1);
     receiveLedI2cData(LED_DRIVER_ADDR, data, 1);
     return hal::HalStatus::SUCCESS;
+}
+
+hal::HalStatus hal::setLedDma(LedNumbers* nums, uint8_t size) {
+#ifdef MOUSE_LAZULI
+    uint8_t current_en;
+    receiveLedI2cCommand(LedDriverCommands::LED_EN_IDVD, &current_en);
+
+    uint8_t en = 0;
+    for (uint8_t i = 0; i < size; i++) {
+        switch (nums[i]) {
+            case hal::LedNumbers::MIDDLE1:
+                en |= 0x80;
+                break;
+            case hal::LedNumbers::MIDDLE2:
+                en |= 0x40;
+                break;
+            case hal::LedNumbers::MIDDLE3:
+                en |= 0x20;
+                break;
+            case hal::LedNumbers::MIDDLE4:
+                en |= 0x10;
+                break;
+            case hal::LedNumbers::MIDDLE5:
+                en |= 0x08;
+                break;
+            case hal::LedNumbers::FRONTR:
+                en |= 0x04;
+                break;
+            case hal::LedNumbers::FRONTL:
+                en |= 0x02;
+                break;
+            case hal::LedNumbers::LEFT:
+                en |= 0x01;
+                break;
+            case hal::LedNumbers::RIGHT:
+                en |= 0x00;
+                break;
+            case hal::LedNumbers::FLAG:
+                return hal::HalStatus::NOIMPLEMENT;
+                break;
+            case hal::LedNumbers::ALL:
+                hal::setLedDma(nums, 8);
+                break;
+            default:
+                return hal::HalStatus::INVALID_PARAMS;
+                break;
+        }
+    }
+    transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | en);
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_LAZULI
+
+    return hal::HalStatus::NOIMPLEMENT;
 }
 
 hal::HalStatus hal::onLed(hal::LedNumbers num) {

@@ -25,4 +25,16 @@ enum class DmaState : uint8_t {
     ERROR = 255,
 };
 
+enum class I2cAsyncState : uint8_t {
+    IDLE = 0,
+    READ_ADDRESS = 1,
+    READ_REGISTER = 2,
+    READ_DATA = 3,
+    WRITE_ADDRESS = 4,
+    WRITE_REGISTER = 5,
+    WRITE_DATA = 6,
+    UNINITIALIZED = 254,
+    ERROR = 255,
+};
+
 }  // namespace mpl

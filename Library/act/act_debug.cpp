@@ -37,18 +37,17 @@ void DebugActivity::init() {}
 // }
 
 Status DebugActivity::run() {
-    char debug_buffer[mpl::SNPRINTF_BUFFER_SIZE];
-
     auto cmd_server = cmd::CommandServer::getInstance();
     cmd::CommandFormatDebugTx cmd_debug_tx = {0};
 
     auto debug = mpl::Debug::getInstance();
-    debug->init(hal::InitializeType::Dma);
+    // debug->init(hal::InitializeType::Dma);
+    debug->init(hal::InitializeType::Sync);
     cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Hello Lazuli! %d\n", 1);
     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
 
     auto led = mpl::Led::getInstance();
-    auto mplstatus = led->initPort(hal::LedNumbers::ALL);
+    auto mplstatus = led->initPort(hal::InitializeType::Dma);
     if (mplstatus == mpl::MplStatus::SUCCESS) {
         cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "LED: Initialization SUCCESS\n");
         cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
@@ -127,10 +126,10 @@ Status DebugActivity::run() {
 
     mpl::Timer::init();
 
-    // auto speaker = mpl::Speaker::getInstance();
-    // speaker->initPort();
-    // speaker->playToneSync(mpl::MusicTone::A5, 200);
-    // speaker->playToneAsync(mpl::MusicTone::D6, 400);
+    auto speaker = mpl::Speaker::getInstance();
+    speaker->initPort();
+    speaker->playToneSync(mpl::MusicTone::A5, 200);
+    speaker->playToneAsync(mpl::MusicTone::D6, 400);
 
     auto message = msg::MessageServer::getInstance();
     msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
@@ -154,16 +153,6 @@ Status DebugActivity::run() {
                                          msg_imu.gyro_pitch, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
                                          msg_imu.temperature);
         cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
-        // debug->sendDma(debug_buffer, debug->format(
-        //                                  debug_buffer,
-        //                                  "T: %10d B: %1.2f | L: %5d, R: %5d | FL: %4d, L: %4d, R: %4d, FR: "
-        //                                  "%4d, IMU: %8d, %10d, % 6d, % 6d, % 6d, % 6d, % 6d, % 6d, %d\n",
-        //                                  mpl::Timer::getMicroTime(), msg_battery.battery, msg_encoder.left,
-        //                                  msg_encoder.right, msg_wallsensor.frontleft, msg_wallsensor.left,
-        //                                  msg_wallsensor.right, msg_wallsensor.frontright, msg_imu.getCount(),
-        //                                  msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.gyro_roll,
-        //                                  msg_imu.gyro_pitch, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
-        //                                  msg_imu.temperature));
     }
 
     return Status::ERROR;

@@ -7,18 +7,26 @@
 
 #include "mpl_timer.h"
 
-mpl::Led::Led() {}
+mpl::Led::Led() {
+    i2c_state = mpl::I2cAsyncState::UNINITIALIZED;
+}
 
-mpl::MplStatus mpl::Led::initPort(hal::LedNumbers num) {
-    auto status = hal::initLedPort(num);
+mpl::MplStatus mpl::Led::initPort(hal::InitializeType type) {
+    auto status = hal::initLedPort(type);
     if (status != hal::HalStatus::SUCCESS) {
         return mpl::MplStatus::ERROR;
     } else {
+        if (type == hal::InitializeType::Async) {
+            i2c_state = mpl::I2cAsyncState::IDLE;
+        }
         return mpl::MplStatus::SUCCESS;
     }
 }
 
-void mpl::Led::deinitPort(hal::LedNumbers num) { hal::deinitLedPort(num); }
+void mpl::Led::deinitPort() {
+    i2c_state = mpl::I2cAsyncState::UNINITIALIZED;
+    hal::deinitLedPort();
+}
 
 bool mpl::Led::isFlicking(hal::LedNumbers num) {
     if (flick_params.at(static_cast<uint8_t>(num)).start_time == 0)
@@ -27,9 +35,13 @@ bool mpl::Led::isFlicking(hal::LedNumbers num) {
         return true;
 }
 
-void mpl::Led::on(hal::LedNumbers num) { hal::onLed(num); }
+void mpl::Led::on(hal::LedNumbers num) {
+    hal::onLed(num);
+}
 
-void mpl::Led::off(hal::LedNumbers num) { hal::offLed(num); }
+void mpl::Led::off(hal::LedNumbers num) {
+    hal::offLed(num);
+}
 
 void mpl::Led::flickSync(hal::LedNumbers num, float freq, uint16_t time) {
     flickAsync(num, freq, time);
@@ -48,7 +60,7 @@ void mpl::Led::flickStop(hal::LedNumbers num) {
     hal::offLed(num);
 }
 
-void mpl::Led::interrupt() {
+void mpl::Led::interruptPeriodic() {
     uint32_t t;
     uint32_t t2;
     int8_t i = -1;
@@ -69,6 +81,11 @@ void mpl::Led::interrupt() {
             hal::offLed(static_cast<hal::LedNumbers>(i));
     }
 }
+
+void mpl::Led::interruptI2cRxComplete() {}
+void mpl::Led::interruptI2cTxComplete() {}
+void mpl::Led::interruptDmaTxComplete() {}
+void mpl::Led::interruptDmaTxError() {}
 
 mpl::Led* mpl::Led::getInstance() {
     static mpl::Led instance;
