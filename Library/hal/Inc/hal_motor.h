@@ -25,12 +25,23 @@
 
 namespace hal {
 
+#ifdef MOUSE_LAZULI
+const uint32_t MOTOR_TIMER_MAXCOUNT = 262144;
+#endif  // ifdef MOUSE_LAZULI
+
 HalStatus initMotorPort();
 HalStatus deinitMotorPort();
 
+// Drive Motor
 HalStatus setMotorDutyL(float duty);
 HalStatus setMotorDutyR(float duty);
 
 HalStatus setMotorFloat();
+
+// return: [mA]
+HalStatus getMotorCurrentSync(float& current_l, float& current_r);
+
+// Suction Motor
+HalStatus setMotorDutySuction(float duty);
 
 }  // namespace hal

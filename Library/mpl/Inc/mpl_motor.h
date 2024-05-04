@@ -5,15 +5,19 @@
 //******************************************************************************
 #pragma once
 
-#include "hal_motor.h"
 #include "mpl_conf.h"
-#include "stdint.h"
+#include "msg_format_motor_current.h"
+#include "msg_server.h"
 
 namespace mpl {
 
 class Motor {
    private:
     Motor();
+
+    float last_current_l;
+    float last_current_r;
+    msg::MsgFormatMotorCurrent msg_format;
 
    public:
     void initPort();
@@ -25,7 +29,11 @@ class Motor {
     mpl::MplStatus setDutyR(float duty);
     mpl::MplStatus setDuty(float duty_l, float duty_r);
 
-    void interrupt();
+    mpl::MplStatus setDutySuction(float duty);
+
+    mpl::MplStatus getCurrentSync(float& current_l, float& current_r);
+
+    void interruptPeriodic();
 
     static Motor* getInstance();
 };

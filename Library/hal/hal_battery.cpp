@@ -25,9 +25,10 @@ hal::HalStatus hal::initBatteryPort() {
 
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC);
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
+
+    LL_ADC_Disable(ADC1);
+
     /**ADC1 GPIO Configuration
-    PA3   ------> ADC1_IN8 : MOTOR_R_SENS
-    PA4   ------> ADC1_IN9 : MOTOR_L_SENS
     PA5   ------> ADC1_IN10 : BATTERY
     */
     GPIO_InitStruct.Pin = BATTERY_Pin;
