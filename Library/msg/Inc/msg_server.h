@@ -3,6 +3,8 @@
 // @file        msg_server.h
 // @brief       Message Server
 //******************************************************************************
+#pragma once
+
 #include "msg_format.h"
 
 namespace msg {
