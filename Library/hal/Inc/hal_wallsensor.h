@@ -28,11 +28,46 @@
 
 namespace hal {
 
+enum class AD7091RCommands : uint8_t {
+    CONVERSION_RESULT = 0x00,
+    CHANNEL = 0x01,
+    CONFIGURATION = 0x02,
+    ALERT_INDICATION = 0x03,
+    CHANNEL0_LOW_LIMIT = 0x04,
+    CHANNEL0_HIGH_LIMIT = 0x05,
+    CHANNEL0_HYSTERESIS = 0x06,
+    CHANNEL1_LOW_LIMIT = 0x07,
+    CHANNEL1_HIGH_LIMIT = 0x08,
+    CHANNEL1_HYSTERESIS = 0x09,
+    CHANNEL2_LOW_LIMIT = 0x0A,
+    CHANNEL2_HIGH_LIMIT = 0x0B,
+    CHANNEL2_HYSTERESIS = 0x0C,
+    CHANNEL3_LOW_LIMIT = 0x0D,
+    CHANNEL3_HIGH_LIMIT = 0x0E,
+    CHANNEL3_HYSTERESIS = 0x0F,
+    NOP = 0x1F,
+};
+const uint16_t WALLSENSOR_WRITE_MASK = 0x0200;
+// READ: 0, WRITE: 1
+// Address MSB 6bits + R/W 1bit + Data 9bits
+
 HalStatus initWallSensorPort();
 HalStatus deinitWallSensorPort();
 
 HalStatus setWallSensorLedOn(WallSensorNumbers n);
+HalStatus setWallSensorLedOff(WallSensorNumbers n);
 HalStatus setWallSensorLedOff();
+
+HalStatus setWallSensorChargeStart();
+HalStatus setWallSensorChargeStop();
+
+// AD7091R用の関数
+// 変換トリガのトグルは1000ns以上の間隔をあける
+// 変換トリガから変換終了までの時間は最大600ns
+// SPIクロックが止まってから変換開始までは50ns以上の間隔をあける
+HalStatus startWallSensorConversion();
+HalStatus setWallSensorAdcSelect(WallSensorNumbers n);
+HalStatus getWallSensorSingleSync(uint16_t& data);
 
 HalStatus getWallSensorSingleSync(uint16_t& data, WallSensorNumbers n);
 

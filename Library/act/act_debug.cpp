@@ -109,11 +109,11 @@ Status DebugActivity::run() {
         led->on(hal::LedNumbers::MIDDLE5);
     }
 
-    // auto encoder = mpl::Encoder::getInstance();
-    // hal::EncoderData encoder_data = {0};
+    auto encoder = mpl::Encoder::getInstance();
+    encoder->initPort();
 
-    // // Wallsensor Test code
-    // auto wallsensor = mpl::WallSensor::getInstance();
+    auto wallsensor = mpl::WallSensor::getInstance();
+    wallsensor->initPort();
     // hal::WallSensorData wallsensor_data = {0};
 
     // // Motor Test code

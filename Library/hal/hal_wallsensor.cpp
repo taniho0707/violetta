@@ -6,7 +6,16 @@
 
 #include "hal_wallsensor.h"
 
-#include "hal_timer.h"
+#ifdef MOUSE_LAZULI
+#include "stm32l4xx_ll_bus.h"
+#include "stm32l4xx_ll_dma.h"
+#include "stm32l4xx_ll_gpio.h"
+#include "stm32l4xx_ll_spi.h"
+#endif  // ifdef MOUSE_LAZULI
+
+namespace hal {
+hal::HalStatus readwriteWallSensorSpiSync(uint16_t tx, uint16_t& rx);
+}
 
 hal::HalStatus hal::initWallSensorPort() {
 #ifdef MOUSE_VIOLETTA
@@ -14,8 +23,103 @@ hal::HalStatus hal::initWallSensorPort() {
 #endif  // ifdef MOUSE_VIOLETTA
 
 #ifdef MOUSE_LAZULI
-    return hal::HalStatus::NOIMPLEMENT;
-    // FIXME: Implement WallSensor initialization for Lazuli
+    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+    LL_SPI_InitTypeDef SPI_InitStruct = {0};
+
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
+    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI2);
+
+    LL_GPIO_SetOutputPin(GPIOC, ADC_CNVST_Pin);
+    LL_GPIO_SetOutputPin(GPIOB, IRLED_P_Pin);
+    LL_GPIO_ResetOutputPin(GPIOB, IRLED_N_FL_Pin);
+    LL_GPIO_ResetOutputPin(GPIOA, IRLED_N_L_Pin | IRLED_N_R_Pin | IRLED_N_FR_Pin);
+
+    GPIO_InitStruct.Pin = ADC_CNVST_Pin;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = ADC_BUSY_Pin;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    LL_GPIO_Init(ADC_BUSY_GPIO_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = IRLED_P_Pin | IRLED_N_FL_Pin;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = IRLED_N_L_Pin | IRLED_N_R_Pin | IRLED_N_FR_Pin;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /* SPI2 GPIO Configuration
+    PB12   ------> SPI2_NSS
+    PB13   ------> SPI2_SCK
+    PB14   ------> SPI2_MISO
+    PB15   ------> SPI2_MOSI
+    */
+    GPIO_InitStruct.Pin = ADC_CS_Pin | ADC_SCK_Pin | ADC_MISO_Pin | ADC_MOSI_Pin;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
+    LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    // LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_5, LL_DMAMUX_REQ_SPI2_RX);
+    // LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_5, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    // LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PRIORITY_HIGH);
+    // LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MODE_NORMAL);
+    // LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PERIPH_NOINCREMENT);
+    // LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MEMORY_INCREMENT);
+    // LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_5, LL_DMA_PDATAALIGN_BYTE);
+    // LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MDATAALIGN_BYTE);
+
+    // LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_6, LL_DMAMUX_REQ_SPI2_TX);
+    // LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_6, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    // LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_6, LL_DMA_PRIORITY_HIGH);
+    // LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_6, LL_DMA_MODE_NORMAL);
+    // LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_6, LL_DMA_PERIPH_NOINCREMENT);
+    // LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_6, LL_DMA_MEMORY_INCREMENT);
+    // LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_6, LL_DMA_PDATAALIGN_BYTE);
+    // LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_6, LL_DMA_MDATAALIGN_BYTE);
+
+    // NVIC_SetPriority(SPI2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
+    // NVIC_EnableIRQ(SPI2_IRQn);
+
+    SPI_InitStruct.TransferDirection = LL_SPI_FULL_DUPLEX;
+    SPI_InitStruct.Mode = LL_SPI_MODE_MASTER;
+    SPI_InitStruct.DataWidth = LL_SPI_DATAWIDTH_16BIT;
+    SPI_InitStruct.ClockPolarity = LL_SPI_POLARITY_LOW;
+    SPI_InitStruct.ClockPhase = LL_SPI_PHASE_2EDGE;
+    SPI_InitStruct.NSS = LL_SPI_NSS_HARD_OUTPUT;
+    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV2;
+    SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
+    SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
+    SPI_InitStruct.CRCPoly = 7;
+    LL_SPI_Init(SPI2, &SPI_InitStruct);
+    LL_SPI_SetStandard(SPI2, LL_SPI_PROTOCOL_MOTOROLA);
+    LL_SPI_DisableNSSPulseMgt(SPI2);
+    // LL_SPI_SetRxFIFOThreshold(SPI2, LL_SPI_RX_FIFO_TH_QUARTER);
+    LL_SPI_Enable(SPI2);
+
+    // CONFIGURATION:
+    // 0b 0000 0000 1100 0100 (DEBUG)
+    // 0b 0000 0000 1100 0000 (疎通確認後)
+    uint16_t buf;
+    hal::readwriteWallSensorSpiSync(0x00C4, buf);
+
+    return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
 #ifdef MOUSE_ZIRCONIA2KAI
@@ -130,7 +234,23 @@ hal::HalStatus hal::setWallSensorLedOn(WallSensorNumbers n) {
 #endif  // ifdef MOUSE_VIOLETTA
 
 #ifdef MOUSE_LAZULI
-    return hal::HalStatus::NOIMPLEMENT;
+    switch (n) {
+        case WallSensorNumbers::FRONTLEFT:
+            LL_GPIO_SetOutputPin(GPIOB, IRLED_N_FL_Pin);
+            break;
+        case WallSensorNumbers::LEFT:
+            LL_GPIO_SetOutputPin(GPIOA, IRLED_N_L_Pin);
+            break;
+        case WallSensorNumbers::RIGHT:
+            LL_GPIO_SetOutputPin(GPIOA, IRLED_N_R_Pin);
+            break;
+        case WallSensorNumbers::FRONTRIGHT:
+            LL_GPIO_SetOutputPin(GPIOA, IRLED_N_FR_Pin);
+            break;
+        default:
+            return hal::HalStatus::INVALID_PARAMS;
+    }
+    return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
 #ifdef MOUSE_ZIRCONIA2KAI
@@ -165,13 +285,29 @@ hal::HalStatus hal::setWallSensorLedOn(WallSensorNumbers n) {
 #endif  // ifdef LINUX
 }
 
-hal::HalStatus hal::setWallSensorLedOff() {
+hal::HalStatus hal::setWallSensorLedOff(WallSensorNumbers n) {
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_VIOLETTA
 
 #ifdef MOUSE_LAZULI
-    return hal::HalStatus::NOIMPLEMENT;
+    switch (n) {
+        case WallSensorNumbers::FRONTLEFT:
+            LL_GPIO_ResetOutputPin(GPIOB, IRLED_N_FL_Pin);
+            break;
+        case WallSensorNumbers::LEFT:
+            LL_GPIO_ResetOutputPin(GPIOA, IRLED_N_L_Pin);
+            break;
+        case WallSensorNumbers::RIGHT:
+            LL_GPIO_ResetOutputPin(GPIOA, IRLED_N_R_Pin);
+            break;
+        case WallSensorNumbers::FRONTRIGHT:
+            LL_GPIO_ResetOutputPin(GPIOA, IRLED_N_FR_Pin);
+            break;
+        default:
+            return hal::HalStatus::INVALID_PARAMS;
+    }
+    return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
 #ifdef MOUSE_ZIRCONIA2KAI
@@ -186,6 +322,95 @@ hal::HalStatus hal::setWallSensorLedOff() {
         return hal::HalStatus::ERROR;
     }
 #endif  // ifdef LINUX
+}
+
+hal::HalStatus hal::setWallSensorLedOff() {
+#ifdef MOUSE_VIOLETTA
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_VIOLETTA
+
+#ifdef MOUSE_LAZULI
+    LL_GPIO_ResetOutputPin(GPIOB, IRLED_N_FL_Pin);
+    LL_GPIO_ResetOutputPin(GPIOA, IRLED_N_L_Pin | IRLED_N_R_Pin | IRLED_N_FR_Pin);
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
+    LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_7);
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
+
+#ifdef LINUX
+    if (plt::Observer::getInstance()->getWallSensorData(data)) {
+        return hal::HalStatus::SUCCESS;
+    } else {
+        return hal::HalStatus::ERROR;
+    }
+#endif  // ifdef LINUX
+}
+
+hal::HalStatus hal::setWallSensorChargeStart() {
+#ifdef MOUSE_LAZULI
+    LL_GPIO_ResetOutputPin(GPIOB, IRLED_P_Pin);
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+}
+
+hal::HalStatus hal::setWallSensorChargeStop() {
+#ifdef MOUSE_LAZULI
+    LL_GPIO_SetOutputPin(GPIOB, IRLED_P_Pin);
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+}
+
+hal::HalStatus hal::startWallSensorConversion() {
+#ifdef MOUSE_LAZULI
+    LL_GPIO_ResetOutputPin(GPIOC, ADC_CNVST_Pin);
+    // pipelineの最適化で命令が実行されない可能性に注意
+    __NOP();
+    __NOP();
+    LL_GPIO_SetOutputPin(GPIOC, ADC_CNVST_Pin);
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+}
+
+hal::HalStatus hal::setWallSensorAdcSelect(WallSensorNumbers n) {
+#ifdef MOUSE_LAZULI
+    uint16_t channel_register = 0x0000;
+    uint16_t buf;
+    switch (n) {
+        case WallSensorNumbers::FRONTLEFT:
+            channel_register = 0x0001;  // channel 0
+            break;
+        case WallSensorNumbers::LEFT:
+            channel_register = 0x0002;  // channel 1
+            break;
+        case WallSensorNumbers::RIGHT:
+            channel_register = 0x0004;  // channel 2
+            break;
+        case WallSensorNumbers::FRONTRIGHT:
+            channel_register = 0x0008;  // channel 3
+            break;
+        default:
+            return hal::HalStatus::INVALID_PARAMS;
+    }
+    channel_register = (channel_register | WALLSENSOR_WRITE_MASK | static_cast<uint16_t>(AD7091RCommands::CHANNEL));
+    hal::readwriteWallSensorSpiSync(channel_register, buf);
+#endif  // ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
+}
+
+hal::HalStatus hal::getWallSensorSingleSync(uint16_t& data) {
+#ifdef MOUSE_LAZULI
+    uint16_t data_buf;
+    hal::readwriteWallSensorSpiSync(static_cast<uint16_t>(AD7091RCommands::NOP), data_buf);
+    data = (data_buf & 0x0FFF);
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_LAZULI
+    return hal::HalStatus::NOIMPLEMENT;
 }
 
 hal::HalStatus hal::getWallSensorSingleSync(uint16_t& data,
@@ -220,8 +445,7 @@ hal::HalStatus hal::getWallSensorSingleSync(uint16_t& data,
             return hal::HalStatus::ERROR;
     }
     LL_ADC_REG_StartConversionSWStart(ADC1);
-    while (LL_ADC_IsActiveFlag_EOCS(ADC1) == RESET)
-        ;
+    while (LL_ADC_IsActiveFlag_EOCS(ADC1) == RESET);
     LL_ADC_ClearFlag_EOCS(ADC1);
     data = LL_ADC_REG_ReadConversionData12(ADC1);
     return hal::HalStatus::SUCCESS;
@@ -277,3 +501,17 @@ hal::HalStatus hal::getWallSensorSingleSync(uint16_t& data,
 //     }
 // #endif  // ifdef LINUX
 // }
+
+hal::HalStatus hal::readwriteWallSensorSpiSync(uint16_t tx, uint16_t& rx) {
+#ifdef MOUSE_LAZULI
+    // LL_GPIO_ResetOutputPin(GPIOA, IMU_CS_Pin);
+    while (LL_SPI_IsActiveFlag_TXE(SPI2) == RESET);
+    LL_SPI_TransmitData16(SPI2, tx);
+    while (LL_SPI_IsActiveFlag_RXNE(SPI2) == RESET);
+    rx = LL_SPI_ReceiveData16(SPI2);
+    while (LL_SPI_IsActiveFlag_BSY(SPI2) == SET);
+    // LL_GPIO_SetOutputPin(GPIOA, IMU_CS_Pin);
+
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_LAZULI
+}

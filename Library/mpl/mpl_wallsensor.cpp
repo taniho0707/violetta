@@ -9,17 +9,73 @@
 #include "msg_format_wallsensor.h"
 #include "msg_server.h"
 
-mpl::WallSensor::WallSensor() { hal::initWallSensorPort(); }
+mpl::WallSensor::WallSensor() {}
 
-void mpl::WallSensor::initPort() { hal::initWallSensorPort(); }
+void mpl::WallSensor::initPort() {
+    hal::initWallSensorPort();
+}
 
-void mpl::WallSensor::deinitPort() { hal::deinitWallSensorPort(); }
+void mpl::WallSensor::deinitPort() {
+    hal::deinitWallSensorPort();
+}
 
 mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
+    // 順番にすべてのチャンネルをスキャン
     hal::WallSensorData buffer_bundle = {0};
-    // hal::HalStatus result = hal::getWallSensorAllSync(buffer);
     uint16_t buffer_single = 0;
     hal::HalStatus result;
+
+#ifdef MOUSE_LAZULI
+    hal::setWallSensorAdcSelect(hal::WallSensorNumbers::FRONTLEFT);
+    mpl::Timer::sleepNs(50);
+    hal::startWallSensorConversion();
+    mpl::Timer::sleepNs(600);
+    hal::getWallSensorSingleSync(buffer_single);  // 破棄
+    mpl::Timer::sleepNs(50);
+    hal::startWallSensorConversion();
+    mpl::Timer::sleepNs(600);
+    result = hal::getWallSensorSingleSync(buffer_single);
+    mpl::Timer::sleepNs(50);
+    buffer_bundle.FRONTLEFT = buffer_single;
+
+    hal::setWallSensorAdcSelect(hal::WallSensorNumbers::LEFT);
+    mpl::Timer::sleepNs(50);
+    hal::startWallSensorConversion();
+    mpl::Timer::sleepNs(600);
+    hal::getWallSensorSingleSync(buffer_single);  // 破棄
+    mpl::Timer::sleepNs(50);
+    hal::startWallSensorConversion();
+    mpl::Timer::sleepNs(600);
+    result = hal::getWallSensorSingleSync(buffer_single);
+    mpl::Timer::sleepNs(50);
+    buffer_bundle.LEFT = buffer_single;
+
+    hal::setWallSensorAdcSelect(hal::WallSensorNumbers::RIGHT);
+    mpl::Timer::sleepNs(50);
+    hal::startWallSensorConversion();
+    mpl::Timer::sleepNs(600);
+    hal::getWallSensorSingleSync(buffer_single);  // 破棄
+    mpl::Timer::sleepNs(50);
+    hal::startWallSensorConversion();
+    mpl::Timer::sleepNs(600);
+    result = hal::getWallSensorSingleSync(buffer_single);
+    mpl::Timer::sleepNs(50);
+    buffer_bundle.RIGHT = buffer_single;
+
+    hal::setWallSensorAdcSelect(hal::WallSensorNumbers::FRONTRIGHT);
+    mpl::Timer::sleepNs(50);
+    hal::startWallSensorConversion();
+    mpl::Timer::sleepNs(600);
+    hal::getWallSensorSingleSync(buffer_single);  // 破棄
+    mpl::Timer::sleepNs(50);
+    hal::startWallSensorConversion();
+    mpl::Timer::sleepNs(600);
+    result = hal::getWallSensorSingleSync(buffer_single);
+    mpl::Timer::sleepNs(50);
+    buffer_bundle.FRONTRIGHT = buffer_single;
+#endif  // MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
     hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTLEFT);
     mpl::Timer::sleepNs(500);
     result = hal::getWallSensorSingleSync(buffer_single,
@@ -41,6 +97,9 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
                                           hal::WallSensorNumbers::FRONTRIGHT);
     buffer_bundle.FRONTRIGHT = buffer_single;
     hal::setWallSensorLedOff();
+#endif  // MOUSE_ZIRCONIA2KAI
+
+    // 結果を格納
     if (result == hal::HalStatus::SUCCESS) {
 #ifdef MOUSE_VIOLETTA
         data.FRONTLEFT = buffer[0];
