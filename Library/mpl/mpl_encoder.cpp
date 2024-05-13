@@ -8,11 +8,15 @@
 #include "msg_format_encoder.h"
 #include "msg_server.h"
 
-mpl::Encoder::Encoder() { hal::initEncoderPort(); }
+mpl::Encoder::Encoder() {}
 
-void mpl::Encoder::initPort() { hal::initEncoderPort(); }
+void mpl::Encoder::initPort() {
+    hal::initEncoderPort();
+}
 
-void mpl::Encoder::deinitPort() { hal::deinitEncoderPort(); }
+void mpl::Encoder::deinitPort() {
+    hal::deinitEncoderPort();
+}
 
 mpl::MplStatus mpl::Encoder::scanEncoderSync(hal::EncoderData& data) {
     if (hal::getEncoderSync(data) == hal::HalStatus::SUCCESS) {
