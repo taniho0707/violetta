@@ -156,10 +156,11 @@ Status DebugActivity::run() {
         //                                  msg_imu.gyro_pitch, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
         //                                  msg_imu.temperature);
         cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
-                                         "T: %10d B: %1.2f | IMU: %8d, %10d, % 6d, % 6d, % 6d, % 6d | STAT: Min.% 5d Max.% 5d Avg.% 5.2f\n",
+                                         "T: %10d B: %1.2f | IMU: %8d, %10d, % 6d, % 6d, % 6d, % 6d | STAT: Max.[% 2.0f|% 2.0f|% 2.0f|% 2.0f] Avg.[% 2.0f|% 2.0f|% 2.0f|% 2.0f]\n",
                                          mpl::Timer::getMicroTime(), msg_battery.battery, msg_imu.getCount(),
                                          msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
-                                         timer_statistics.max(), timer_statistics.min(), timer_statistics.avg());
+                                         float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_max) * 100 / hal::TIMER_COUNT_MAX,
+                                         float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count2_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_avg) * 100 / hal::TIMER_COUNT_MAX);
         cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
     }
 

@@ -26,36 +26,36 @@ volatile uint32_t mpl::Timer::total = 0;
 uint8_t mpl::Timer::tick_count = 0;
 uint32_t mpl::Timer::last_reference_us = 0;
 
+#ifdef ENABLE_TIMER_STATISTICS
+uint16_t mpl::Timer::history_count1[LENGTH_TIMER_STATISTICS] = {0};
+uint16_t mpl::Timer::history_count2[LENGTH_TIMER_STATISTICS] = {0};
+uint16_t mpl::Timer::history_count3[LENGTH_TIMER_STATISTICS] = {0};
+uint16_t mpl::Timer::history_count4[LENGTH_TIMER_STATISTICS] = {0};
+uint16_t mpl::Timer::ite_count1 = LENGTH_TIMER_STATISTICS - 1;
+uint16_t mpl::Timer::ite_count2 = LENGTH_TIMER_STATISTICS - 1;
+uint16_t mpl::Timer::ite_count3 = LENGTH_TIMER_STATISTICS - 1;
+uint16_t mpl::Timer::ite_count4 = LENGTH_TIMER_STATISTICS - 1;
+mpl::TimerStatistics mpl::Timer::statistics = {
+    .count1_max = 0,
+    .count2_max = 0,
+    .count3_max = 0,
+    .count4_max = 0,
+    .count1_min = hal::TIMER_COUNT_MAX,
+    .count2_min = hal::TIMER_COUNT_MAX,
+    .count3_min = hal::TIMER_COUNT_MAX,
+    .count4_min = hal::TIMER_COUNT_MAX,
+    .count1_avg = 0,
+    .count2_avg = 0,
+    .count3_avg = 0,
+    .count4_avg = 0,
+};
+#endif  // ENABLE_TIMER_STATISTICS
+
 #ifdef LINUX
 std::chrono::system_clock::time_point mpl::Timer::_observe_last_time = {};
 #endif
 
 mpl::MplStatus mpl::Timer::init() {
-#ifdef ENABLE_TIMER_STATISTICS
-    for (uint16_t i = 0; i < LENGTH_TIMER_STATISTICS; i++) {
-        history_count1[i] = 0;
-        history_count2[i] = 0;
-        history_count3[i] = 0;
-        history_count4[i] = 0;
-    }
-    ite_count1 = LENGTH_TIMER_STATISTICS - 1;
-    ite_count2 = LENGTH_TIMER_STATISTICS - 1;
-    ite_count3 = LENGTH_TIMER_STATISTICS - 1;
-    ite_count4 = LENGTH_TIMER_STATISTICS - 1;
-    Timer::statistics.count1_max = 0;
-    Timer::statistics.count2_max = 0;
-    Timer::statistics.count3_max = 0;
-    Timer::statistics.count4_max = 0;
-    Timer::statistics.count1_min = hal::TIMER_COUNT_MAX;
-    Timer::statistics.count2_min = hal::TIMER_COUNT_MAX;
-    Timer::statistics.count3_min = hal::TIMER_COUNT_MAX;
-    Timer::statistics.count4_min = hal::TIMER_COUNT_MAX;
-    Timer::statistics.count1_avg = 0;
-    Timer::statistics.count2_avg = 0;
-    Timer::statistics.count3_avg = 0;
-    Timer::statistics.count4_avg = 0;
-#endif  // ENABLE_TIMER_STATISTICS
-
     if (hal::initTimer() != hal::HalStatus::SUCCESS) {
         return MplStatus::ERROR;
     } else {
@@ -76,9 +76,13 @@ uint32_t mpl::Timer::getNanoTimeFromLastInterrupt() {
            hal::TIMER_COUNT_MAX;
 }
 
-uint32_t mpl::Timer::getMicroTime() { return total; }
+uint32_t mpl::Timer::getMicroTime() {
+    return total;
+}
 
-uint32_t mpl::Timer::getMilliTime() { return total / 1000; }
+uint32_t mpl::Timer::getMilliTime() {
+    return total / 1000;
+}
 
 uint32_t mpl::Timer::getTimeFromLastReference() {
     uint32_t now = getMicroTime();
@@ -105,6 +109,18 @@ void mpl::Timer::sleepMs(uint32_t ms) {
 mpl::MplStatus mpl::Timer::getStatistics(TimerStatistics &statistics) {
 #ifdef ENABLE_TIMER_STATISTICS
     statistics = Timer::statistics;
+    statistics.count1_max = misc::max(history_count1, LENGTH_TIMER_STATISTICS);
+    statistics.count2_max = misc::max(history_count2, LENGTH_TIMER_STATISTICS);
+    statistics.count3_max = misc::max(history_count3, LENGTH_TIMER_STATISTICS);
+    statistics.count4_max = misc::max(history_count4, LENGTH_TIMER_STATISTICS);
+    statistics.count1_min = misc::min(history_count1, LENGTH_TIMER_STATISTICS);
+    statistics.count2_min = misc::min(history_count2, LENGTH_TIMER_STATISTICS);
+    statistics.count3_min = misc::min(history_count3, LENGTH_TIMER_STATISTICS);
+    statistics.count4_min = misc::min(history_count4, LENGTH_TIMER_STATISTICS);
+    statistics.count1_avg = misc::average(history_count1, LENGTH_TIMER_STATISTICS);
+    statistics.count2_avg = misc::average(history_count2, LENGTH_TIMER_STATISTICS);
+    statistics.count3_avg = misc::average(history_count3, LENGTH_TIMER_STATISTICS);
+    statistics.count4_avg = misc::average(history_count4, LENGTH_TIMER_STATISTICS);
     return MplStatus::SUCCESS;
 #else
     return MplStatus::NO_IMPLEMENT;
@@ -127,10 +143,10 @@ void mpl::Timer::interrupt() {
             if (next_ite >= LENGTH_TIMER_STATISTICS) {
                 next_ite = 0;
             }
-            Timer::statistics.count1_avg =
-                Timer::statistics.count1_avg +
-                ((history_count1[ite_count1] - history_count1[next_ite]) /
-                 LENGTH_TIMER_STATISTICS);
+            // Timer::statistics.count1_avg =
+            //     Timer::statistics.count1_avg +
+            //     ((history_count1[ite_count1] - history_count1[next_ite]) /
+            //      static_cast<float>(LENGTH_TIMER_STATISTICS));
             ite_count1 = next_ite;
             history_count1[ite_count1] = getInternalCounter();
 #endif  // ENABLE_TIMER_STATISTICS
@@ -143,10 +159,10 @@ void mpl::Timer::interrupt() {
             if (next_ite >= LENGTH_TIMER_STATISTICS) {
                 next_ite = 0;
             }
-            Timer::statistics.count2_avg =
-                Timer::statistics.count2_avg +
-                ((history_count2[ite_count2] - history_count2[next_ite]) /
-                 LENGTH_TIMER_STATISTICS);
+            // Timer::statistics.count2_avg =
+            //     Timer::statistics.count2_avg +
+            //     ((history_count2[ite_count2] - history_count2[next_ite]) /
+            //      static_cast<float>(LENGTH_TIMER_STATISTICS));
             ite_count2 = next_ite;
             history_count2[ite_count2] = getInternalCounter();
 #endif  // ENABLE_TIMER_STATISTICS
@@ -159,10 +175,10 @@ void mpl::Timer::interrupt() {
             if (next_ite >= LENGTH_TIMER_STATISTICS) {
                 next_ite = 0;
             }
-            Timer::statistics.count3_avg =
-                Timer::statistics.count3_avg +
-                ((history_count3[ite_count3] - history_count3[next_ite]) /
-                 LENGTH_TIMER_STATISTICS);
+            // Timer::statistics.count3_avg =
+            //     Timer::statistics.count3_avg +
+            //     ((history_count3[ite_count3] - history_count3[next_ite]) /
+            //      static_cast<float>(LENGTH_TIMER_STATISTICS));
             ite_count3 = next_ite;
             history_count3[ite_count3] = getInternalCounter();
 #endif  // ENABLE_TIMER_STATISTICS
@@ -175,10 +191,10 @@ void mpl::Timer::interrupt() {
             if (next_ite >= LENGTH_TIMER_STATISTICS) {
                 next_ite = 0;
             }
-            Timer::statistics.count4_avg =
-                Timer::statistics.count4_avg +
-                ((history_count4[ite_count4] - history_count4[next_ite]) /
-                 LENGTH_TIMER_STATISTICS);
+            // Timer::statistics.count4_avg =
+            //     Timer::statistics.count4_avg +
+            //     ((history_count4[ite_count4] - history_count4[next_ite]) /
+            //      static_cast<float>(LENGTH_TIMER_STATISTICS));
             ite_count4 = next_ite;
             history_count4[ite_count4] = getInternalCounter();
 #endif  // ENABLE_TIMER_STATISTICS

@@ -5,12 +5,10 @@
 //******************************************************************************
 #pragma once
 
-#include "hal_timer.h"
 #include "mpl_conf.h"
 #include "util.h"
 
-// #define ENABLE_TIMER_STATISTICS  // タイマーの統計情報を取得する
-// TODO: STATISTICS 動作確認
+#define ENABLE_TIMER_STATISTICS       // タイマーの統計情報を取得する
 #define LENGTH_TIMER_STATISTICS 1000  // タイマーの Average 取得期間
 
 // #ifdef STM32L4P5xx
@@ -35,17 +33,17 @@ struct TimerStatistics {
     uint16_t count2_min;
     uint16_t count3_min;
     uint16_t count4_min;
-    uint16_t count1_avg;
-    uint16_t count2_avg;
-    uint16_t count3_avg;
-    uint16_t count4_avg;
+    float count1_avg;
+    float count2_avg;
+    float count3_avg;
+    float count4_avg;
     uint16_t max() {
         return misc::max(count1_max, count2_max, count3_max, count4_max);
     }
     uint16_t min() {
         return misc::min(count1_min, count2_min, count3_min, count4_min);
     }
-    uint16_t avg() {
+    float avg() {
         return (count1_avg + count2_avg + count3_avg + count4_avg) / 4;
     }
 };

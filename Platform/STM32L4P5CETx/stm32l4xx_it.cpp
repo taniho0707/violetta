@@ -22,6 +22,7 @@
 #include "mpl_timer.h"
 #include "stm32l4xx_ll_dma.h"
 #include "stm32l4xx_ll_i2c.h"
+#include "stm32l4xx_ll_tim.h"
 #include "stm32l4xx_ll_usart.h"
 
 /******************************************************************************/
