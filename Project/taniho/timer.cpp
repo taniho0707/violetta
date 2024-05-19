@@ -18,13 +18,13 @@ void mpl::Timer::run1() {
     static auto imu = mpl::Imu::getInstance();
     imu->interruptPeriodic();
 
-    // static auto encoder = mpl::Encoder::getInstance();
-    // encoder->interruptPeriodic();
+    static auto encoder = mpl::Encoder::getInstance();
+    encoder->interruptPeriodic();
 }
 
 void mpl::Timer::run2() {
-    // static auto wallsensor = mpl::WallSensor::getInstance();
-    // wallsensor->interruptPeriodic();
+    static auto wallsensor = mpl::WallSensor::getInstance();
+    wallsensor->interruptPeriodic();
 }
 
 void mpl::Timer::run3() {

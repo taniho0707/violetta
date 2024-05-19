@@ -68,12 +68,17 @@ hal::HalStatus hal::initWallSensorPort() {
     PB14   ------> SPI2_MISO
     PB15   ------> SPI2_MOSI
     */
-    GPIO_InitStruct.Pin = ADC_CS_Pin | ADC_SCK_Pin | ADC_MISO_Pin | ADC_MOSI_Pin;
+    GPIO_InitStruct.Pin = ADC_SCK_Pin | ADC_MISO_Pin | ADC_MOSI_Pin;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
     GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
     GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
     GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
+    LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    LL_GPIO_SetOutputPin(GPIOB, ADC_CS_Pin);
+    GPIO_InitStruct.Pin = ADC_CS_Pin;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
     LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     // LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_5, LL_DMAMUX_REQ_SPI2_RX);
@@ -100,9 +105,9 @@ hal::HalStatus hal::initWallSensorPort() {
     SPI_InitStruct.TransferDirection = LL_SPI_FULL_DUPLEX;
     SPI_InitStruct.Mode = LL_SPI_MODE_MASTER;
     SPI_InitStruct.DataWidth = LL_SPI_DATAWIDTH_16BIT;
-    SPI_InitStruct.ClockPolarity = LL_SPI_POLARITY_LOW;
+    SPI_InitStruct.ClockPolarity = LL_SPI_POLARITY_HIGH;
     SPI_InitStruct.ClockPhase = LL_SPI_PHASE_2EDGE;
-    SPI_InitStruct.NSS = LL_SPI_NSS_HARD_OUTPUT;
+    SPI_InitStruct.NSS = LL_SPI_NSS_SOFT;
     SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV2;
     SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
     SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
@@ -110,14 +115,17 @@ hal::HalStatus hal::initWallSensorPort() {
     LL_SPI_Init(SPI2, &SPI_InitStruct);
     LL_SPI_SetStandard(SPI2, LL_SPI_PROTOCOL_MOTOROLA);
     LL_SPI_DisableNSSPulseMgt(SPI2);
-    // LL_SPI_SetRxFIFOThreshold(SPI2, LL_SPI_RX_FIFO_TH_QUARTER);
+    LL_SPI_SetRxFIFOThreshold(SPI2, LL_SPI_RX_FIFO_TH_HALF);
     LL_SPI_Enable(SPI2);
 
     // CONFIGURATION:
-    // 0b 0000 0000 1100 0100 (DEBUG)
-    // 0b 0000 0000 1100 0000 (疎通確認後)
+    // 0b 0000 0000 1101 1100 (DEBUG)
+    // 0b 0000 0000 1101 1000 (疎通確認後)
     uint16_t buf;
-    hal::readwriteWallSensorSpiSync(0x00C4, buf);
+    hal::readwriteWallSensorSpiSync(0x00DC | static_cast<uint16_t>(AD7091RCommands::CONFIGURATION) | hal::WALLSENSOR_WRITE_MASK, buf);
+    hal::readwriteWallSensorSpiSync(static_cast<uint16_t>(AD7091RCommands::CONFIGURATION), buf);
+
+    hal::readwriteWallSensorSpiSync(0x0001 | static_cast<uint16_t>(AD7091RCommands::CHANNEL) | hal::WALLSENSOR_WRITE_MASK, buf);
 
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
@@ -368,9 +376,9 @@ hal::HalStatus hal::setWallSensorChargeStop() {
 hal::HalStatus hal::startWallSensorConversion() {
 #ifdef MOUSE_LAZULI
     LL_GPIO_ResetOutputPin(GPIOC, ADC_CNVST_Pin);
-    // pipelineの最適化で命令が実行されない可能性に注意
-    __NOP();
-    __NOP();
+    // // pipelineの最適化で命令が実行されない可能性に注意
+    // __NOP();
+    // __NOP();
     LL_GPIO_SetOutputPin(GPIOC, ADC_CNVST_Pin);
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
@@ -504,13 +512,14 @@ hal::HalStatus hal::getWallSensorSingleSync(uint16_t& data,
 
 hal::HalStatus hal::readwriteWallSensorSpiSync(uint16_t tx, uint16_t& rx) {
 #ifdef MOUSE_LAZULI
-    // LL_GPIO_ResetOutputPin(GPIOA, IMU_CS_Pin);
+    LL_GPIO_ResetOutputPin(GPIOB, ADC_CS_Pin);
     while (LL_SPI_IsActiveFlag_TXE(SPI2) == RESET);
     LL_SPI_TransmitData16(SPI2, tx);
     while (LL_SPI_IsActiveFlag_RXNE(SPI2) == RESET);
+    LL_GPIO_SetOutputPin(GPIOB, ADC_CS_Pin);
+
     rx = LL_SPI_ReceiveData16(SPI2);
     while (LL_SPI_IsActiveFlag_BSY(SPI2) == SET);
-    // LL_GPIO_SetOutputPin(GPIOA, IMU_CS_Pin);
 
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
