@@ -26,49 +26,81 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
     hal::HalStatus result;
 
 #ifdef MOUSE_LAZULI
+    // FRONTLEFT
+    hal::setWallSensorChargeStart();
+    // mpl::Timer::sleepNs(50);
+    // hal::setWallSensorChargeStop();
+
     hal::setWallSensorAdcSelect(hal::WallSensorNumbers::FRONTLEFT);
     mpl::Timer::sleepNs(50);
     hal::startWallSensorConversion();
     mpl::Timer::sleepNs(600);
     hal::getWallSensorSingleSync(buffer_single);  // 破棄
+
+    hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTLEFT);
     mpl::Timer::sleepNs(50);
     hal::startWallSensorConversion();
+    // hal::setWallSensorLedOff(hal::WallSensorNumbers::FRONTLEFT);
     mpl::Timer::sleepNs(600);
     result = hal::getWallSensorSingleSync(buffer_single);
     mpl::Timer::sleepNs(50);
     buffer_bundle.FRONTLEFT = buffer_single;
+
+    // LEFT
+    // hal::setWallSensorChargeStart();
+    // mpl::Timer::sleepNs(50);
+    // hal::setWallSensorChargeStop();
 
     hal::setWallSensorAdcSelect(hal::WallSensorNumbers::LEFT);
     mpl::Timer::sleepNs(50);
     hal::startWallSensorConversion();
     mpl::Timer::sleepNs(600);
     hal::getWallSensorSingleSync(buffer_single);  // 破棄
+
+    hal::setWallSensorLedOn(hal::WallSensorNumbers::LEFT);
     mpl::Timer::sleepNs(50);
     hal::startWallSensorConversion();
+    hal::setWallSensorLedOff(hal::WallSensorNumbers::LEFT);
     mpl::Timer::sleepNs(600);
     result = hal::getWallSensorSingleSync(buffer_single);
     mpl::Timer::sleepNs(50);
     buffer_bundle.LEFT = buffer_single;
+
+    // RIGHT
+    // hal::setWallSensorChargeStart();
+    // mpl::Timer::sleepNs(50);
+    // hal::setWallSensorChargeStop();
 
     hal::setWallSensorAdcSelect(hal::WallSensorNumbers::RIGHT);
     mpl::Timer::sleepNs(50);
     hal::startWallSensorConversion();
     mpl::Timer::sleepNs(600);
     hal::getWallSensorSingleSync(buffer_single);  // 破棄
+
+    hal::setWallSensorLedOn(hal::WallSensorNumbers::RIGHT);
     mpl::Timer::sleepNs(50);
     hal::startWallSensorConversion();
+    hal::setWallSensorLedOff(hal::WallSensorNumbers::RIGHT);
     mpl::Timer::sleepNs(600);
     result = hal::getWallSensorSingleSync(buffer_single);
     mpl::Timer::sleepNs(50);
     buffer_bundle.RIGHT = buffer_single;
+
+    // FRONTRIGHT
+    // hal::setWallSensorChargeStart();
+    // mpl::Timer::sleepNs(50);
+    // hal::setWallSensorChargeStop();
 
     hal::setWallSensorAdcSelect(hal::WallSensorNumbers::FRONTRIGHT);
     mpl::Timer::sleepNs(50);
     hal::startWallSensorConversion();
     mpl::Timer::sleepNs(600);
     hal::getWallSensorSingleSync(buffer_single);  // 破棄
+
+    hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTRIGHT);
     mpl::Timer::sleepNs(50);
     hal::startWallSensorConversion();
+    hal::setWallSensorLedOff(hal::WallSensorNumbers::FRONTRIGHT);
     mpl::Timer::sleepNs(600);
     result = hal::getWallSensorSingleSync(buffer_single);
     mpl::Timer::sleepNs(50);
