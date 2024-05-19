@@ -14,6 +14,14 @@
 #include "stm32l4xx_ll_usart.h"
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32F411xE
+#include "stm32f4xx_ll_bus.h"
+#include "stm32f4xx_ll_dma.h"
+#include "stm32f4xx_ll_gpio.h"
+#include "stm32f4xx_ll_rcc.h"
+#include "stm32f4xx_ll_usart.h"
+#endif  // ifdef STM32F411xE
+
 hal::HalStatus hal::initUartDebugPort(InitializeType type) {
 #ifdef STM32L4P5xx
     LL_USART_InitTypeDef USART_InitStruct = {0};
@@ -144,63 +152,108 @@ hal::HalStatus hal::initUartDebugPort(InitializeType type) {
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
     LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
 
-    /**USART1 GPIO Configuration
-    PA9   ------> USART1_TX
-    PA10   ------> USART1_RX
-    */
-    GPIO_InitStruct.Pin = UART_TX_Pin | UART_RX_Pin;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
-    LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    if (type == InitializeType::Sync) {
+        /* USART1 GPIO Configuration
+            PA9   ------> USART1_TX
+            PA10   ------> USART1_RX
+        */
+        GPIO_InitStruct.Pin = UART_TX_Pin | UART_RX_Pin;
+        GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+        GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+        GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+        GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
+        LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    // /* USART1_TX Init */
-    // LL_DMA_SetChannelSelection(DMA2, LL_DMA_STREAM_7, LL_DMA_CHANNEL_4);
-    // LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_STREAM_7,
-    //                                 LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
-    // LL_DMA_SetStreamPriorityLevel(DMA2, LL_DMA_STREAM_7,
-    // LL_DMA_PRIORITY_LOW); LL_DMA_SetMode(DMA2, LL_DMA_STREAM_7,
-    // LL_DMA_MODE_NORMAL); LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_STREAM_7,
-    // LL_DMA_PERIPH_NOINCREMENT); LL_DMA_SetMemoryIncMode(DMA2,
-    // LL_DMA_STREAM_7, LL_DMA_MEMORY_INCREMENT); LL_DMA_SetPeriphSize(DMA2,
-    // LL_DMA_STREAM_7, LL_DMA_PDATAALIGN_BYTE); LL_DMA_SetMemorySize(DMA2,
-    // LL_DMA_STREAM_7, LL_DMA_MDATAALIGN_BYTE); LL_DMA_DisableFifoMode(DMA2,
-    // LL_DMA_STREAM_7);
+        USART_InitStruct.BaudRate = 921600;  // 動作未確認
+        USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
+        USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
+        USART_InitStruct.Parity = LL_USART_PARITY_NONE;
+        USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
+        USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
+        USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
+        auto status = LL_USART_Init(USART1, &USART_InitStruct);
+        LL_USART_ConfigSyncMode(USART1);
+        LL_USART_Enable(USART1);
 
-    // /* USART1_RX Init */
-    // LL_DMA_SetChannelSelection(DMA2, LL_DMA_STREAM_2, LL_DMA_CHANNEL_4);
-    // LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_STREAM_2,
-    //                                 LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-    // LL_DMA_SetStreamPriorityLevel(DMA2, LL_DMA_STREAM_2,
-    // LL_DMA_PRIORITY_LOW); LL_DMA_SetMode(DMA2, LL_DMA_STREAM_2,
-    // LL_DMA_MODE_NORMAL); LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_STREAM_2,
-    // LL_DMA_PERIPH_NOINCREMENT); LL_DMA_SetMemoryIncMode(DMA2,
-    // LL_DMA_STREAM_2, LL_DMA_MEMORY_INCREMENT); LL_DMA_SetPeriphSize(DMA2,
-    // LL_DMA_STREAM_2, LL_DMA_PDATAALIGN_BYTE); LL_DMA_SetMemorySize(DMA2,
-    // LL_DMA_STREAM_2, LL_DMA_MDATAALIGN_BYTE); LL_DMA_DisableFifoMode(DMA2,
-    // LL_DMA_STREAM_2);
+        if (status == SUCCESS) {
+            return hal::HalStatus::SUCCESS;
+        } else {
+            return hal::HalStatus::ERROR;
+        }
+    } else if (type == InitializeType::Async) {
+        return HalStatus::NOIMPLEMENT;
+    } else if (type == InitializeType::Dma) {
+        LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA2);
 
-    // NVIC_SetPriority(USART1_IRQn,
-    //                  NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
-    // NVIC_EnableIRQ(USART1_IRQn);
+        LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_2);
+        LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_7);
 
-    USART_InitStruct.BaudRate = 115200;
-    USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
-    USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
-    USART_InitStruct.Parity = LL_USART_PARITY_NONE;
-    USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
-    USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
-    USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
-    auto status = LL_USART_Init(USART1, &USART_InitStruct);
-    LL_USART_ConfigSyncMode(USART1);
-    LL_USART_Enable(USART1);
+        /* USART1_TX Init */
+        LL_DMA_SetChannelSelection(DMA2, LL_DMA_STREAM_7, LL_DMA_CHANNEL_4);
+        LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_STREAM_7, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+        LL_DMA_SetStreamPriorityLevel(DMA2, LL_DMA_STREAM_7, LL_DMA_PRIORITY_LOW);
+        LL_DMA_SetMode(DMA2, LL_DMA_STREAM_7, LL_DMA_MODE_NORMAL);
+        LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_STREAM_7, LL_DMA_PERIPH_NOINCREMENT);
+        LL_DMA_SetMemoryIncMode(DMA2, LL_DMA_STREAM_7, LL_DMA_MEMORY_INCREMENT);
+        LL_DMA_SetPeriphSize(DMA2, LL_DMA_STREAM_7, LL_DMA_PDATAALIGN_BYTE);
+        LL_DMA_SetMemorySize(DMA2, LL_DMA_STREAM_7, LL_DMA_MDATAALIGN_BYTE);
+        LL_DMA_DisableFifoMode(DMA2, LL_DMA_STREAM_7);
 
-    if (status == SUCCESS) {
-        return hal::HalStatus::SUCCESS;
-    } else {
-        return hal::HalStatus::ERROR;
+        /* USART1_RX Init */
+        LL_DMA_SetChannelSelection(DMA2, LL_DMA_STREAM_2, LL_DMA_CHANNEL_4);
+        LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_STREAM_2, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+        LL_DMA_SetStreamPriorityLevel(DMA2, LL_DMA_STREAM_2, LL_DMA_PRIORITY_LOW);
+        LL_DMA_SetMode(DMA2, LL_DMA_STREAM_2, LL_DMA_MODE_NORMAL);
+        LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_STREAM_2, LL_DMA_PERIPH_NOINCREMENT);
+        LL_DMA_SetMemoryIncMode(DMA2, LL_DMA_STREAM_2, LL_DMA_MEMORY_INCREMENT);
+        LL_DMA_SetPeriphSize(DMA2, LL_DMA_STREAM_2, LL_DMA_PDATAALIGN_BYTE);
+        LL_DMA_SetMemorySize(DMA2, LL_DMA_STREAM_2, LL_DMA_MDATAALIGN_BYTE);
+        LL_DMA_DisableFifoMode(DMA2, LL_DMA_STREAM_2);
+
+        NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 4));
+        NVIC_EnableIRQ(USART1_IRQn);
+        NVIC_SetPriority(DMA2_Stream2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 3));
+        NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+        NVIC_SetPriority(DMA2_Stream7_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 2));
+        NVIC_EnableIRQ(DMA2_Stream7_IRQn);
+
+        LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_2);
+        LL_DMA_EnableIT_TE(DMA2, LL_DMA_STREAM_2);
+        LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_7);
+        LL_DMA_EnableIT_TE(DMA2, LL_DMA_STREAM_7);
+
+        // LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_2);
+        // LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_7);
+
+        /* USART1 GPIO Configuration
+            PA9   ------> USART1_TX
+            PA10   ------> USART1_RX
+        */
+        GPIO_InitStruct.Pin = UART_TX_Pin | UART_RX_Pin;
+        GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+        GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+        GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+        GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
+        LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+        USART_InitStruct.BaudRate = 921600;
+        USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
+        USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
+        USART_InitStruct.Parity = LL_USART_PARITY_NONE;
+        USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
+        USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
+        USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
+        auto status = LL_USART_Init(USART1, &USART_InitStruct);
+        LL_USART_ConfigAsyncMode(USART1);
+        LL_USART_Enable(USART1);
+
+        if (status == SUCCESS) {
+            return hal::HalStatus::SUCCESS;
+        } else {
+            return hal::HalStatus::ERROR;
+        }
     }
 #endif  // ifdef STM32F411xE
 
@@ -276,7 +329,20 @@ hal::HalStatus hal::sendUartDebugDmaNByte(const char *data, const int len) {
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE
-    return hal::HalStatus::NOIMPLEMENT;
+    static char debugDmaTxBuffer[DEBUG_DMA_TX_BUFFER_SIZE];
+
+    for (int i = 0; i < len; ++i) debugDmaTxBuffer[i] = data[i];
+    LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_7);
+    LL_DMA_ConfigAddresses(
+        DMA2, LL_DMA_STREAM_7, (uint32_t)debugDmaTxBuffer,
+        LL_USART_DMA_GetRegAddr(USART1),
+        LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_STREAM_7));
+    LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_7, len);
+
+    LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_7);
+    LL_USART_EnableDMAReq_TX(USART1);
+
+    return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32F411xE
 
 #ifdef LINUX

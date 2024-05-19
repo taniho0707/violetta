@@ -7,16 +7,6 @@
 
 #include "act_conf.h"
 
-// MPL
-#include "mpl_battery.h"
-#include "mpl_debug.h"
-#include "mpl_encoder.h"
-#include "mpl_imu.h"
-#include "mpl_led.h"
-#include "mpl_motor.h"
-#include "mpl_timer.h"
-#include "mpl_wallsensor.h"
-
 namespace act {
 
 class DebugActivity : public IActivity {

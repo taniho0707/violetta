@@ -5,6 +5,7 @@
 //******************************************************************************
 #include "mpl_led.h"
 
+#include "hal_led.h"
 #include "mpl_timer.h"
 
 mpl::Led::Led() {

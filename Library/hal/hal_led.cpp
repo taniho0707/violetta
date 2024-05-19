@@ -605,7 +605,7 @@ hal::HalStatus hal::onLed(hal::LedNumbers num) {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef STM32F411xE
+#ifdef MOUSE_ZIRCONIA2KAI
     switch (num) {
         case hal::LedNumbers::RED:
             LL_GPIO_SetOutputPin(LED3_GPIO_Port, LED3_Pin);
@@ -627,7 +627,7 @@ hal::HalStatus hal::onLed(hal::LedNumbers num) {
             break;
     }
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;
@@ -721,7 +721,7 @@ hal::HalStatus hal::offLed(hal::LedNumbers num) {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef STM32F411xE
+#ifdef MOUSE_ZIRCONIA2KAI
     switch (num) {
         case hal::LedNumbers::RED:
             LL_GPIO_ResetOutputPin(LED3_GPIO_Port, LED3_Pin);
@@ -743,7 +743,7 @@ hal::HalStatus hal::offLed(hal::LedNumbers num) {
             break;
     }
     return hal::HalStatus::SUCCESS;
-#endif  // ifdef STM32F411xE
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef LINUX
     return hal::HalStatus::SUCCESS;

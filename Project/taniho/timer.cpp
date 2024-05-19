@@ -29,8 +29,11 @@ void mpl::Timer::run2() {
 
 void mpl::Timer::run3() {
     // mpl::Led::getInstance()->interrupt();
+
+#ifdef MOUSE_LAZULI
     static auto speaker = mpl::Speaker::getInstance();
     speaker->interruptPeriodic();
+#endif  // MOUSE_LAZULI
 
     static auto battery = mpl::Battery::getInstance();
     battery->interruptPeriodic();

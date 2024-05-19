@@ -6,8 +6,14 @@
 #include "act_debug.h"
 
 #include "cmd_server.h"
+#include "mpl_battery.h"
+#include "mpl_debug.h"
+#include "mpl_encoder.h"
+#include "mpl_imu.h"
+#include "mpl_led.h"
 #include "mpl_speaker.h"
 #include "mpl_timer.h"
+#include "mpl_wallsensor.h"
 #include "msg_format_imu.h"
 #include "msg_server.h"
 
@@ -37,6 +43,7 @@ void DebugActivity::init() {}
 //     }
 // }
 
+#ifdef MOUSE_LAZULI
 Status DebugActivity::run() {
     auto cmd_server = cmd::CommandServer::getInstance();
     cmd::CommandFormatDebugTx cmd_debug_tx = {0};
@@ -51,15 +58,6 @@ Status DebugActivity::run() {
     if (mplstatus == mpl::MplStatus::SUCCESS) {
         cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "LED: Initialization SUCCESS\n");
         cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
-        // led->on(hal::LedNumbers::LEFT);
-        // led->on(hal::LedNumbers::RIGHT);
-        // led->on(hal::LedNumbers::FRONTL);
-        // led->on(hal::LedNumbers::FRONTR);
-        // led->on(hal::LedNumbers::MIDDLE1);
-        // led->on(hal::LedNumbers::MIDDLE2);
-        // led->on(hal::LedNumbers::MIDDLE3);
-        // led->on(hal::LedNumbers::MIDDLE4);
-        // led->on(hal::LedNumbers::MIDDLE5);
     } else {
         while (true);
     }
@@ -167,5 +165,119 @@ Status DebugActivity::run() {
 
     return Status::ERROR;
 }
+#endif  // MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
+Status DebugActivity::run() {
+    auto cmd_server = cmd::CommandServer::getInstance();
+    cmd::CommandFormatDebugTx cmd_debug_tx = {0};
+
+    auto debug = mpl::Debug::getInstance();
+    debug->init(hal::InitializeType::Dma);
+    cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Hello Lazuli! %d\n", 1);
+    cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+
+    auto led = mpl::Led::getInstance();
+    auto mplstatus = led->initPort(hal::InitializeType::Sync);
+    if (mplstatus == mpl::MplStatus::SUCCESS) {
+        cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "LED: Initialization SUCCESS\n");
+        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    } else {
+        while (true);
+    }
+
+    auto imu = mpl::Imu::getInstance();
+    imu->setConfig();
+    auto result = imu->whoami();
+    if (result == mpl::MplStatus::SUCCESS) {
+        cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "IMU WhoAmI: SUCCESS\n");
+        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    } else {
+        cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "IMU WhoAmI: ERROR\n");
+        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    }
+
+    // Battery Test code
+    auto battery = mpl::Battery::getInstance();
+    cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Battery: ");
+    cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    if (battery->initPort() != mpl::MplStatus::SUCCESS) {
+        cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Initialize ERROR\n");
+        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    }
+    float battery_data = 0.0f;
+    battery->scanSync(battery_data);
+    cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "%1.2f\n", battery_data);
+    cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    if (battery_data > 4.1f) {
+        led->on(hal::LedNumbers::BLUE);
+        led->on(hal::LedNumbers::GREEN);
+        led->on(hal::LedNumbers::YELLOW);
+        led->on(hal::LedNumbers::RED);
+    } else if (battery_data > 3.9f) {
+        led->on(hal::LedNumbers::GREEN);
+        led->on(hal::LedNumbers::YELLOW);
+        led->on(hal::LedNumbers::RED);
+    } else if (battery_data > 3.7f) {
+        led->on(hal::LedNumbers::YELLOW);
+        led->on(hal::LedNumbers::RED);
+    } else if (battery_data > 3.5f) {
+        led->on(hal::LedNumbers::RED);
+    }
+
+    auto encoder = mpl::Encoder::getInstance();
+    encoder->initPort();
+
+    auto wallsensor = mpl::WallSensor::getInstance();
+    wallsensor->initPort();
+    // hal::WallSensorData wallsensor_data = {0};
+
+    // // Motor Test code
+    // auto motor = mpl::Motor::getInstance();
+    // debug->printf("Motor: 25%% ON...");
+    // motor->setDuty(+0.05, -0.05);
+    // LL_mDelay(1000);
+    // debug->printf("OFF\n");
+    // motor->setFloat();
+
+    mpl::Timer::init();
+
+    auto message = msg::MessageServer::getInstance();
+    msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
+    msg::MsgFormatEncoder msg_encoder = msg::MsgFormatEncoder();
+    msg::MsgFormatImu msg_imu = msg::MsgFormatImu();
+    msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
+
+    mpl::TimerStatistics timer_statistics;
+
+    while (1) {
+        mpl::Timer::sleepMs(500);
+        mpl::Timer::getStatistics(timer_statistics);
+        message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
+        message->receiveMessage(msg::ModuleId::ENCODER, &msg_encoder);
+        message->receiveMessage(msg::ModuleId::IMU, &msg_imu);
+        message->receiveMessage(msg::ModuleId::WALLSENSOR, &msg_wallsensor);
+        // cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
+        //                                  "T: %10d B: %1.2f | L: %5d, R: %5d | FL: %4d, L: %4d, R: %4d, FR: "
+        //                                  "%4d, IMU: %8d, %10d, % 6d, % 6d, % 6d, % 6d, % 6d, % 6d, %d\n",
+        //                                  mpl::Timer::getMicroTime(), msg_battery.battery, msg_encoder.left,
+        //                                  msg_encoder.right, msg_wallsensor.frontleft, msg_wallsensor.left,
+        //                                  msg_wallsensor.right, msg_wallsensor.frontright, msg_imu.getCount(),
+        //                                  msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.gyro_roll,
+        //                                  msg_imu.gyro_pitch, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
+        //                                  msg_imu.temperature);
+        cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
+                                         "T: %10d B: %1.2f | IMU: %8d, %10d, % 6d, % 6d, % 6d, % 6d | WALL: % 4d,% 4d,% 4d,% 4d | STAT: Max.[%2.0f|%2.0f|%2.0f|%2.0f] Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n",
+                                         mpl::Timer::getMicroTime(), msg_battery.battery, msg_imu.getCount(),
+                                         msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
+                                         msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.right, msg_wallsensor.frontright,
+                                         float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_max) * 100 / hal::TIMER_COUNT_MAX,
+                                         float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count2_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_avg) * 100 / hal::TIMER_COUNT_MAX);
+        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    }
+
+    return Status::ERROR;
+}
+#endif  // MOUSE_ZIRCONIA2KAI
 
 void DebugActivity::finalize() {}

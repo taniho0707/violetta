@@ -9,7 +9,6 @@
 #include <array>
 
 #include "hal_conf.h"
-#include "hal_led.h"
 #include "mpl_conf.h"
 
 namespace mpl {

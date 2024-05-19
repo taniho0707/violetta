@@ -50,7 +50,7 @@ const uint8_t LED_DRIVER_ADDR = 0x40;
 #else
 enum class LedDriverCommands : uint8_t {
     UNDEFINED = 0x00,
-}
+};
 
 const uint8_t LED_DRIVER_ADDR = 0x00;
 #endif  // ifdef MOUSE_LAZULI

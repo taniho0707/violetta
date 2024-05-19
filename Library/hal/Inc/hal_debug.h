@@ -11,10 +11,6 @@
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE
-#include "stm32f4xx_ll_bus.h"
-#include "stm32f4xx_ll_dma.h"
-#include "stm32f4xx_ll_gpio.h"
-#include "stm32f4xx_ll_usart.h"
 #endif  // ifdef STM32F411xE
 
 #ifdef LINUX
