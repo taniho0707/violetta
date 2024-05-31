@@ -13,4 +13,5 @@ add_library(Library STATIC
     $<TARGET_OBJECTS:act>
     $<TARGET_OBJECTS:msg>
     $<TARGET_OBJECTS:cmd>
+    $<TARGET_OBJECTS:mll>
 )

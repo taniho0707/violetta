@@ -5,6 +5,14 @@
 //******************************************************************************
 #include "act_manager.h"
 
+#include "act_debug.h"
+#include "act_module_test.h"
+#include "act_none.h"
+#include "act_paramtune_motor.h"
+#include "act_search.h"
+#include "act_select_next.h"
+#include "act_shortrun.h"
+
 using namespace act;
 
 Manager::Manager(Activities first_activity) {
@@ -12,7 +20,7 @@ Manager::Manager(Activities first_activity) {
     current = nullptr;
 }
 
-IActivity* Manager::createActivity(Activities) {
+IActivity* Manager::createActivity(Activities next_activity) {
     switch (next_activity) {
         case Activities::SEARCH:
             return new SearchActivity();

@@ -103,8 +103,8 @@ elseif(${MOUSE} STREQUAL Zirconia2kai)
         -fstack-usage
         --specs=nano.specs
     )
-    set(CMAKE_C_FLAGS "-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -std=gnu11")
-    set(CMAKE_CXX_FLAGS "-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -fno-use-cxa-atexit -std=c++17")
+    set(CMAKE_C_FLAGS "-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -std=gnu11 -fstack-usage")
+    set(CMAKE_CXX_FLAGS "-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -fno-use-cxa-atexit -std=c++17 -fstack-usage")
     set(CMAKE_AS_FLAGS "-mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -x assembler-with-cpp")
     set(CMAKE_EXE_LINKER_FLAGS "-mcpu=cortex-m4 -T${CMAKE_CURRENT_SOURCE_DIR}/Platform/STM32F411xE/STM32F411CEUx_FLASH.ld -Wl,-Map=${CMAKE_CURRENT_SOURCE_DIR}/build/${TARGET}.map,--cref -Wl,--gc-sections -static --specs=nano.specs --specs=nosys.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lnosys -lc -lm -lstdc++ -lsupc++ -Wl,--end-group -Wl,--no-warn-rwx-segment -u _printf_float -u _scanf_float")
     # --specs=rdimon.specs

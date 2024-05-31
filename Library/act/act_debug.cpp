@@ -6,11 +6,13 @@
 #include "act_debug.h"
 
 #include "cmd_server.h"
+#include "mll_logger.h"
 #include "mpl_battery.h"
 #include "mpl_debug.h"
 #include "mpl_encoder.h"
 #include "mpl_imu.h"
 #include "mpl_led.h"
+#include "mpl_motor.h"
 #include "mpl_speaker.h"
 #include "mpl_timer.h"
 #include "mpl_wallsensor.h"
@@ -174,7 +176,7 @@ Status DebugActivity::run() {
 
     auto debug = mpl::Debug::getInstance();
     debug->init(hal::InitializeType::Dma);
-    cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Hello Lazuli! %d\n", 1);
+    cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Hello Zirconia2kai!\n");
     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
 
     auto led = mpl::Led::getInstance();
@@ -230,10 +232,9 @@ Status DebugActivity::run() {
 
     auto wallsensor = mpl::WallSensor::getInstance();
     wallsensor->initPort();
-    // hal::WallSensorData wallsensor_data = {0};
 
-    // // Motor Test code
-    // auto motor = mpl::Motor::getInstance();
+    // Motor Test code
+    auto motor = mpl::Motor::getInstance();
     // debug->printf("Motor: 25%% ON...");
     // motor->setDuty(+0.05, -0.05);
     // LL_mDelay(1000);
@@ -250,6 +251,86 @@ Status DebugActivity::run() {
 
     mpl::TimerStatistics timer_statistics;
 
+    // 【モーターのパラメータチューニング】
+    // 48KB の RAM を確保、片輪 2Bytes の両輪 4Bytes、12288 カウントのデータを保存できる
+    // 1ms 周期で 12.288 秒間保存する
+    // uint16_t encoder_log_l[12288] = {0};
+    // uint16_t encoder_log_r[12288] = {0};
+    // ジャイロの各軸が安定し3秒経過するまで待機
+
+    // LED を5回点滅させる
+    for (int i = 0; i < 5; i++) {
+        led->on(hal::LedNumbers::BLUE);
+        mpl::Timer::sleepMs(500);
+        led->off(hal::LedNumbers::BLUE);
+        mpl::Timer::sleepMs(500);
+    }
+    // 1V のステップ入力を並進方向に与えながらログを取得
+    // auto start_time = mpl::Timer::getMicroTime();
+    // int encoder_log_index = 0;
+    // while (mpl::Timer::getMicroTime() - start_time < 1000000) {
+    //     message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
+    //     float motor_duty = 1.0f / msg_battery.battery;
+    //     motor->setDuty(motor_duty, motor_duty);
+    //     // encoder->getCountSync(msg_encoder.left, msg_encoder.right);
+    //     encoder_log_l[encoder_log_index] = msg_encoder.left;
+    //     encoder_log_r[encoder_log_index] = msg_encoder.right;
+    //     encoder_log_index++;
+    //     if (encoder_log_index >= 12288) {
+    //         break;
+    //     }
+    // }
+
+    const uint32_t ENCODER_LOG_LENGTH = 3000;
+    mll::LogFormatEncoder log_test[ENCODER_LOG_LENGTH] = {{0}};
+    auto logger = mll::Logger::getInstance();
+    auto logconfig = mll::LogConfig{mll::LogType::ENCODER, mll::LogDestinationType::INTERNAL_RAM, ENCODER_LOG_LENGTH, (uint32_t)(&log_test)};
+    logger->init(logconfig);
+    // mll::LogFormatEncoder log_item = {0, 1.0f, 1.0f};
+    // for (int i = 0; i < 100; ++i) {
+    //     log_item.time = mpl::Timer::getMicroTime();
+    //     log_item.left = 1.0f * i;
+    //     logger->save(mll::LogType::ENCODER, (void *)(&log_item));
+    //     mpl::Timer::sleepMs(1);
+    // }
+    // log_item = {0, 0.0f, 0.0f};
+    // for (int i = 0; i < 100; ++i) {
+    //     logger->read(logconfig, i, (void *)(&log_item));
+    //     cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Log[%d]: %d, %1.2f, %1.2f\n", i, log_item.time, log_item.left, log_item.right);
+    //     // cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Log[%d]: %d, %1.2f, %1.2f\n", i, log_test[i].time, log_test[i].left, log_test[i].right);
+    //     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    //     mpl::Timer::sleepMs(10);
+    // }
+    logger->startPeriodic(mll::LogType::ENCODER, ENCODER_LOG_LENGTH);
+    motor->setDuty(0.25f, 0.25f);
+    mpl::Timer::sleepMs(ENCODER_LOG_LENGTH);
+    motor->setDuty(0.0f, 0.0f);
+    logger->stopPeriodic(mll::LogType::ENCODER);
+    for (int i = 0; i < 5; i++) {
+        led->on(hal::LedNumbers::BLUE);
+        mpl::Timer::sleepMs(500);
+        led->off(hal::LedNumbers::BLUE);
+        mpl::Timer::sleepMs(500);
+    }
+    for (int i = 0; i < 10; i++) {
+        led->on(hal::LedNumbers::BLUE);
+        mpl::Timer::sleepMs(250);
+        led->off(hal::LedNumbers::BLUE);
+        mpl::Timer::sleepMs(250);
+    }
+    mll::LogFormatEncoder log_item = {0, 1.0f, 1.0f};
+    for (int i = 0; i < ENCODER_LOG_LENGTH; ++i) {
+        logger->read(logconfig, i, (void *)(&log_item));
+        cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Log[%d]: %d, %1.2f, %1.2f\n", i, log_item.time, log_item.left, log_item.right);
+        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+        mpl::Timer::sleepMs(2);
+    }
+
+    // メモリがいっぱいになったらモーターを停止させ LED を点滅させる
+
+    // HOGE になったら UART にログ出力する
+
+    // 【各センサの値を取るための無限ループ】
     while (1) {
         mpl::Timer::sleepMs(500);
         mpl::Timer::getStatistics(timer_statistics);

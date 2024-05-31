@@ -5,7 +5,7 @@
 //******************************************************************************
 #include "mpl_timer.h"
 
-// 追加で必要なライブラリ
+// 追加で必要なライブラリ : MPL
 #include "mpl_battery.h"
 #include "mpl_debug.h"
 #include "mpl_encoder.h"
@@ -13,6 +13,9 @@
 #include "mpl_led.h"
 #include "mpl_speaker.h"
 #include "mpl_wallsensor.h"
+
+// 追加で必要なライブラリ : MLL
+#include "mll_logger.h"
 
 void mpl::Timer::run1() {
     static auto imu = mpl::Imu::getInstance();
@@ -40,6 +43,9 @@ void mpl::Timer::run3() {
 }
 
 void mpl::Timer::run4() {
+    static auto logger = mll::Logger::getInstance();
+    logger->interruptPeriodic();
+
     static auto debug = mpl::Debug::getInstance();
     debug->interruptPeriodic();
 }

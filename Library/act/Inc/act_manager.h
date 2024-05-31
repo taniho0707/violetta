@@ -7,15 +7,6 @@
 
 #include "act_conf.h"
 
-// Activities
-#include "act_debug.h"
-#include "act_module_test.h"
-#include "act_none.h"
-#include "act_paramtune_motor.h"
-#include "act_search.h"
-#include "act_select_next.h"
-#include "act_shortrun.h"
-
 namespace act {
 
 class Manager {

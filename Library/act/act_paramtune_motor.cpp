@@ -9,6 +9,8 @@ using namespace act;
 
 void ParamtuneMotorActivity::init() {}
 
-Status ParamtuneMotorActivity::run() { return Status::NOIMPLEMENT; }
+Status ParamtuneMotorActivity::run() {
+    return Status::NOIMPLEMENT;
+}
 
 void ParamtuneMotorActivity::finalize() {}
