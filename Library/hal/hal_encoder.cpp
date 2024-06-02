@@ -219,8 +219,10 @@ hal::HalStatus hal::getEncoderSync(EncoderData& data) {
 #endif  // ifdef MOUSE_LAZULI
 
 #ifdef MOUSE_ZIRCONIA2KAI
-    data.LEFT = LL_TIM_GetCounter(TIM2);
-    data.RIGHT = LL_TIM_GetCounter(TIM3);
+    data.LEFT = LL_TIM_GetCounter(TIM2) - 32768;
+    LL_TIM_SetCounter(TIM2, 32768);
+    data.RIGHT = LL_TIM_GetCounter(TIM3) - 32768;
+    LL_TIM_SetCounter(TIM3, 32768);
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
 

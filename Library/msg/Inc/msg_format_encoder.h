@@ -17,8 +17,8 @@ class MsgFormatEncoder : public MsgFormat {
 
     void update(void* from) override;
 
-    uint16_t left;
-    uint16_t right;
+    float left;
+    float right;
 };
 
 }  // namespace msg

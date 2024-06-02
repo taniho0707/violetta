@@ -7,6 +7,8 @@
 
 #include "msg_format_encoder.h"
 #include "msg_server.h"
+#include "params.h"
+#include "util.h"
 
 mpl::Encoder::Encoder() {}
 
@@ -31,8 +33,10 @@ void mpl::Encoder::interruptPeriodic() {
     static auto server = msg::MessageServer::getInstance();
     scanEncoderSync(last);
 
-    msg_format.left = last.LEFT;
-    msg_format.right = last.RIGHT;
+    static auto params_cache = misc::Params::getInstance()->getCachePointer();
+
+    msg_format.left = static_cast<float>(last.LEFT) * params_cache->tire_diameter * misc::PI / params_cache->encoder_resolution;
+    msg_format.right = static_cast<float>(last.RIGHT) * params_cache->tire_diameter * misc::PI / params_cache->encoder_resolution;
     server->sendMessage(msg::ModuleId::ENCODER, &msg_format);
 }
 
