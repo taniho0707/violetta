@@ -184,9 +184,13 @@ const uint32_t TIMER_COUNT_INTERVAL = 250;  // [us]
 // const uint32_t TIMER_COUNT_MAX = 12500;     // 1 カウントあたり 0.02 [us] = 20 [ns] // 50MHz
 const uint32_t TIMER_COUNT_MAX = 25000;  // 1カウントあたり 0.02 [us] = 20 [ns] // 100MHz
 
-const uint16_t IMU_TSEN = 256;    // [LSB/°C]
-const uint16_t IMU_TOFF = 25;     // [°C]
-const float IMU_GSEN = 0.140;     // [dps/LSB]
+[[deprecated]]
+const uint16_t IMU_TSEN = 256;  // [LSB/°C]
+[[deprecated]]
+const uint16_t IMU_TOFF = 25;  // [°C]
+[[deprecated]]
+const float IMU_GSEN = 0.140;  // [dps/LSB]
+[[deprecated]]
 const float IMU_ASEN = 0.000244;  // [g/LSB]
 
 #define WALLSENSOR_NUMS 4

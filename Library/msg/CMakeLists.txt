@@ -8,4 +8,5 @@ add_library(msg OBJECT
     msg_format_battery.cpp
     msg_format_motor.cpp
     msg_format_motor_current.cpp
+    msg_format_localizer.cpp
 )

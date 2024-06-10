@@ -42,6 +42,8 @@ elseif(${MOUSE} STREQUAL Lazuli)
         -DMOUSE_LAZULI
         -DSTM32L4P5
         -DSTM32L4P5xx
+        -DARM_MATH_CM4
+        -D__FPU_PRESENT
         -DUSE_FULL_LL_DRIVER
         -DPREFETCH_ENABLE=1
         -DINSTRUCTION_CACHE_ENABLE=1
@@ -59,6 +61,7 @@ elseif(${MOUSE} STREQUAL Lazuli)
         Generate/Lazuli/Drivers/CMSIS/Device/ST/STM32L4xx/Include
         Generate/Lazuli/Drivers/CMSIS/Include
         Generate/Lazuli/Drivers/STM32L4xx_HAL_Driver/Inc
+        Generate/Lazuli/DSP/Include
     )
     add_compile_options(
         -ffunction-sections
@@ -79,6 +82,8 @@ elseif(${MOUSE} STREQUAL Zirconia2kai)
     add_definitions(
         -DMOUSE_ZIRCONIA2KAI
         -DSTM32F411xE
+        -DARM_MATH_CM4
+        -D__FPU_PRESENT
         -DUSE_FULL_LL_DRIVER
         -DPREFETCH_ENABLE=1
         -DINSTRUCTION_CACHE_ENABLE=1
@@ -96,6 +101,7 @@ elseif(${MOUSE} STREQUAL Zirconia2kai)
         Generate/zirconia2kai/Drivers/CMSIS/Device/ST/STM32F4xx/Include
         Generate/zirconia2kai/Drivers/CMSIS/Include
         Generate/zirconia2kai/Drivers/STM32F4xx_HAL_Driver/Inc
+        Generate/zirconia2kai/DSP/Include
     )
     add_compile_options(
         -ffunction-sections
@@ -211,6 +217,17 @@ elseif(${PLATFORM} STREQUAL STM32)
     )
 else()
     message(FATAL_ERROR "[BUILD PLATFORM] Invalid or unspecified platform. Please specify it as -DPLATFORM=[Linux,STM32]")
+endif()
+
+# CMSIS DSP
+if(${MOUSE} STREQUAL Zirconia2kai)
+    target_link_libraries(${ELF_FILE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Generate/zirconia2kai/DSP/libarm_cortexM4lf_math.a
+    )
+elseif(${MOUSE} STREQUAL Lazuli)
+    target_link_libraries(${ELF_FILE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Generate/Lazuli/DSP/libarm_cortexM4lf_math.a
+    )
 endif()
 
 # # マウス分岐

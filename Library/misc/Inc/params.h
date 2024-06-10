@@ -20,10 +20,13 @@
 
 namespace misc {
 
-enum class LoggingMemoryTarget : uint8_t {
-    INTERNALFLASH = 0,
-    INTERNALRAM,
-    FRAM,
+// 保存先の種類を示す列挙型
+enum class ParameterDestinationType : uint8_t {
+    HARDCODED = 0,
+    INTERNAL_FLASH,
+    INTERNAL_RAM,
+    EXTERNAL_FRAM,
+    CACHE,
 };
 
 struct MouseParams {
@@ -43,11 +46,29 @@ struct MouseParams {
     float battery_capacity;  // バッテリー容量 [mAh]
     float battery_warning;   // バッテリー低電圧警告電圧 [mV]
     float battery_shutdown;  // バッテリー強制シャットダウン電圧 [mV]
-    float battery_ratio;  // バッテリー電圧比率 (ADC * ratio = voltage) [1]
+    float battery_ratio;     // バッテリー電圧比率 (ADC * ratio = voltage) [1]
+
+    // Motor Control
+    uint32_t motor_control_frequency;    // モータ制御の PWM 周波数 [Hz]
+    float motor_control_translation_kp;  // モータ制御の直進方向の P ゲイン [1]
+    float motor_control_translation_ki;  // モータ制御の直進方向の I ゲイン [1]
+    float motor_control_translation_kd;  // モータ制御の直進方向の D ゲイン [1]
+    float motor_control_rotation_kp;     // モータ制御の回転方向の P ゲイン [1]
+    float motor_control_rotation_ki;     // モータ制御の回転方向の I ゲイン [1]
+    float motor_control_rotation_kd;     // モータ制御の回転方向の D ゲイン [1]
 
     // Wall Sensor
-    uint16_t wallsensor_turnon;  // 壁センサLEDの立ち上がり待ち時間 [ns]
+    uint16_t wallsensor_turnon;              // 壁センサLEDの立ち上がり待ち時間 [ns]
     uint16_t wallsensor_exist_threshold[6];  // 壁センサの壁有無判定閾値 [1]
+
+    // Encoder
+    uint16_t encoder_resolution;  // エンコーダの分解能 [1/pulse]
+
+    // IMU
+    float imu_sensitivity_acceleration;  // IMU の加速度センサの感度 [m/s^2 / LSB]
+    float imu_offset_acceleration;       // IMU の加速度センサのオフセット [m/s^2]
+    float imu_sensitivity_gyro;          // IMU の角速度センサの感度 [rad/s / LSB]
+    float imu_offset_gyro;               // IMU の角速度センサのオフセット [rad/s]
 
     // Memory
     // ログ用内蔵フラッシュメモリのサイズ [byte]
@@ -64,6 +85,10 @@ class Params {
 
    public:
     MouseParams* getCachePointer();
+
+    bool load(ParameterDestinationType from);
+
+    bool save(ParameterDestinationType to);
 
     static Params* getInstance();
 };

@@ -9,6 +9,8 @@
 
 namespace misc {
 
+constexpr float PI = 3.14159265358979323846f;
+
 template <typename T>
 inline T min(T a, T b) {
     return a < b ? a : b;
@@ -59,5 +61,11 @@ T average(T* array, uint16_t len) {
     }
     return sum;
 }
+
+template <typename T>
+struct Point {
+    T x;
+    T y;
+};
 
 }  // namespace misc

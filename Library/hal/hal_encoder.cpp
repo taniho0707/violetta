@@ -182,8 +182,8 @@ hal::HalStatus hal::initEncoderPort() {
     LL_TIM_EnableCounter(TIM2);
     LL_TIM_EnableCounter(TIM3);
 
-    LL_TIM_SetCounter(TIM2, 0);
-    LL_TIM_SetCounter(TIM3, 0);
+    LL_TIM_SetCounter(TIM2, 32768);
+    LL_TIM_SetCounter(TIM3, 32768);
 
     if (status_R == SUCCESS && status_L == SUCCESS) {
         return hal::HalStatus::SUCCESS;

@@ -17,13 +17,13 @@ class MsgFormatImu : public MsgFormat {
 
     void update(void* from) override;
 
-    int16_t gyro_yaw;
-    int16_t gyro_roll;
-    int16_t gyro_pitch;
-    int16_t acc_x;
-    int16_t acc_y;
-    int16_t acc_z;
-    int16_t temperature;
+    float gyro_yaw;
+    float gyro_roll;
+    float gyro_pitch;
+    float acc_x;
+    float acc_y;
+    float acc_z;
+    float temperature;
 };
 
 }  // namespace msg

@@ -15,19 +15,28 @@
 #include "mpl_wallsensor.h"
 
 // 追加で必要なライブラリ : MLL
+#include "mll_localizer.h"
 #include "mll_logger.h"
+#include "mll_motor_controller.h"
+#include "mll_operation_controller.h"
 
 void mpl::Timer::run1() {
+    static auto wallsensor = mpl::WallSensor::getInstance();
+    wallsensor->interruptPeriodic();
+
+    // static auto wallanalyser = mll::WallAnalyser::getInstance();
+    // wallanalyser->interruptPeriodic();
+}
+
+void mpl::Timer::run2() {
     static auto imu = mpl::Imu::getInstance();
     imu->interruptPeriodic();
 
     static auto encoder = mpl::Encoder::getInstance();
     encoder->interruptPeriodic();
-}
 
-void mpl::Timer::run2() {
-    static auto wallsensor = mpl::WallSensor::getInstance();
-    wallsensor->interruptPeriodic();
+    static auto battery = mpl::Battery::getInstance();
+    battery->interruptPeriodic();
 }
 
 void mpl::Timer::run3() {
@@ -38,8 +47,14 @@ void mpl::Timer::run3() {
     speaker->interruptPeriodic();
 #endif  // MOUSE_LAZULI
 
-    static auto battery = mpl::Battery::getInstance();
-    battery->interruptPeriodic();
+    static auto localizer = mll::Localizer::getInstance();
+    localizer->interruptPeriodic();
+
+    static auto operationcontroller = mll::OperationController::getInstance();
+    operationcontroller->interruptPeriodic();
+
+    static auto motorcontroller = mll::MotorController::getInstance();
+    motorcontroller->interruptPeriodic();
 }
 
 void mpl::Timer::run4() {

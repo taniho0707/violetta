@@ -1,4 +1,4 @@
 cmake_minimum_required(VERSION 3.10)
-# add_library(misc STATIC
-#   func1.cpp
-# )
+add_library(misc STATIC
+  params.cpp
+)

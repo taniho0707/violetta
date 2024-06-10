@@ -3,6 +3,8 @@
 // @file        cmd_server.h
 // @brief       Command Server
 //******************************************************************************
+#pragma once
+
 #include "cmd_format.h"
 
 namespace cmd {

@@ -28,7 +28,8 @@ enum class ModuleId : uint8_t {
     SWITCH = 8,
     MOTORCURRENT = 9,
     UI = 10,
-    LENGTH = 11
+    LOCALIZER = 11,
+    LENGTH = 12
 };
 
 class MsgFormat {
@@ -38,9 +39,15 @@ class MsgFormat {
     virtual void copy(void* target) = 0;
     virtual void update(void* from) = 0;
 
-    ModuleId getModuleId() { return moduleid; }
-    uint32_t getCount() { return count; }
-    uint32_t getTime() { return time; }
+    ModuleId getModuleId() {
+        return moduleid;
+    }
+    uint32_t getCount() {
+        return count;
+    }
+    uint32_t getTime() {
+        return time;
+    }
 
    protected:
     ModuleId moduleid;
