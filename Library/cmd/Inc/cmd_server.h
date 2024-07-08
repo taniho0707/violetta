@@ -23,6 +23,10 @@ class CommandServer {
     uint32_t iteLastDebugRx;
     CommandFormatDebugRx bufferDebugRx[COMMAND_BUFFER_SIZE];
 
+    uint32_t iteNextOperationDirection;
+    uint32_t iteLastOperationDirection;
+    CommandFormatOperationDirection bufferOperationDirection[COMMAND_BUFFER_SIZE];
+
    public:
     uint16_t length(CommandId id);
 

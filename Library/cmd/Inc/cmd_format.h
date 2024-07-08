@@ -25,7 +25,9 @@ enum class CommandId : uint8_t {
     UI_IN = 1,
     DEBUG_TX = 2,
     DEBUG_RX = 3,
-    LENGTH = 4
+    OPERATION_DIRECTION = 4,
+    OPERATION_MOVE = 5,
+    LENGTH = 6
 };
 
 //***************************
@@ -73,5 +75,21 @@ struct CommandFormatDebugRx {
 //     UiInType type;
 //     // 入力内容
 // };
+
+//***************************
+//  Operation
+//***************************
+
+enum class OperationDirectionType : uint8_t {
+    STOP = 0,
+    SEARCH,
+    RUN,
+};
+
+struct CommandFormatOperationDirection {
+    uint32_t time;  // [us]
+    OperationDirectionType type;
+    uint8_t params_index;  // 速度パラメータの番号
+};
 
 }  // namespace cmd

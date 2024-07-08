@@ -77,9 +77,13 @@ void mpl::Motor::interruptPeriodic() {
     static auto server = msg::MessageServer::getInstance();
     getCurrentSync(last_current_l, last_current_r);
 
-    msg_format.current_l = last_current_l;
-    msg_format.current_r = last_current_r;
-    server->sendMessage(msg::ModuleId::MOTORCURRENT, &msg_format);
+    msg_motorcurrent.current_l = last_current_l;
+    msg_motorcurrent.current_r = last_current_r;
+    server->sendMessage(msg::ModuleId::MOTORCURRENT, &msg_motorcurrent);
+
+    server->receiveMessage(msg::ModuleId::MOTOR, &msg_motor);
+    setDuty(msg_motor.duty_l, msg_motor.duty_r);
+    setDutySuction(msg_motor.duty_suction);
 }
 
 mpl::Motor* mpl::Motor::getInstance() {

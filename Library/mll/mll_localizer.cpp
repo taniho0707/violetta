@@ -18,7 +18,7 @@ mll::Localizer::Localizer() {
 
 void mll::Localizer::init() {
     // params = misc::Params::getInstance()->getCachePointer();
-    setPosition(0, 0, 0);
+    setPosition(45.f, 45.f, 0);
 }
 
 void mll::Localizer::setPosition(float x, float y, float theta) {

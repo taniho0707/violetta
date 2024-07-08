@@ -29,7 +29,8 @@ enum class ModuleId : uint8_t {
     MOTORCURRENT = 9,
     UI = 10,
     LOCALIZER = 11,
-    LENGTH = 12
+    MOTORCONTROLLER = 12,
+    LENGTH = 13
 };
 
 class MsgFormat {

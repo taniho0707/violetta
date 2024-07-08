@@ -6,6 +6,7 @@
 #pragma once
 
 #include "mpl_conf.h"
+#include "msg_format_motor.h"
 #include "msg_format_motor_current.h"
 #include "msg_server.h"
 
@@ -17,7 +18,8 @@ class Motor {
 
     float last_current_l;
     float last_current_r;
-    msg::MsgFormatMotorCurrent msg_format;
+    msg::MsgFormatMotorCurrent msg_motorcurrent;
+    msg::MsgFormatMotor msg_motor;
 
    public:
     void initPort();

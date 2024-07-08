@@ -191,7 +191,7 @@ hal::HalStatus hal::initMotorPort() {
     TIM_InitStruct.Prescaler = 0;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
     TIM_InitStruct.Autoreload =
-        65535;  // TODO: 外部パラメータから設定できるように、暫定 3.2kHz
+        65536 / 16 - 1;  // TODO: 外部パラメータから設定できるように、暫定 3.2kHz * 2
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
     LL_TIM_Init(TIM4, &TIM_InitStruct);
 
@@ -297,11 +297,11 @@ hal::HalStatus hal::setMotorDutyR(float duty) {
 #ifdef MOUSE_ZIRCONIA2KAI
     if (duty >= 0.f && duty <= 1.f) {
         // TODO: 計算式の65535を外部パラメータから読むようにする
-        LL_TIM_OC_SetCompareCH4(TIM4, (uint32_t)(65535.f * (1.f - duty)));
-        LL_TIM_OC_SetCompareCH3(TIM4, 65535);
+        LL_TIM_OC_SetCompareCH4(TIM4, (uint32_t)(4095.f * (1.f - duty)));
+        LL_TIM_OC_SetCompareCH3(TIM4, 4095);
     } else if (duty < 0.f && duty >= -1.f) {
-        LL_TIM_OC_SetCompareCH4(TIM4, 65535);
-        LL_TIM_OC_SetCompareCH3(TIM4, (uint32_t)(65535.f * (1.f + duty)));
+        LL_TIM_OC_SetCompareCH4(TIM4, 4095);
+        LL_TIM_OC_SetCompareCH3(TIM4, (uint32_t)(4095.f * (1.f + duty)));
     } else {
         return hal::HalStatus::INVALID_PARAMS;
     }
@@ -334,11 +334,11 @@ hal::HalStatus hal::setMotorDutyL(float duty) {
 #ifdef MOUSE_ZIRCONIA2KAI
     if (duty >= 0.f && duty <= 1.f) {
         // TODO: 計算式の65535を外部パラメータから読むようにする
-        LL_TIM_OC_SetCompareCH1(TIM4, (uint32_t)(65535.f * (1.f - duty)));
-        LL_TIM_OC_SetCompareCH2(TIM4, 65535);
+        LL_TIM_OC_SetCompareCH1(TIM4, (uint32_t)(4095.f * (1.f - duty)));
+        LL_TIM_OC_SetCompareCH2(TIM4, 4095);
     } else if (duty < 0.f && duty >= -1.f) {
-        LL_TIM_OC_SetCompareCH1(TIM4, 65535);
-        LL_TIM_OC_SetCompareCH2(TIM4, (uint32_t)(65535.f * (1.f + duty)));
+        LL_TIM_OC_SetCompareCH1(TIM4, 4095);
+        LL_TIM_OC_SetCompareCH2(TIM4, (uint32_t)(4095.f * (1.f + duty)));
     } else {
         return hal::HalStatus::INVALID_PARAMS;
     }

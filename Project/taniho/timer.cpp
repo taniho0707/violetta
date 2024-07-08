@@ -11,6 +11,7 @@
 #include "mpl_encoder.h"
 #include "mpl_imu.h"
 #include "mpl_led.h"
+#include "mpl_motor.h"
 #include "mpl_speaker.h"
 #include "mpl_wallsensor.h"
 
@@ -55,6 +56,9 @@ void mpl::Timer::run3() {
 
     static auto motorcontroller = mll::MotorController::getInstance();
     motorcontroller->interruptPeriodic();
+
+    static auto motor = mpl::Motor::getInstance();
+    motor->interruptPeriodic();
 }
 
 void mpl::Timer::run4() {

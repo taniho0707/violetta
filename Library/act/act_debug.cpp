@@ -344,6 +344,26 @@ Status DebugActivity::run() {
 
     // HOGE になったら UART にログ出力する
 
+    // 宴会芸
+    motor_controller->setStay();
+    while (true) {
+        mpl::Timer::sleepMs(100);
+        mpl::Timer::getStatistics(timer_statistics);
+        message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
+        message->receiveMessage(msg::ModuleId::ENCODER, &msg_encoder);
+        message->receiveMessage(msg::ModuleId::IMU, &msg_imu);
+        message->receiveMessage(msg::ModuleId::LOCALIZER, &msg_localizer);
+        cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
+                                         "%10d, trans % 8.2f, % 7.2f, % 5.2f, rot % 5.2f, % 5.2f, the % 5.2f x % 5.2f y % 5.2f\n",
+                                         mpl::Timer::getMicroTime(),
+                                         msg_localizer.accel_translation, msg_localizer.velocity_translation,
+                                         msg_localizer.position_translation,
+                                         msg_localizer.accel_rotation, msg_localizer.velocity_rotation,
+                                         msg_localizer.position_theta,
+                                         msg_localizer.position_x, msg_localizer.position_y);
+        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    }
+
     // 【各センサの値を取るための無限ループ】
     while (1) {
         mpl::Timer::sleepMs(100);
