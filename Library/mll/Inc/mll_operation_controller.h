@@ -6,6 +6,7 @@
 #pragma once
 
 #include "cmd_format.h"
+#include "mll_trajectory.h"
 #include "params.h"
 
 namespace mll {
@@ -31,7 +32,8 @@ enum class OperationMoveType : uint8_t {
     TRAPACCEL,
     PIVOTTURN,
     TRAPDIAGO,
-    LENGTH
+    LENGTH,
+    UNDEFINED
 };  // TODO: 考える
 
 class OperationController {
@@ -39,6 +41,21 @@ class OperationController {
     OperationController();
 
     cmd::OperationDirectionType current_operation_direction;
+
+    Trajectory trajectory;
+
+    OperationMoveType current_operation_move;
+    OperationMoveType next_operation_move;
+    bool is_operation_move_changed;  // OperationMoveType が変更されたフレームのみ true
+
+    float continuous_distance_trapaccel;
+    float continuous_distance_pivotturn;
+    float latest_move_distance_trapaccel;  // 現在のMoveTypeの累計移動距離
+    float latest_move_distance_pivotturn;  // 現在のMoveTypeの累計回転距離
+    uint32_t latest_start_time;            // 現在のMoveTypeの開始時刻
+
+    float velocity_slowest_translation;  // 超低速移動時の速度;
+    float velocity_slowest_rotation;     // 超低速回転時の速度;
 
     misc::MouseParams* params;
 

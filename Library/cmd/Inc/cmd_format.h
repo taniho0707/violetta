@@ -26,7 +26,7 @@ enum class CommandId : uint8_t {
     DEBUG_TX = 2,
     DEBUG_RX = 3,
     OPERATION_DIRECTION = 4,
-    OPERATION_MOVE = 5,
+    // OPERATION_MOVE = 5,
     LENGTH = 6
 };
 

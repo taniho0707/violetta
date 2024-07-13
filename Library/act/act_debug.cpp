@@ -344,6 +344,15 @@ Status DebugActivity::run() {
 
     // HOGE になったら UART にログ出力する
 
+    // OperationController のテスト
+    mpl::Timer::sleepMs(3000);
+    motor_controller->setStay();
+    mpl::Timer::sleepMs(2000);
+    auto cmd_format_operation_direction = cmd::CommandFormatOperationDirection();
+    cmd_format_operation_direction.type = cmd::OperationDirectionType::SEARCH;
+    cmd_server->push(cmd::CommandId::OPERATION_DIRECTION, &cmd_format_operation_direction);
+    while (true);
+
     // 宴会芸
     motor_controller->setStay();
     while (true) {

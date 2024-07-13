@@ -8,4 +8,5 @@ add_library(mll STATIC
     mll_map_section.cpp
     mll_motor_controller.cpp
     mll_operation_controller.cpp
+    mll_trajectory.cpp
 )

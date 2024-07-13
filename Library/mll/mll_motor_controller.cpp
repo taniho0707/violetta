@@ -69,15 +69,21 @@ void mll::MotorController::interruptPeriodic() {
     static msg::MsgFormatBattery msg_battery;
     msg_server->receiveMessage(msg::ModuleId::LOCALIZER, &msg_localizer);
     msg_server->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
+    msg_server->receiveMessage(msg::ModuleId::MOTORCONTROLLER, &msg_motor_controller);
+
+    // OperationController からの指令を処理 (MOTORCONTROLLER)
+    if (!enabled && msg_motor_controller.is_controlled) {
+        startControl();
+    } else if (!enabled) {
+        // モーター制御が有効でない場合は何もしない
+        stopControl();
+        return;
+    }
+    setVelocity(msg_motor_controller.velocity_translation, msg_motor_controller.velocity_rotation);
 
     // TODO: msg::ModuleId::ERROR_CONTROL を受け、エラーが発生している場合はモーター制御を停止する
 
     const uint8_t params_index = 0;  // FIXME: cmd か msg から取得する
-
-    // モーター制御が有効でない場合は何もしない
-    if (!enabled) {
-        return;
-    }
 
     // translation 成分の計算、出力は電流 [mA]
     const float error_translation = target_velocity_translation - msg_localizer.velocity_translation;
@@ -104,32 +110,12 @@ void mll::MotorController::interruptPeriodic() {
     msg_motor.duty_suction = 0;  // TODO: 吸引ファンを使う
     msg_server->sendMessage(msg::ModuleId::MOTOR, &msg_motor);
 
-    // static float encoder_current_l = 0;
-    // static float encoder_current_r = 0;
-    // static float encoder_total_l = 0;
-    // static float encoder_total_r = 0;
-    // static float accel_current = 0;
-    // static float accel_total = 0;
-    // static float gyro_current = 0;
-    // static float gyro_total = 0;
-
-    // encoder_current_l = msg_encoder.left;
-    // encoder_current_r = msg_encoder.right;
-    // encoder_total_l += encoder_current_l;
-    // encoder_total_r += encoder_current_r;
-    // accel_current = msg_imu.acc_y;
-    // accel_total += accel_current;
-    // gyro_current = msg_imu.gyro_yaw;
-    // gyro_total += gyro_current;
-
     // static auto debug = mpl::Debug::getInstance();
     // cmd::CommandFormatDebugTx cmd_debug_tx = {};
     // cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
-    //                                  "%10d, %f, %f, %f, %f, %f, %f\n",
+    //                                  "%10d, %f, %f\n",
     //                                  mpl::Timer::getMicroTime(),
-    //                                  encoder_current_l, encoder_current_r,
-    //                                  encoder_total_l, encoder_total_r,
-    //                                  accel_current, gyro_current);
+    //                                  target_velocity_translation, target_velocity_rotation);
     // cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
 }
 

@@ -71,9 +71,11 @@ bool Params::load(ParameterDestinationType from) {
         case ParameterDestinationType::CACHE:
             return false;
     }
+    return false;
 }
 
 bool Params::save(ParameterDestinationType to) {
+    return false;
 }
 
 Params* Params::getInstance() {

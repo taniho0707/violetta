@@ -57,7 +57,7 @@ CmdResult CommandServer::push(CommandId id, void* format) {
 }
 
 CmdResult CommandServer::pop(CommandId id, void* format) {
-    if (iteNextDebugTx == iteLastDebugTx) {
+    if (length(id) == 0) {
         return CmdResult::BUFFER_EMPTY;
     }
     switch (id) {
