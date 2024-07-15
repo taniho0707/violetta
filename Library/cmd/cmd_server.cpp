@@ -18,6 +18,9 @@ CommandServer::CommandServer() {
 
     iteNextOperationDirection = 0;
     iteLastOperationDirection = 0;
+
+    iteNextOperationMoveArray = 0;
+    iteLastOperationMoveArray = 0;
 }
 
 uint16_t CommandServer::length(CommandId id) {
@@ -28,6 +31,8 @@ uint16_t CommandServer::length(CommandId id) {
             return iteNextDebugRx - iteLastDebugRx;
         case CommandId::OPERATION_DIRECTION:
             return iteNextOperationDirection - iteLastOperationDirection;
+        case CommandId::OPERATION_MOVE_ARRAY:
+            return iteNextOperationMoveArray - iteLastOperationMoveArray;
         default:
             return 0;
     }
@@ -51,6 +56,10 @@ CmdResult CommandServer::push(CommandId id, void* format) {
             bufferOperationDirection[iteNextOperationDirection % COMMAND_BUFFER_SIZE] = *(CommandFormatOperationDirection*)format;
             ++iteNextOperationDirection;
             return CmdResult::SUCCESS;
+        case CommandId::OPERATION_MOVE_ARRAY:
+            bufferOperationMoveArray[iteNextOperationMoveArray % COMMAND_BUFFER_SIZE] = *(CommandFormatOperationMoveArray*)format;
+            ++iteNextOperationMoveArray;
+            return CmdResult::SUCCESS;
         default:
             return CmdResult::INVALID_COMMAND_ID;
     }
@@ -72,6 +81,10 @@ CmdResult CommandServer::pop(CommandId id, void* format) {
         case CommandId::OPERATION_DIRECTION:
             *(CommandFormatOperationDirection*)format = bufferOperationDirection[iteLastOperationDirection % COMMAND_BUFFER_SIZE];
             ++iteLastOperationDirection;
+            return CmdResult::SUCCESS;
+        case CommandId::OPERATION_MOVE_ARRAY:
+            *(CommandFormatOperationMoveArray*)format = bufferOperationMoveArray[iteLastOperationMoveArray % COMMAND_BUFFER_SIZE];
+            ++iteLastOperationMoveArray;
             return CmdResult::SUCCESS;
         default:
             return CmdResult::INVALID_COMMAND_ID;

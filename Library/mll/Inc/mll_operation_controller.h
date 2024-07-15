@@ -7,6 +7,7 @@
 
 #include "cmd_format.h"
 #include "mll_trajectory.h"
+#include "msg_format_motor_controller.h"
 #include "params.h"
 
 namespace mll {
@@ -30,11 +31,28 @@ enum class OperationMoveType : uint8_t {
     SLALOM90OBL_RIGHT,
     SLALOM90OBL_LEFT,
     TRAPACCEL,
+    TRAPACCEL_STOP,
     PIVOTTURN,
     TRAPDIAGO,
+    EXTRALENGTH,
     LENGTH,
     UNDEFINED
 };  // TODO: 考える
+
+struct OperationMoveCombination {
+    OperationMoveType type;
+    float distance;
+};
+
+enum class SlalomState : uint8_t {
+    BEFORE = 0,
+    TURN,
+    AFTER,
+    END,
+};
+
+const float SLALOM_LEFT = 1.f;
+const float SLALOM_RIGHT = -1.f;
 
 class OperationController {
    private:
@@ -44,23 +62,45 @@ class OperationController {
 
     Trajectory trajectory;
 
+    OperationMoveType last_operation_move;  // 直前のMoveType (for EXTRALENGTH)
     OperationMoveType current_operation_move;
     OperationMoveType next_operation_move;
     bool is_operation_move_changed;  // OperationMoveType が変更されたフレームのみ true
 
-    float continuous_distance_trapaccel;
-    float continuous_distance_pivotturn;
-    float latest_move_distance_trapaccel;  // 現在のMoveTypeの累計移動距離
-    float latest_move_distance_pivotturn;  // 現在のMoveTypeの累計回転距離
-    uint32_t latest_start_time;            // 現在のMoveTypeの開始時刻
+    float continuous_distance;          // 累計移動/回転距離
+    float latest_move_distance;         // 現在のMoveTypeの累計移動/回転距離
+    uint32_t latest_start_time;         // 現在のMoveTypeの開始時刻
+    float target_move_distance;         // 現在のMoveTypeの目標移動/回転距離
+    float target_velocity_translation;  // 現在のMoveTypeの目標移動速度
 
-    float velocity_slowest_translation;  // 超低速移動時の速度;
-    float velocity_slowest_rotation;     // 超低速回転時の速度;
+    OperationMoveCombination* operation_move_combinations;  // 規定動作の配列、メモリ管理はしないため注意
+    uint16_t operation_move_combinations_length;            // 規定動作の配列のサイズ、0なら規定動作無し
+    int16_t operation_move_combinations_i;                  // 規定動作の配列の現在インデックス
+
+    // TODO: 値をパラメータから読み出す
+    float velocity_slowest_translation;  // 超低速移動時の速度
+    float velocity_slowest_rotation;     // 超低速回転時の速度
+
+    SlalomState slalom_state;
 
     misc::MouseParams* params;
+    misc::SlalomParams* slalom_params;
+
+    // スラロームの初期設定
+    // current_operation_move に正しい値が入っている前提で動く
+    void initSlalom(float rightleft);
+    // スラロームの動作
+    void runSlalom(msg::MsgFormatMotorController& msg);
 
    public:
     void init();
+
+    bool isNextOperationBlank();  // 次の動作が未定義なら true を返す
+
+    // TRAPACCEL の場合初速は現在速
+    // STOP の場合 distance 後に停止することにする
+    // FIXME: 直す…
+    void setNextOperation(OperationMoveType next, float distance = 0);  // 次の動作を設定する
 
     // 分担
     // 動作状態 (OperationMoveType) で区切って動作させる

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "stdint.h"
+#include "util.h"
 
 // ・パラメータの保管、参照
 // ・Flash / FRAM からのロード
@@ -20,6 +21,8 @@
 
 namespace misc {
 
+constexpr uint8_t SLALOM_PARAMS_VELOCITY_LENGTH = 3;  // 0.3, 0.5, 0.7
+
 // 保存先の種類を示す列挙型
 enum class ParameterDestinationType : uint8_t {
     HARDCODED = 0,
@@ -28,6 +31,48 @@ enum class ParameterDestinationType : uint8_t {
     EXTERNAL_FRAM,
     CACHE,
 };
+
+// スラロームの種類を示す列挙型
+// mll::OperationMoveType と同期する必要あり
+enum class SlalomType : uint8_t {
+    UNDEFINED = 0,
+    SLALOM90SML_RIGHT,
+    SLALOM90SML_LEFT,
+    SLALOM90_RIGHT,
+    SLALOM90_LEFT,
+    SLALOM180_RIGHT,
+    SLALOM180_LEFT,
+    SLALOM45IN_RIGHT,
+    SLALOM45IN_LEFT,
+    SLALOM45OUT_RIGHT,
+    SLALOM45OUT_LEFT,
+    SLALOM135IN_RIGHT,
+    SLALOM135IN_LEFT,
+    SLALOM135OUT_RIGHT,
+    SLALOM135OUT_LEFT,
+    SLALOM90OBL_RIGHT,
+    SLALOM90OBL_LEFT,
+    LENGTH
+};
+
+struct SlalomTransition {
+    float x;
+    float y;
+    float angle;
+};
+
+struct SlalomParams {
+    float d_before;
+    float d_after;
+    float acc_rad;
+    float max_v_rad;
+    float deg;
+    float const_deg;
+    float in_vel;
+    float out_vel;
+    float min_vel;
+    float acc_lin;
+} __attribute__((__packed__));
 
 struct MouseParams {
     // Params Spec
@@ -83,12 +128,39 @@ class Params {
 
     MouseParams cache;
 
+    SlalomParams cache_slalom[SLALOM_PARAMS_VELOCITY_LENGTH][static_cast<uint8_t>(SlalomType::LENGTH)];
+
    public:
     MouseParams* getCachePointer();
 
-    bool load(ParameterDestinationType from);
+    SlalomParams* getCacheSlalomPointer(float velocity);
 
+    // ハーフサイズを基準にベクトルと回転角(degree)を記述
+    constexpr static SlalomTransition param_vectors[] = {
+        {           0.f,           0.f,               0.f}, // UNDEFINED
+        {         45.0f,         45.0f,      misc::PI / 2}, // SLALOM90SML_RIGHT
+        {        -45.0f,         45.0f,     -misc::PI / 2}, // SLALOM90SML_LEFT
+        {         90.0f,         90.0f,      misc::PI / 2}, // SLALOM90_RIGHT
+        {        -90.0f,         90.0f,     -misc::PI / 2}, // SLALOM90_LEFT
+        {         90.0f,          0.0f,          misc::PI}, // SLALOM180_RIGHT
+        {        -90.0f,          0.0f,         -misc::PI}, // SLALOM180_LEFT
+        {         45.0f,         90.0f,      misc::PI / 4}, // SLALOM45IN_RIGHT
+        {        -45.0f,         90.0f,     -misc::PI / 4}, // SLALOM45IN_LEFT
+        { 31.819805153f, 95.459415460f,      misc::PI / 4}, // SLALOM45OUT_RIGHT
+        {-31.819805153f, 95.459415460f,     -misc::PI / 4}, // SLALOM45OUT_LEFT
+        {         90.0f,         45.0f,  3 * misc::PI / 4}, // SLALOM135IN_RIGHT
+        {        -90.0f,         45.0f, -3 * misc::PI / 4}, // SLALOM135IN_LEFT
+        { 95.459415460f, 31.819805153f,  3 * misc::PI / 4}, // SLALOM135OUT_RIGHT
+        {-95.459415460f, 31.819805153f, -3 * misc::PI / 4}, // SLALOM135OUT_LEFT
+        { 63.639610307f, 63.639610307f,      misc::PI / 2}, // SLALOM90OBL_RIGHT
+        {-63.639610307f, 63.639610307f,     -misc::PI / 2}, // SLALOM90OBL_LEFT
+    };
+
+    bool load(ParameterDestinationType from);
     bool save(ParameterDestinationType to);
+
+    bool loadSlalom(ParameterDestinationType from);
+    bool saveSlalom(ParameterDestinationType to);
 
     static Params* getInstance();
 };

@@ -7,6 +7,7 @@
 
 #include "arm_math.h"
 #include "stdint.h"
+#include "util.h"
 
 namespace mll {
 
@@ -26,9 +27,9 @@ Trajectory::Trajectory() {
 bool Trajectory::availableConstantVelocity() const {
     if (form == TrajectoryFormType::TRAPEZOID) {
         if (v_start == v_end) {
-            return (v_max * v_max - v_start * v_start) / (accel) <= distance;
+            return (v_max * v_max - v_start * v_start) / misc::abs(accel) <= misc::abs(distance);
         } else {
-            return (2 * v_max * v_max - v_start * v_start - v_end * v_end) / (2 * accel) <= distance;
+            return (2 * v_max * v_max - v_start * v_start - v_end * v_end) / misc::abs(2 * accel) <= misc::abs(distance);
         }
     } else {
         return false;
@@ -50,14 +51,14 @@ void Trajectory::init(TrajectoryCalcType calc, TrajectoryFormType form,
         include_constant_velocity = availableConstantVelocity();
 
         if (include_constant_velocity) {
-            float x_1 = (v_max * v_max - v_start * v_start) / (2 * accel);
-            float x_3 = (v_max * v_max - v_end * v_end) / (2 * accel);
-            float x_2 = distance - x_1 - x_3;
+            float x_1 = (v_max * v_max - v_start * v_start) / misc::abs(2 * accel);
+            float x_3 = (v_max * v_max - v_end * v_end) / misc::abs(2 * accel);
+            float x_2 = misc::abs(distance) - misc::abs(x_1) - misc::abs(x_3);
             t_1 = ((v_max - v_start) / accel) * 1000;
-            t_2 = (x_2 / v_max) * 1000 + t_1;
+            t_2 = (x_2 / misc::abs(v_max)) * 1000 + t_1;
             t_end = ((v_max - v_end) / accel) * 1000 + t_2;
         } else {
-            arm_sqrt_f32((2 * accel * distance + v_start * v_start + v_end * v_end) / 2, &this->v_max);
+            arm_sqrt_f32((misc::abs(2 * accel * distance) + v_start * v_start + v_end * v_end) / 2, &this->v_max);
             // float x_1 = (v_max * v_max - v_start * v_start) / (2 * accel);
             // float x_3 = (v_max * v_max - v_end * v_end) / (2 * accel);
             t_1 = ((v_max - v_start) / accel) * 1000;

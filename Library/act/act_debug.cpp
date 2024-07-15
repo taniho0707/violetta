@@ -9,6 +9,7 @@
 #include "mll_localizer.h"
 #include "mll_logger.h"
 #include "mll_motor_controller.h"
+#include "mll_operation_controller.h"
 #include "mpl_battery.h"
 #include "mpl_debug.h"
 #include "mpl_encoder.h"
@@ -215,20 +216,22 @@ Status DebugActivity::run() {
     battery->scanSync(battery_data);
     cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "%1.2f\n", battery_data);
     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
-    if (battery_data > 4.1f) {
+    if (battery_data > 4.f) {
         led->on(hal::LedNumbers::BLUE);
         led->on(hal::LedNumbers::GREEN);
         led->on(hal::LedNumbers::YELLOW);
         led->on(hal::LedNumbers::RED);
-    } else if (battery_data > 3.9f) {
+    } else if (battery_data > 3.8f) {
         led->on(hal::LedNumbers::GREEN);
         led->on(hal::LedNumbers::YELLOW);
         led->on(hal::LedNumbers::RED);
-    } else if (battery_data > 3.7f) {
+    } else if (battery_data > 3.6f) {
         led->on(hal::LedNumbers::YELLOW);
         led->on(hal::LedNumbers::RED);
-    } else if (battery_data > 3.5f) {
+    } else if (battery_data > 3.4f) {
         led->on(hal::LedNumbers::RED);
+    } else {
+        while (true);
     }
 
     auto encoder = mpl::Encoder::getInstance();
@@ -348,8 +351,22 @@ Status DebugActivity::run() {
     mpl::Timer::sleepMs(3000);
     motor_controller->setStay();
     mpl::Timer::sleepMs(2000);
+
+    mll::OperationMoveCombination move_array[] = {
+        // {     mll::OperationMoveType::TRAPACCEL,     90.f},
+        // {mll::OperationMoveType::TRAPACCEL_STOP, 90.f},
+        // {mll::OperationMoveType::PIVOTTURN, misc::PI},
+        {        mll::OperationMoveType::TRAPACCEL, 45.f},
+        {mll::OperationMoveType::SLALOM90SML_RIGHT,  0.f},
+        {   mll::OperationMoveType::TRAPACCEL_STOP, 45.f},
+    };
+    auto cmd_format_operation_move_array = cmd::CommandFormatOperationMoveArray();
+    cmd_format_operation_move_array.move_array = (void*)move_array;
+    cmd_format_operation_move_array.length = sizeof(move_array) / sizeof(mll::OperationMoveCombination);
+    cmd_server->push(cmd::CommandId::OPERATION_MOVE_ARRAY, &cmd_format_operation_move_array);
+
     auto cmd_format_operation_direction = cmd::CommandFormatOperationDirection();
-    cmd_format_operation_direction.type = cmd::OperationDirectionType::SEARCH;
+    cmd_format_operation_direction.type = cmd::OperationDirectionType::SPECIFIC;
     cmd_server->push(cmd::CommandId::OPERATION_DIRECTION, &cmd_format_operation_direction);
     while (true);
 

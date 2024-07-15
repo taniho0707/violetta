@@ -27,6 +27,10 @@ class CommandServer {
     uint32_t iteLastOperationDirection;
     CommandFormatOperationDirection bufferOperationDirection[COMMAND_BUFFER_SIZE];
 
+    uint32_t iteNextOperationMoveArray;
+    uint32_t iteLastOperationMoveArray;
+    CommandFormatOperationMoveArray bufferOperationMoveArray[COMMAND_BUFFER_SIZE];
+
    public:
     uint16_t length(CommandId id);
 

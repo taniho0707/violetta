@@ -31,6 +31,13 @@ void mll::MotorController::startControl() {
 
 void mll::MotorController::stopControl() {
     enabled = false;
+
+    // TODO: 正しいところに移す
+    msg::MsgFormatMotor msg_motor;
+    msg_motor.duty_l = 0;
+    msg_motor.duty_r = 0;
+    msg_motor.duty_suction = 0;
+    msg_server->sendMessage(msg::ModuleId::MOTOR, &msg_motor);
 }
 
 void mll::MotorController::setVelocityTransition(float velocity_transition) {
@@ -82,6 +89,10 @@ void mll::MotorController::interruptPeriodic() {
     setVelocity(msg_motor_controller.velocity_translation, msg_motor_controller.velocity_rotation);
 
     // TODO: msg::ModuleId::ERROR_CONTROL を受け、エラーが発生している場合はモーター制御を停止する
+    if (integral_rotation > 3000.f) {
+        stopControl();
+        return;
+    }
 
     const uint8_t params_index = 0;  // FIXME: cmd か msg から取得する
 

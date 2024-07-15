@@ -9,6 +9,7 @@
 
 namespace misc {
 
+#undef PI
 constexpr float PI = 3.14159265358979323846f;
 
 template <typename T>
@@ -60,6 +61,11 @@ T average(T* array, uint16_t len) {
         sum += (array[i] / len);
     }
     return sum;
+}
+
+template <typename T>
+T abs(T a) {
+    return a < 0 ? -a : a;
 }
 
 template <typename T>
