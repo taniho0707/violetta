@@ -3,7 +3,7 @@ BasedOnStyle: Google
 IndentWidth: 4
 
 # No column limit
-ColumnLimit: 0
+ColumnLimit: 150
 
 AlignArrayOfStructures: Right
 AlignConsecutiveAssignments: None

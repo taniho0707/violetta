@@ -45,5 +45,6 @@
   "cmake.configureOnOpen": false,
   "cortex-debug.liveWatchRefreshRate": 300,
   "cortex-debug.armToolchainPath": "/usr/bin",
-  "cortex-debug.stm32cubeprogrammer": "/home/nonoho/bin/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer.sh"
+  "cortex-debug.stm32cubeprogrammer": "/home/nonoho/bin/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer.sh",
+  "cortex-debug.variableUseNaturalFormat": true
 }
