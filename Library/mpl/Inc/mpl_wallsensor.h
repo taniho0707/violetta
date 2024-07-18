@@ -11,6 +11,7 @@
 #include "hal_wallsensor.h"
 #include "mpl_conf.h"
 #include "msg_format_wallsensor.h"
+#include "msg_server.h"
 
 namespace mpl {
 
@@ -19,6 +20,8 @@ class WallSensor {
     WallSensor();
 
     hal::WallSensorData last;
+
+    msg::MessageServer* msg_server;
     msg::MsgFormatWallsensor msg_format;
 
    public:

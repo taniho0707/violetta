@@ -103,8 +103,10 @@ struct MouseParams {
     float motor_control_rotation_kd;     // モータ制御の回転方向の D ゲイン [1]
 
     // Wall Sensor
-    uint16_t wallsensor_turnon;              // 壁センサLEDの立ち上がり待ち時間 [ns]
-    uint16_t wallsensor_exist_threshold[6];  // 壁センサの壁有無判定閾値 [1]
+    uint16_t wallsensor_turnon;                  // 壁センサLEDの立ち上がり待ち時間 [ns]
+    uint16_t wallsensor_exist_threshold[6];      // 壁センサの壁有無判定閾値 [1]
+    uint16_t wallsensor_center[6];               // 区画中央にいるときの壁センサ値 [1]
+    uint16_t wallsensor_kabekire_dif_threshold;  // 壁切れ判定する変位のしきい値 [1]
 
     // Encoder
     uint16_t encoder_resolution;  // エンコーダの分解能 [1/pulse]

@@ -35,13 +35,14 @@ enum class OperationMoveType : uint8_t {
     PIVOTTURN,
     TRAPDIAGO,
     EXTRALENGTH,
+    WAIT,
     LENGTH,
     UNDEFINED
 };  // TODO: 考える
 
 struct OperationMoveCombination {
     OperationMoveType type;
-    float distance;
+    float distance;  // 距離、角度、秒数など
 };
 
 enum class SlalomState : uint8_t {

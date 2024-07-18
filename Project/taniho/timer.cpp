@@ -20,13 +20,14 @@
 #include "mll_logger.h"
 #include "mll_motor_controller.h"
 #include "mll_operation_controller.h"
+#include "mll_wall_analyser.h"
 
 void mpl::Timer::run1() {
     static auto wallsensor = mpl::WallSensor::getInstance();
     wallsensor->interruptPeriodic();
 
-    // static auto wallanalyser = mll::WallAnalyser::getInstance();
-    // wallanalyser->interruptPeriodic();
+    static auto wallanalyser = mll::WallAnalyser::getInstance();
+    wallanalyser->interruptPeriodic();
 }
 
 void mpl::Timer::run2() {
@@ -41,7 +42,8 @@ void mpl::Timer::run2() {
 }
 
 void mpl::Timer::run3() {
-    // mpl::Led::getInstance()->interrupt();
+    // static auto led = mpl::Led::getInstance();
+    // led->interrupt();
 
 #ifdef MOUSE_LAZULI
     static auto speaker = mpl::Speaker::getInstance();
@@ -57,8 +59,8 @@ void mpl::Timer::run3() {
     static auto motorcontroller = mll::MotorController::getInstance();
     motorcontroller->interruptPeriodic();
 
-    static auto motor = mpl::Motor::getInstance();
-    motor->interruptPeriodic();
+    // static auto motor = mpl::Motor::getInstance();
+    // motor->interruptPeriodic();
 }
 
 void mpl::Timer::run4() {

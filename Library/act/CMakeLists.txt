@@ -8,4 +8,5 @@ add_library(act STATIC
   act_search.cpp
   act_select_next.cpp
   act_shortrun.cpp
+  act_wallsensor_check.cpp
 )

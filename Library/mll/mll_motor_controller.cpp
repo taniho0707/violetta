@@ -81,7 +81,7 @@ void mll::MotorController::interruptPeriodic() {
     // OperationController からの指令を処理 (MOTORCONTROLLER)
     if (!enabled && msg_motor_controller.is_controlled) {
         startControl();
-    } else if (!enabled) {
+    } else if (!enabled || !msg_motor_controller.is_controlled) {
         // モーター制御が有効でない場合は何もしない
         stopControl();
         return;
@@ -107,11 +107,10 @@ void mll::MotorController::interruptPeriodic() {
 
     // rotation 成分の計算、出力は電流 [mA]
     const float error_rotation = msg_localizer.velocity_rotation - target_velocity_rotation;  // FIXME: 逆になっているので戻す
-    integral_rotation += error_rotation;                                                      // FIXME: サンプリング周期をパラメータか固定値から読み出す
+    integral_rotation += error_rotation;  // FIXME: サンプリング周期をパラメータか固定値から読み出す
     const float error_diff_rotation = error_rotation - last_differential_rotation;
     last_differential_rotation = error_rotation;
-    const float control_rotation = params->motor_control_rotation_kp * error_rotation +
-                                   params->motor_control_rotation_ki * integral_rotation +
+    const float control_rotation = params->motor_control_rotation_kp * error_rotation + params->motor_control_rotation_ki * integral_rotation +
                                    params->motor_control_rotation_kd * error_diff_rotation;
 
     // モーターに指令を送る

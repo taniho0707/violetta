@@ -12,6 +12,7 @@
 #include "act_search.h"
 #include "act_select_next.h"
 #include "act_shortrun.h"
+#include "act_wallsensor_check.h"
 
 using namespace act;
 
@@ -34,6 +35,8 @@ IActivity* Manager::createActivity(Activities next_activity) {
             return new ModuleTestActivity();
         case Activities::DEBUG:
             return new DebugActivity();
+        case Activities::WALLSENSOR_CHECK:
+            return new WallsensorCheckActivity();
         default:
             return new NoneActivity();
     }

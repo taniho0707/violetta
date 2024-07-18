@@ -1,14 +1,14 @@
 //******************************************************************************
 // @addtogroup ACT
-// @file       act_search.cpp
-// @brief      Search Activity
+// @file       act_wallsensor_check.cpp
+// @brief      Wallsensor Check Activity
 //******************************************************************************
-#include "act_search.h"
+#include "act_wallsensor_check.h"
 
 #include "cmd_server.h"
 #include "mll_localizer.h"
 #include "mll_motor_controller.h"
-#include "mll_operation_controller.h"
+#include "mll_wall_analyser.h"
 #include "mpl_battery.h"
 #include "mpl_debug.h"
 #include "mpl_encoder.h"
@@ -17,16 +17,25 @@
 #include "mpl_motor.h"
 #include "mpl_timer.h"
 #include "mpl_wallsensor.h"
-#include "msg_format_imu.h"
-#include "msg_format_localizer.h"
+#include "msg_format_wall_analyser.h"
 #include "msg_server.h"
 #include "params.h"
 
 using namespace act;
 
-void SearchActivity::init() {}
+void WallsensorCheckActivity::init() {}
 
-Status SearchActivity::run() {
+#ifdef MOUSE_LAZULI
+Status DebugActivity::run() {}
+#endif  // MOUSE_LAZULI
+
+#ifdef MOUSE_ZIRCONIA2KAI
+Status WallsensorCheckActivity::run() {
+    auto message = msg::MessageServer::getInstance();
+    msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
+    msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
+    msg::MsgFormatWallAnalyser msg_wallanalyser = msg::MsgFormatWallAnalyser();
+
     auto cmd_server = cmd::CommandServer::getInstance();
     cmd::CommandFormatDebugTx cmd_debug_tx = {0};
 
@@ -55,6 +64,7 @@ Status SearchActivity::run() {
         cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
     }
 
+    // Battery Test code
     auto battery = mpl::Battery::getInstance();
     cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Battery: ");
     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
@@ -90,38 +100,50 @@ Status SearchActivity::run() {
     auto wallsensor = mpl::WallSensor::getInstance();
     wallsensor->initPort();
 
+    // Motor Test code
     auto motor = mpl::Motor::getInstance();
-
     auto motor_controller = mll::MotorController::getInstance();
     motor_controller->init();
 
     auto localizer = mll::Localizer::getInstance();
     localizer->init();
 
+    auto wallanalyser = mll::WallAnalyser::getInstance();
+    wallanalyser->init();
+
     static auto params_cache = misc::Params::getInstance()->getCachePointer();
     misc::Params::getInstance()->load(misc::ParameterDestinationType::HARDCODED);
     misc::Params::getInstance()->loadSlalom(misc::ParameterDestinationType::HARDCODED);
 
-    // タイマー割り込みの開始
     mpl::Timer::init();
-    mpl::TimerStatistics timer_statistics;
 
-    auto message = msg::MessageServer::getInstance();
-    msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
-    msg::MsgFormatEncoder msg_encoder = msg::MsgFormatEncoder();
-    msg::MsgFormatImu msg_imu = msg::MsgFormatImu();
-    msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
-    msg::MsgFormatLocalizer msg_localizer = msg::MsgFormatLocalizer();
+    // 【壁センサの値を取るための無限ループ】
+    while (1) {
+        auto start_time = mpl::Timer::getMilliTime();
+        bool kabekire_left = false;
+        bool kabekire_right = false;
+        while (mpl::Timer::getMilliTime() <= start_time + 100) {
+            message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
+            message->receiveMessage(msg::ModuleId::WALLSENSOR, &msg_wallsensor);
+            message->receiveMessage(msg::ModuleId::WALLANALYSER, &msg_wallanalyser);
+            if (msg_wallanalyser.kabekire_left) {
+                kabekire_left = true;
+            }
+            if (msg_wallanalyser.kabekire_right) {
+                kabekire_right = true;
+            }
+        }
 
-    // OperationController のテスト
-    mpl::Timer::sleepMs(3000);
-    motor_controller->setStay();
-    mpl::Timer::sleepMs(2000);
+        cmd_debug_tx.len =
+            debug->format(cmd_debug_tx.message, "T: %10d B: %1.2f | FL: %4d, L: %4d, R: %4d, FR: %4d | kire(%d|%d) | F: % 4.1f, LR: % 4.1f\n",
+                          mpl::Timer::getMilliTime(), msg_battery.battery, msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.right,
+                          msg_wallsensor.frontright, kabekire_left ? 1 : 0, kabekire_right ? 1 : 0, msg_wallanalyser.distance_from_front,
+                          msg_wallanalyser.distance_from_center);
+        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    }
 
-    auto cmd_format_operation_direction = cmd::CommandFormatOperationDirection();
-    cmd_format_operation_direction.type = cmd::OperationDirectionType::SEARCH;
-    cmd_server->push(cmd::CommandId::OPERATION_DIRECTION, &cmd_format_operation_direction);
-    while (true);
+    return Status::ERROR;
 }
+#endif  // MOUSE_ZIRCONIA2KAI
 
-void SearchActivity::finalize() {}
+void WallsensorCheckActivity::finalize() {}

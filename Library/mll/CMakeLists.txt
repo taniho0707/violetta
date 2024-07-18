@@ -9,4 +9,5 @@ add_library(mll STATIC
     mll_motor_controller.cpp
     mll_operation_controller.cpp
     mll_trajectory.cpp
+    mll_wall_analyser.cpp
 )

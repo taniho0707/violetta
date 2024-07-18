@@ -30,7 +30,8 @@ enum class ModuleId : uint8_t {
     UI = 10,
     LOCALIZER = 11,
     MOTORCONTROLLER = 12,
-    LENGTH = 13
+    WALLANALYSER = 13,
+    LENGTH = 14
 };
 
 class MsgFormat {

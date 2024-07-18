@@ -206,23 +206,9 @@ void mll::OperationController::interruptPeriodic() {
                 target_velocity_translation = 0.f;
                 break;
             case OperationMoveType::SLALOM90SML_RIGHT:
-                // trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID,
-                //                 -1 * slalom_params[static_cast<uint8_t>(OperationMoveType::SLALOM90SML_RIGHT)].acc_rad,
-                //                 -1 * slalom_params[static_cast<uint8_t>(OperationMoveType::SLALOM90SML_RIGHT)].deg,
-                //                 0.f,
-                //                 -1 * slalom_params[static_cast<uint8_t>(OperationMoveType::SLALOM90SML_RIGHT)].max_v_rad,
-                //                 0.f);
-                // slalom_state = SlalomState::BEFORE;
                 initSlalom(SLALOM_RIGHT);
                 break;
             case OperationMoveType::SLALOM90SML_LEFT:
-                // trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID,
-                //                 slalom_params[static_cast<uint8_t>(OperationMoveType::SLALOM90SML_LEFT)].acc_rad,
-                //                 slalom_params[static_cast<uint8_t>(OperationMoveType::SLALOM90SML_LEFT)].deg,
-                //                 0.f,
-                //                 slalom_params[static_cast<uint8_t>(OperationMoveType::SLALOM90SML_LEFT)].max_v_rad,
-                //                 0.f);
-                // slalom_state = SlalomState::BEFORE;
                 initSlalom(SLALOM_LEFT);
                 break;
             case OperationMoveType::SLALOM90_RIGHT:
@@ -283,22 +269,14 @@ void mll::OperationController::interruptPeriodic() {
     // 動作指令を更新
     switch (current_operation_move) {
         case OperationMoveType::STOP:
-            // msg_format_motor_controller.velocity_translation = trajectory.getVelocity(mpl::Timer::getMilliTime() -
-            // latest_start_time);
             msg_format_motor_controller.velocity_translation = 0.0f;
             msg_format_motor_controller.velocity_rotation = 0.0f;
             msg_format_motor_controller.is_controlled = true;
             break;
         case OperationMoveType::SLALOM90SML_RIGHT:
-            // msg_format_motor_controller.velocity_translation = target_velocity_translation;
-            // msg_format_motor_controller.velocity_rotation = trajectory.getVelocity(mpl::Timer::getMilliTime() -
-            // latest_start_time); msg_format_motor_controller.is_controlled = true;
             runSlalom(msg_format_motor_controller);
             break;
         case OperationMoveType::SLALOM90SML_LEFT:
-            // msg_format_motor_controller.velocity_translation = target_velocity_translation;
-            // msg_format_motor_controller.velocity_rotation = trajectory.getVelocity(mpl::Timer::getMilliTime() -
-            // latest_start_time); msg_format_motor_controller.is_controlled = true;
             runSlalom(msg_format_motor_controller);
             break;
         case OperationMoveType::SLALOM90_RIGHT:

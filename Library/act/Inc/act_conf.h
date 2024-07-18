@@ -16,13 +16,14 @@ enum class Status : uint8_t {
 };
 
 enum class Activities : uint8_t {
-    NONE = 0x00,             // 何もしない 使わない想定
-    SEARCH = 0x01,           // 探索モード
-    SHORTRUN = 0x02,         // 最短経路モード
-    SELECT_NEXT = 0xD1,      // 次のアクティビティを選択
-    PARAMTUNE_MOTOR = 0xE1,  // モーターパラメータ調整
-    MODULE_TEST = 0xF1,      // モジュールテスト
-    DEBUG = 0xFF,            // デバッグモード
+    NONE = 0x00,              // 何もしない 使わない想定
+    SEARCH = 0x01,            // 探索モード
+    SHORTRUN = 0x02,          // 最短経路モード
+    SELECT_NEXT = 0xD1,       // 次のアクティビティを選択
+    WALLSENSOR_CHECK = 0xE0,  // 壁センサチェック
+    PARAMTUNE_MOTOR = 0xE1,   // モーターパラメータ調整
+    MODULE_TEST = 0xF1,       // モジュールテスト
+    DEBUG = 0xFF,             // デバッグモード
 };
 
 class IActivity {
