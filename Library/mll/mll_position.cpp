@@ -65,3 +65,25 @@ bool MultiplePosition::isInclude(misc::Point<uint16_t> cur) {
     }
     return false;
 }
+
+bool MultiplePosition::hasData(uint8_t index) {
+    return (stored & (1 << index)) != 0;
+}
+
+misc::Point<uint16_t>* MultiplePosition::begin() {
+    for (uint8_t i = 0; i < MAX_LENGTH_MULTIPLE_POSITION; i++) {
+        if (hasData(i)) {
+            return &curs[i];
+        }
+    }
+    return nullptr;
+}
+
+misc::Point<uint16_t>* MultiplePosition::end() {
+    for (uint8_t i = MAX_LENGTH_MULTIPLE_POSITION - 1; i >= 0; i--) {
+        if (hasData(i)) {
+            return &curs[i + 1];
+        }
+    }
+    return nullptr;
+}

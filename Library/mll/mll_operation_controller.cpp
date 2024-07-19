@@ -29,6 +29,10 @@ mll::OperationController::OperationController() {
     velocity_slowest_translation = 50.f;
     velocity_slowest_rotation = 1.f;
 
+    section_position.x = 0;
+    section_position.y = 1;
+    section_position.d = CardinalDirection::NORTH;
+
     init();
 }
 
@@ -112,8 +116,8 @@ void mll::OperationController::interruptPeriodic() {
         switch (current_operation_direction) {
             case cmd::OperationDirectionType::STOP:
                 if (cmd_format_operation_direction.type == cmd::OperationDirectionType::SEARCH) {
-                    // next_operation_move = OperationMoveType::TRAPACCEL;
-                    next_operation_move = OperationMoveType::PIVOTTURN;
+                    next_operation_move = OperationMoveType::TRAPACCEL;
+                    target_move_distance = 900.f;
                 } else if (cmd_format_operation_direction.type == cmd::OperationDirectionType::SPECIFIC) {
                     cmd_server->pop(cmd::CommandId::OPERATION_MOVE_ARRAY, &cmd_format_operation_move_array);
                     operation_move_combinations_i = -1;
@@ -137,8 +141,20 @@ void mll::OperationController::interruptPeriodic() {
         is_operation_move_changed = true;
     }
 
+    // OperationMoveTypeがSTOPならモーターを止める
+    if (current_operation_move == OperationMoveType::STOP) {
+        msg_format_motor_controller.velocity_translation = 0.0f;
+        msg_format_motor_controller.velocity_rotation = 0.0f;
+        msg_format_motor_controller.is_controlled = false;
+        msg_server->sendMessage(msg::ModuleId::MOTORCONTROLLER, &msg_format_motor_controller);
+        return;
+    }
+
     // MoveTypeの更新が必要か確認
-    if (current_operation_move != OperationMoveType::STOP &&
+    // TODO: スラロームのときの処理が間違っていないか確認
+    if ((current_operation_move == OperationMoveType::TRAPACCEL || current_operation_move == OperationMoveType::TRAPACCEL_STOP ||
+         current_operation_move == OperationMoveType::EXTRALENGTH || current_operation_move == OperationMoveType::PIVOTTURN ||
+         current_operation_move == OperationMoveType::TRAPDIAGO) &&
         trajectory.getTimeStartDeceleration() <= mpl::Timer::getMilliTime() - latest_start_time) {
         // 減速開始時刻を過ぎ、終端速度以下になろうとしていれば終端距離まで維持する
         float target_velocity = target_velocity_translation;
@@ -154,6 +170,12 @@ void mll::OperationController::interruptPeriodic() {
             }
             current_operation_move = OperationMoveType::EXTRALENGTH;
         }
+    }
+
+    // 探索時の区画情報の更新
+    {
+        // 論理座標をアップデート
+        section_position.move(current_operation_move);
     }
 
     // 終了条件: 軌跡が終了した or EXTRALENGTH で目標距離に達した or SlalomState::END

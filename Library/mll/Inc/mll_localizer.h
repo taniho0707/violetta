@@ -5,7 +5,7 @@
 //******************************************************************************
 #pragma once
 
-#include "params.h"
+#include "mll_position.h"
 
 namespace mll {
 
@@ -30,6 +30,8 @@ class Localizer {
    private:
     Localizer();
 
+    MouseSectionPosition current_section;
+
    public:
     // 現在の推測内容
     LocalizedStatus current_status;
@@ -46,6 +48,7 @@ class Localizer {
 
     // マウス座標を強制的に変更する
     void setPosition(float x, float y, float theta);
+    // void setSectionPosition(int16_t x, int16_t y, CardinalDirection d);
 
     void interruptPeriodic();
 

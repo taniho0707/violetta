@@ -74,4 +74,33 @@ struct Point {
     T y;
 };
 
+// 優先度無しで、ヒープ領域を使用しないキュー
+template <typename T, uint16_t SIZE>
+class Queue {
+   private:
+    T data[SIZE];
+    uint16_t head;
+    uint16_t tail;
+
+   public:
+    Queue() : head(0), tail(0) {}
+
+    void push(T value) {
+        data[tail] = value;
+        tail = (tail + 1) % SIZE;
+    }
+
+    T front() {
+        return data[head];
+    }
+
+    void pop() {
+        head = (head + 1) % SIZE;
+    }
+
+    bool empty() {
+        return head == tail;
+    }
+};
+
 }  // namespace misc

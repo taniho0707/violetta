@@ -10,4 +10,6 @@ add_library(mll STATIC
     mll_operation_controller.cpp
     mll_trajectory.cpp
     mll_wall_analyser.cpp
+    mll_footmap.cpp
+    mll_maze_solver.cpp
 )

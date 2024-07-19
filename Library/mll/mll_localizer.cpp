@@ -6,19 +6,18 @@
 #include "mll_localizer.h"
 
 #include "arm_math.h"
-#include "math.h"
 #include "msg_format_encoder.h"
 #include "msg_format_imu.h"
 #include "msg_format_localizer.h"
 #include "msg_format_wallsensor.h"
 #include "msg_server.h"
 
-mll::Localizer::Localizer() {
-}
+mll::Localizer::Localizer() {}
 
 void mll::Localizer::init() {
     // params = misc::Params::getInstance()->getCachePointer();
     setPosition(45.f, 45.f, 0);
+    // setSectionPosition(0, 1, CardinalDirection::NORTH);
 }
 
 void mll::Localizer::setPosition(float x, float y, float theta) {
@@ -30,6 +29,12 @@ void mll::Localizer::setPosition(float x, float y, float theta) {
     encoder_status.position_y = y;
     encoder_status.position_theta = theta;
 }
+
+// void mll::Localizer::setSectionPosition(int16_t x, int16_t y, CardinalDirection d) {
+//     current_section.x = x;
+//     current_section.y = y;
+//     current_section.d = d;
+// }
 
 void mll::Localizer::interruptPeriodic() {
     // エンコーダ、ジャイロ、加速度、壁センサの値を取得
