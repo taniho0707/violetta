@@ -9,6 +9,7 @@
 #include "mll_localizer.h"
 #include "mll_motor_controller.h"
 #include "mll_operation_controller.h"
+#include "mll_wall_analyser.h"
 #include "mpl_battery.h"
 #include "mpl_debug.h"
 #include "mpl_encoder.h"
@@ -90,6 +91,9 @@ Status SearchActivity::run() {
     auto wallsensor = mpl::WallSensor::getInstance();
     wallsensor->initPort();
 
+    auto wallanalyser = mll::WallAnalyser::getInstance();
+    wallanalyser->init();
+
     auto motor = mpl::Motor::getInstance();
 
     auto motor_controller = mll::MotorController::getInstance();
@@ -98,13 +102,12 @@ Status SearchActivity::run() {
     auto localizer = mll::Localizer::getInstance();
     localizer->init();
 
+    auto operation_controller = mll::OperationController::getInstance();
+    operation_controller->init();
+
     static auto params_cache = misc::Params::getInstance()->getCachePointer();
     misc::Params::getInstance()->load(misc::ParameterDestinationType::HARDCODED);
     misc::Params::getInstance()->loadSlalom(misc::ParameterDestinationType::HARDCODED);
-
-    // タイマー割り込みの開始
-    mpl::Timer::init();
-    mpl::TimerStatistics timer_statistics;
 
     auto message = msg::MessageServer::getInstance();
     msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
@@ -112,6 +115,10 @@ Status SearchActivity::run() {
     msg::MsgFormatImu msg_imu = msg::MsgFormatImu();
     msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
     msg::MsgFormatLocalizer msg_localizer = msg::MsgFormatLocalizer();
+
+    // タイマー割り込みの開始
+    mpl::Timer::init();
+    mpl::TimerStatistics timer_statistics;
 
     // OperationController のテスト
     mpl::Timer::sleepMs(3000);

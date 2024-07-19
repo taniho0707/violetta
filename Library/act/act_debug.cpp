@@ -10,6 +10,7 @@
 #include "mll_logger.h"
 #include "mll_motor_controller.h"
 #include "mll_operation_controller.h"
+#include "mll_wall_analyser.h"
 #include "mpl_battery.h"
 #include "mpl_debug.h"
 #include "mpl_encoder.h"
@@ -160,13 +161,16 @@ Status DebugActivity::run() {
         //                                  msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.gyro_roll,
         //                                  msg_imu.gyro_pitch, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
         //                                  msg_imu.temperature);
-        cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
-                                         "T: %10d B: %1.2f | IMU: %8d, %10d, % 6d, % 6d, % 6d, % 6d | WALL: % 4d,% 4d,% 4d,% 4d | STAT: Max.[%2.0f|%2.0f|%2.0f|%2.0f] Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n",
-                                         mpl::Timer::getMicroTime(), msg_battery.battery, msg_imu.getCount(),
-                                         msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
-                                         msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.right, msg_wallsensor.frontright,
-                                         float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_max) * 100 / hal::TIMER_COUNT_MAX,
-                                         float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count2_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_avg) * 100 / hal::TIMER_COUNT_MAX);
+        cmd_debug_tx.len = debug->format(
+            cmd_debug_tx.message,
+            "T: %10d B: %1.2f | IMU: %8d, %10d, % 6d, % 6d, % 6d, % 6d | WALL: % 4d,% 4d,% 4d,% 4d | STAT: Max.[%2.0f|%2.0f|%2.0f|%2.0f] "
+            "Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n",
+            mpl::Timer::getMicroTime(), msg_battery.battery, msg_imu.getCount(), msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.acc_x, msg_imu.acc_y,
+            msg_imu.acc_z, msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.right, msg_wallsensor.frontright,
+            float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX,
+            float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_max) * 100 / hal::TIMER_COUNT_MAX,
+            float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count2_avg) * 100 / hal::TIMER_COUNT_MAX,
+            float(timer_statistics.count3_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_avg) * 100 / hal::TIMER_COUNT_MAX);
         cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
     }
 
@@ -240,6 +244,9 @@ Status DebugActivity::run() {
     auto wallsensor = mpl::WallSensor::getInstance();
     wallsensor->initPort();
 
+    auto wallanalyser = mll::WallAnalyser::getInstance();
+    wallanalyser->init();
+
     // Motor Test code
     auto motor = mpl::Motor::getInstance();
     // debug->printf("Motor: 25%% ON...");
@@ -254,10 +261,11 @@ Status DebugActivity::run() {
     auto localizer = mll::Localizer::getInstance();
     localizer->init();
 
+    auto operation_controller = mll::OperationController::getInstance();
+    operation_controller->init();
+
     static auto params_cache = misc::Params::getInstance()->getCachePointer();
     misc::Params::getInstance()->load(misc::ParameterDestinationType::HARDCODED);
-
-    mpl::Timer::init();
 
     auto message = msg::MessageServer::getInstance();
     msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
@@ -266,6 +274,7 @@ Status DebugActivity::run() {
     msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
     msg::MsgFormatLocalizer msg_localizer = msg::MsgFormatLocalizer();
 
+    mpl::Timer::init();
     mpl::TimerStatistics timer_statistics;
 
     // 【モーターのパラメータチューニング】
@@ -314,7 +323,8 @@ Status DebugActivity::run() {
     // // for (int i = 0; i < 100; ++i) {
     // //     logger->read(logconfig, i, (void *)(&log_item));
     // //     cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Log[%d]: %d, %1.2f, %1.2f\n", i, log_item.time, log_item.left, log_item.right);
-    // //     // cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Log[%d]: %d, %1.2f, %1.2f\n", i, log_test[i].time, log_test[i].left, log_test[i].right);
+    // //     // cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Log[%d]: %d, %1.2f, %1.2f\n", i, log_test[i].time, log_test[i].left,
+    // log_test[i].right);
     // //     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
     // //     mpl::Timer::sleepMs(10);
     // // }
@@ -353,12 +363,14 @@ Status DebugActivity::run() {
     mpl::Timer::sleepMs(2000);
 
     mll::OperationMoveCombination move_array[] = {
-        // {     mll::OperationMoveType::TRAPACCEL,     90.f},
+        // {     mll::OperationMoveType::TRAPACCEL, 90.f},
         // {mll::OperationMoveType::TRAPACCEL_STOP, 90.f},
         // {mll::OperationMoveType::PIVOTTURN, misc::PI},
-        {        mll::OperationMoveType::TRAPACCEL, 45.f},
-        {mll::OperationMoveType::SLALOM90SML_RIGHT,  0.f},
-        {   mll::OperationMoveType::TRAPACCEL_STOP, 45.f},
+        {     mll::OperationMoveType::TRAPACCEL,     45.f},
+        {mll::OperationMoveType::TRAPACCEL_STOP,     45.f},
+        {     mll::OperationMoveType::PIVOTTURN, misc::PI},
+        {     mll::OperationMoveType::TRAPACCEL,     45.f},
+        {mll::OperationMoveType::TRAPACCEL_STOP,     45.f},
     };
     auto cmd_format_operation_move_array = cmd::CommandFormatOperationMoveArray();
     cmd_format_operation_move_array.move_array = (void*)move_array;
@@ -379,14 +391,11 @@ Status DebugActivity::run() {
         message->receiveMessage(msg::ModuleId::ENCODER, &msg_encoder);
         message->receiveMessage(msg::ModuleId::IMU, &msg_imu);
         message->receiveMessage(msg::ModuleId::LOCALIZER, &msg_localizer);
-        cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
-                                         "%10d, trans % 8.2f, % 7.2f, % 5.2f, rot % 5.2f, % 5.2f, the % 5.2f x % 5.2f y % 5.2f\n",
-                                         mpl::Timer::getMicroTime(),
-                                         msg_localizer.accel_translation, msg_localizer.velocity_translation,
-                                         msg_localizer.position_translation,
-                                         msg_localizer.accel_rotation, msg_localizer.velocity_rotation,
-                                         msg_localizer.position_theta,
-                                         msg_localizer.position_x, msg_localizer.position_y);
+        cmd_debug_tx.len =
+            debug->format(cmd_debug_tx.message, "%10d, trans % 8.2f, % 7.2f, % 5.2f, rot % 5.2f, % 5.2f, the % 5.2f x % 5.2f y % 5.2f\n",
+                          mpl::Timer::getMicroTime(), msg_localizer.accel_translation, msg_localizer.velocity_translation,
+                          msg_localizer.position_translation, msg_localizer.accel_rotation, msg_localizer.velocity_rotation,
+                          msg_localizer.position_theta, msg_localizer.position_x, msg_localizer.position_y);
         cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
     }
 
@@ -407,21 +416,22 @@ Status DebugActivity::run() {
         //                                  msg_wallsensor.right, msg_wallsensor.frontright, msg_imu.gyro_yaw, msg_imu.gyro_roll,
         //                                  msg_imu.gyro_pitch, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z);
         // cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
-        //                                  "T: %10d B: %1.2f | IMU: %f, %f, %f, %f | WALL: % 4d,% 4d,% 4d,% 4d | STAT: Max.[%2.0f|%2.0f|%2.0f|%2.0f] Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n",
-        //                                  mpl::Timer::getMicroTime(), msg_battery.battery, msg_imu.gyro_yaw, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
-        //                                  msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.right, msg_wallsensor.frontright,
-        //                                  float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_max) * 100 / hal::TIMER_COUNT_MAX,
-        //                                  float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count2_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_avg) * 100 / hal::TIMER_COUNT_MAX);
+        //                                  "T: %10d B: %1.2f | IMU: %f, %f, %f, %f | WALL: % 4d,% 4d,% 4d,% 4d | STAT: Max.[%2.0f|%2.0f|%2.0f|%2.0f]
+        //                                  Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n", mpl::Timer::getMicroTime(), msg_battery.battery, msg_imu.gyro_yaw,
+        //                                  msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z, msg_wallsensor.frontleft, msg_wallsensor.left,
+        //                                  msg_wallsensor.right, msg_wallsensor.frontright, float(timer_statistics.count1_max) * 100 /
+        //                                  hal::TIMER_COUNT_MAX, float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX,
+        //                                  float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_max) * 100
+        //                                  / hal::TIMER_COUNT_MAX, float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX,
+        //                                  float(timer_statistics.count2_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_avg) * 100
+        //                                  / hal::TIMER_COUNT_MAX, float(timer_statistics.count4_avg) * 100 / hal::TIMER_COUNT_MAX);
         // cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
         // cmd::CommandFormatDebugTx cmd_debug_tx = {};
-        cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
-                                         "%10d, trans % 8.2f, % 7.2f, % 5.2f, rot % 5.2f, % 5.2f, the % 5.2f x % 5.2f y % 5.2f\n",
-                                         mpl::Timer::getMicroTime(),
-                                         msg_localizer.accel_translation, msg_localizer.velocity_translation,
-                                         msg_localizer.position_translation,
-                                         msg_localizer.accel_rotation, msg_localizer.velocity_rotation,
-                                         msg_localizer.position_theta,
-                                         msg_localizer.position_x, msg_localizer.position_y);
+        cmd_debug_tx.len =
+            debug->format(cmd_debug_tx.message, "%10d, trans % 8.2f, % 7.2f, % 5.2f, rot % 5.2f, % 5.2f, the % 5.2f x % 5.2f y % 5.2f\n",
+                          mpl::Timer::getMicroTime(), msg_localizer.accel_translation, msg_localizer.velocity_translation,
+                          msg_localizer.position_translation, msg_localizer.accel_rotation, msg_localizer.velocity_rotation,
+                          msg_localizer.position_theta, msg_localizer.position_x, msg_localizer.position_y);
         cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
     }
 

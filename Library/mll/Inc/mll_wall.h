@@ -17,7 +17,7 @@ struct Walldata {
     /**
      * @brief 右ビットから順に前，右，後、左のデータが格納されている
      */
-    uint8_t data;
+    uint8_t data = 0;
 
     /**
      * @brief =演算子のオーバーロード<br>char型の代入ができます。

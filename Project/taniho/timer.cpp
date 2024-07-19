@@ -59,8 +59,8 @@ void mpl::Timer::run3() {
     static auto motorcontroller = mll::MotorController::getInstance();
     motorcontroller->interruptPeriodic();
 
-    // static auto motor = mpl::Motor::getInstance();
-    // motor->interruptPeriodic();
+    static auto motor = mpl::Motor::getInstance();
+    motor->interruptPeriodic();
 }
 
 void mpl::Timer::run4() {

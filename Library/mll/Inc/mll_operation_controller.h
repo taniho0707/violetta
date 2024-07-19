@@ -6,6 +6,7 @@
 #pragma once
 
 #include "cmd_format.h"
+#include "mll_maze_solver.h"
 #include "mll_operation_move_type.h"
 #include "mll_position.h"
 #include "mll_trajectory.h"
@@ -56,6 +57,8 @@ class OperationController {
     // マウスの論理座標を保持
     // FIXME: 適切なクラスに移管する
     MouseSectionPosition section_position;
+
+    MazeSolver* solver;
 
     misc::MouseParams* params;
     misc::SlalomParams* slalom_params;

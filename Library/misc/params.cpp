@@ -55,10 +55,11 @@ bool Params::load(ParameterDestinationType from) {
             cache.motor_control_rotation_kp = 75.f;  // 50.0f;
             cache.motor_control_rotation_ki = 5.5;   // 0.8;
             cache.motor_control_rotation_kd = 0;
+            cache.motor_control_kabe_kp = 0.02;
             cache.wallsensor_turnon = 100;
             cache.wallsensor_exist_threshold[0] = 35;  // TODO: ここの番号とセンサ番号をいい感じに一致させたい
-            cache.wallsensor_exist_threshold[1] = 100;
-            cache.wallsensor_exist_threshold[2] = 75;
+            cache.wallsensor_exist_threshold[1] = 60;
+            cache.wallsensor_exist_threshold[2] = 70;
             cache.wallsensor_exist_threshold[3] = 30;
             cache.wallsensor_exist_threshold[4] = 0;
             cache.wallsensor_exist_threshold[5] = 0;

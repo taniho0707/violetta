@@ -89,7 +89,7 @@ void mll::MotorController::interruptPeriodic() {
     setVelocity(msg_motor_controller.velocity_translation, msg_motor_controller.velocity_rotation);
 
     // TODO: msg::ModuleId::ERROR_CONTROL を受け、エラーが発生している場合はモーター制御を停止する
-    if (integral_rotation > 3000.f) {
+    if (integral_rotation > 300.f) {
         stopControl();
         return;
     }

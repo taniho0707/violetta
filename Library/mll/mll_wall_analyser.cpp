@@ -64,24 +64,36 @@ void WallAnalyser::interruptPeriodic() {
     if (sensor_buffer_left[sensor_buffer_index] > params->wallsensor_exist_threshold[1]) {
         // 左壁あり
         wall.addWall(FirstPersonDirection::LEFT);
+        // 変化量が負 (遠ざかる・切れる方向) であれば壁制御量を 0 にする
+        if (sensor_buffer_left[sensor_buffer_index] - sensor_buffer_left[previous_index] < 0) {
+            dif_from_center_left = 0;
+            dif_from_center_right *= 2;
+        }
     } else {
-        dif_from_center_left = 0;
-        dif_from_center_right *= 2;
         if (sensor_buffer_left[previous_index] > params->wallsensor_exist_threshold[1] &&
             sensor_buffer_left[previous_index] - sensor_buffer_left[sensor_buffer_index] > params->wallsensor_kabekire_dif_threshold) {
             kabekire_left = true;
         }
+        // 壁がなければ壁制御量を 0 にする
+        dif_from_center_left = 0;
+        dif_from_center_right *= 2;
     }
     if (sensor_buffer_right[sensor_buffer_index] > params->wallsensor_exist_threshold[2]) {
         // 右壁あり
         wall.addWall(FirstPersonDirection::RIGHT);
+        // 変化量が負 (遠ざかる・切れる方向) であれば壁制御量を 0 にする
+        if (sensor_buffer_right[sensor_buffer_index] - sensor_buffer_right[previous_index] < 0) {
+            dif_from_center_right = 0;
+            dif_from_center_left *= 2;
+        }
     } else {
-        dif_from_center_right = 0;
-        dif_from_center_left *= 2;
         if (sensor_buffer_right[previous_index] > params->wallsensor_exist_threshold[2] &&
             sensor_buffer_right[previous_index] - sensor_buffer_right[sensor_buffer_index] > params->wallsensor_kabekire_dif_threshold) {
             kabekire_right = true;
         }
+        // 壁がなければ壁制御量を 0 にする
+        dif_from_center_right = 0;
+        dif_from_center_left *= 2;
     }
     if (sensor_buffer_frontleft[sensor_buffer_index] > params->wallsensor_exist_threshold[0] ||
         sensor_buffer_frontright[sensor_buffer_index] > params->wallsensor_exist_threshold[3]) {

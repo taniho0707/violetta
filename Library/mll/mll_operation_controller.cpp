@@ -9,6 +9,7 @@
 #include "mpl_timer.h"
 #include "msg_format_localizer.h"
 #include "msg_format_motor_controller.h"
+#include "msg_format_wall_analyser.h"
 #include "msg_server.h"
 
 mll::OperationController::OperationController() {
@@ -32,6 +33,12 @@ mll::OperationController::OperationController() {
     section_position.x = 0;
     section_position.y = 1;
     section_position.d = CardinalDirection::NORTH;
+
+    solver = mll::MazeSolver::getInstance();
+    solver->clearFootmap();
+    solver->setAlgorithm(AlgorithmType::LEFT_HAND);
+    solver->destination.clear();
+    solver->map.format();
 
     init();
 }
@@ -97,7 +104,9 @@ void mll::OperationController::interruptPeriodic() {
     static auto msg_server = msg::MessageServer::getInstance();
     static msg::MsgFormatLocalizer msg_format_localizer;
     static msg::MsgFormatMotorController msg_format_motor_controller;
+    static msg::MsgFormatWallAnalyser msg_format_wall_analyser;
     msg_server->receiveMessage(msg::ModuleId::LOCALIZER, &msg_format_localizer);
+    msg_server->receiveMessage(msg::ModuleId::WALLANALYSER, &msg_format_wall_analyser);
 
     // 現在の MoveType の移動/回転距離更新
     if (current_operation_move == OperationMoveType::PIVOTTURN) {
@@ -117,7 +126,11 @@ void mll::OperationController::interruptPeriodic() {
             case cmd::OperationDirectionType::STOP:
                 if (cmd_format_operation_direction.type == cmd::OperationDirectionType::SEARCH) {
                     next_operation_move = OperationMoveType::TRAPACCEL;
-                    target_move_distance = 900.f;
+                    target_move_distance = 45.f;
+                    solver->destination.add(1, 0);
+                    solver->destination.add(1, 1);
+                    solver->destination.add(2, 0);
+                    solver->destination.add(2, 1);
                 } else if (cmd_format_operation_direction.type == cmd::OperationDirectionType::SPECIFIC) {
                     cmd_server->pop(cmd::CommandId::OPERATION_MOVE_ARRAY, &cmd_format_operation_move_array);
                     operation_move_combinations_i = -1;
@@ -142,7 +155,8 @@ void mll::OperationController::interruptPeriodic() {
     }
 
     // OperationMoveTypeがSTOPならモーターを止める
-    if (current_operation_move == OperationMoveType::STOP) {
+    // ただし動作開始前の場合はスキップして次の処理に移る
+    if (!is_operation_move_changed && current_operation_move == OperationMoveType::STOP) {
         msg_format_motor_controller.velocity_translation = 0.0f;
         msg_format_motor_controller.velocity_rotation = 0.0f;
         msg_format_motor_controller.is_controlled = false;
@@ -151,18 +165,17 @@ void mll::OperationController::interruptPeriodic() {
     }
 
     // MoveTypeの更新が必要か確認
-    // TODO: スラロームのときの処理が間違っていないか確認
+    // TODO: スラロームのときにも同じ処理をする？
     if ((current_operation_move == OperationMoveType::TRAPACCEL || current_operation_move == OperationMoveType::TRAPACCEL_STOP ||
-         current_operation_move == OperationMoveType::EXTRALENGTH || current_operation_move == OperationMoveType::PIVOTTURN ||
-         current_operation_move == OperationMoveType::TRAPDIAGO) &&
+         current_operation_move == OperationMoveType::EXTRALENGTH || current_operation_move == OperationMoveType::TRAPDIAGO) &&
         trajectory.getTimeStartDeceleration() <= mpl::Timer::getMilliTime() - latest_start_time) {
         // 減速開始時刻を過ぎ、終端速度以下になろうとしていれば終端距離まで維持する
         float target_velocity = target_velocity_translation;
-        if (current_operation_move == OperationMoveType::PIVOTTURN) {
-            target_velocity = misc::max(target_velocity, velocity_slowest_rotation);
-        } else {
-            target_velocity = misc::max(target_velocity, velocity_slowest_translation);
-        }
+        // if (current_operation_move == OperationMoveType::PIVOTTURN) {
+        //     target_velocity = misc::max(target_velocity, velocity_slowest_rotation);
+        // } else {
+        target_velocity = misc::max(target_velocity, velocity_slowest_translation);
+        // }
         if (trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time) <= target_velocity) {
             target_velocity_translation = target_velocity;
             if (current_operation_move != OperationMoveType::EXTRALENGTH) {
@@ -172,20 +185,15 @@ void mll::OperationController::interruptPeriodic() {
         }
     }
 
-    // 探索時の区画情報の更新
-    {
-        // 論理座標をアップデート
-        section_position.move(current_operation_move);
-    }
-
     // 終了条件: 軌跡が終了した or EXTRALENGTH で目標距離に達した or SlalomState::END
     if (((current_operation_move == OperationMoveType::TRAPACCEL || current_operation_move == OperationMoveType::TRAPACCEL_STOP ||
           current_operation_move == OperationMoveType::PIVOTTURN) &&
          trajectory.isEnd(mpl::Timer::getMilliTime() - latest_start_time)) ||
         (current_operation_move == OperationMoveType::EXTRALENGTH && target_move_distance <= latest_move_distance) ||
         slalom_state == SlalomState::END || current_operation_move == OperationMoveType::STOP) {
-        // 規定動作の配列がある場合、次の動作を読み込む
+        //
         if (current_operation_direction == cmd::OperationDirectionType::SPECIFIC) {
+            // 規定動作の配列がある場合、次の動作を読み込む
             if (operation_move_combinations_length > 0) {
                 ++operation_move_combinations_i;
                 if (operation_move_combinations_i < operation_move_combinations_length) {
@@ -203,6 +211,56 @@ void mll::OperationController::interruptPeriodic() {
                 }
             } else {
                 next_operation_move = OperationMoveType::UNDEFINED;
+            }
+            is_operation_move_changed = true;
+
+        } else if (current_operation_direction == cmd::OperationDirectionType::SEARCH) {
+            // 探索中の場合、壁センサの値から区画情報の更新をし、次の移動方向を決定
+            // 区画走行が完了し、探索時の区画情報の更新
+
+            if (current_operation_move == OperationMoveType::STOP) {
+                // まだ動き始めていない場合
+                next_operation_move = OperationMoveType::TRAPACCEL;
+                target_move_distance = 45;
+                target_velocity_translation = 0;
+            } else {
+                // 動き始めている場合
+
+                // 壁情報の更新
+                Walldata walldata = msg_format_wall_analyser.front_wall;
+                solver->map.addWall(section_position.x, section_position.y, section_position.d, walldata);
+
+                if (solver->destination.isInclude(misc::Point<uint16_t>{section_position.x, section_position.y})) {
+                    // ゴール到達の場合
+
+                    // FIXME: スタート地点に戻ってくる
+                    next_operation_move = OperationMoveType::TRAPACCEL_STOP;
+                    target_move_distance = 45;
+                    target_velocity_translation = 300;
+                } else {
+                    // ゴールではない場合
+
+                    // 次の移動方向を決定
+                    auto next_direction = solver->getNextDirectionInSearch(section_position.x, section_position.y, section_position.d);
+                    if (next_direction == FirstPersonDirection::FRONT) {
+                        next_operation_move = OperationMoveType::TRAPACCEL;
+                        target_move_distance = 90.f;
+                        target_velocity_translation = 300.f;
+                    } else if (next_direction == FirstPersonDirection::RIGHT) {
+                        next_operation_move = OperationMoveType::SLALOM90SML_RIGHT;
+                        target_velocity_translation = 300.f;
+                    } else if (next_direction == FirstPersonDirection::LEFT) {
+                        next_operation_move = OperationMoveType::SLALOM90SML_LEFT;
+                        target_velocity_translation = 300.f;
+                    } else {
+                        next_operation_move = OperationMoveType::PIVOTTURN;
+                        target_move_distance = misc::PI;
+                        target_velocity_translation = 0.f;
+                    }
+
+                    // 論理座標をアップデート
+                    section_position.move(next_operation_move);
+                }
             }
             is_operation_move_changed = true;
         }
@@ -331,7 +389,7 @@ void mll::OperationController::interruptPeriodic() {
             break;
         case OperationMoveType::TRAPACCEL:
             msg_format_motor_controller.velocity_translation = trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time);
-            msg_format_motor_controller.velocity_rotation = 0.0f;
+            msg_format_motor_controller.velocity_rotation = -1 * params->motor_control_kabe_kp * msg_format_wall_analyser.distance_from_center;
             msg_format_motor_controller.is_controlled = true;
             break;
         case OperationMoveType::TRAPACCEL_STOP:

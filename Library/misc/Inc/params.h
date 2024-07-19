@@ -101,6 +101,7 @@ struct MouseParams {
     float motor_control_rotation_kp;     // モータ制御の回転方向の P ゲイン [1]
     float motor_control_rotation_ki;     // モータ制御の回転方向の I ゲイン [1]
     float motor_control_rotation_kd;     // モータ制御の回転方向の D ゲイン [1]
+    float motor_control_kabe_kp;         // モータ制御の壁制御の P ゲイン [1]
 
     // Wall Sensor
     uint16_t wallsensor_turnon;                  // 壁センサLEDの立ち上がり待ち時間 [ns]
