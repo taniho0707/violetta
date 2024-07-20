@@ -209,6 +209,13 @@ struct WallSensorData {
     uint16_t FRONTRIGHT;
 };
 
+enum class InternalFlashSector : uint8_t {
+    SECTOR_6 = 6,
+    SECTOR_7 = 7,
+};
+
+// TODO: 内蔵FLASHの定義を書く
+
 #define SWITCH_Pin           LL_GPIO_PIN_13
 #define SWITCH_GPIO_Port     GPIOC
 #define LED2_Pin             LL_GPIO_PIN_0
