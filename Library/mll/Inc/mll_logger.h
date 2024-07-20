@@ -24,6 +24,7 @@ enum class LoggerResult : uint8_t {
 enum class LogType : uint8_t {
     MOTOR = 0,
     ENCODER = 1,
+    WALLSENSOR = 2,
     LENGTH
 };
 
@@ -39,6 +40,15 @@ struct LogFormatEncoder {
     uint32_t time;  // ログを取得した時間
     float left;     // 左モータの速度
     float right;    // 右モータの速度
+};
+
+// LogType::WALLSENSOR のデータ構造
+struct LogFormatWallsensor {
+    uint32_t time;        // ログを取得した時間
+    uint16_t frontleft;   // 前左壁センサの値
+    uint16_t left;        // 左壁センサの値
+    uint16_t right;       // 右壁センサの値
+    uint16_t frontright;  // 前右壁センサの値
 };
 
 // ログの保存先の種類を示す列挙型
