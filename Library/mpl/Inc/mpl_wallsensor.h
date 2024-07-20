@@ -12,6 +12,7 @@
 #include "mpl_conf.h"
 #include "msg_format_wallsensor.h"
 #include "msg_server.h"
+#include "params.h"
 
 namespace mpl {
 
@@ -23,6 +24,8 @@ class WallSensor {
 
     msg::MessageServer* msg_server;
     msg::MsgFormatWallsensor msg_format;
+
+    misc::MouseParams* params;
 
    public:
     void initPort();

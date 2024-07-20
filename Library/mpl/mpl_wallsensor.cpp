@@ -11,6 +11,7 @@
 
 mpl::WallSensor::WallSensor() {
     msg_server = msg::MessageServer::getInstance();
+    params = misc::Params::getInstance()->getCachePointer();
 }
 
 void mpl::WallSensor::initPort() {
@@ -114,7 +115,7 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
     // FRONTLEFT
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::FRONTLEFT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTLEFT);
-    mpl::Timer::sleepNs(500);
+    mpl::Timer::sleepNs(params->wallsensor_turnon);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::FRONTLEFT);
     buffer_bundle.FRONTLEFT = buffer_single - buffer_none;
     if (buffer_bundle.FRONTLEFT > 4096) buffer_bundle.FRONTLEFT = 0;
@@ -122,7 +123,7 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
     // LEFT
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::LEFT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::LEFT);
-    mpl::Timer::sleepNs(500);
+    mpl::Timer::sleepNs(params->wallsensor_turnon);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::LEFT);
     buffer_bundle.LEFT = buffer_single - buffer_none;
     if (buffer_bundle.LEFT > 4096) buffer_bundle.LEFT = 0;
@@ -130,7 +131,7 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
     // RIGHT
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::RIGHT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::RIGHT);
-    mpl::Timer::sleepNs(500);
+    mpl::Timer::sleepNs(params->wallsensor_turnon);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::RIGHT);
     buffer_bundle.RIGHT = buffer_single - buffer_none;
     if (buffer_bundle.RIGHT > 4096) buffer_bundle.RIGHT = 0;
@@ -138,7 +139,7 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
     // FRONTRIGHT
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::FRONTRIGHT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTRIGHT);
-    mpl::Timer::sleepNs(500);
+    mpl::Timer::sleepNs(params->wallsensor_turnon);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::FRONTRIGHT);
     buffer_bundle.FRONTRIGHT = buffer_single - buffer_none;
     if (buffer_bundle.FRONTRIGHT > 4096) buffer_bundle.FRONTRIGHT = 0;
