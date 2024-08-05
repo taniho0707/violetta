@@ -15,6 +15,10 @@
 #endif  // ifdef MOUSE_LAZULI
 
 hal::HalStatus hal::initBatteryPort() {
+#ifdef LINUX
+    return HalStatus::SUCCESS;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_LAZULI
     // REF:
     // https://github.com/STMicroelectronics/STM32CubeL4/blob/master/Projects/NUCLEO-L496ZG/Examples_LL/ADC/ADC_SingleConversion_TriggerSW/Src/main.c
@@ -35,8 +39,7 @@ hal::HalStatus hal::initBatteryPort() {
     LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     LL_RCC_SetADCClockSource(LL_RCC_ADC_CLKSOURCE_PLLSAI1);
-    LL_ADC_SetCommonClock(__LL_ADC_COMMON_INSTANCE(ADC1),
-                          LL_ADC_CLOCK_SYNC_PCLK_DIV2);
+    LL_ADC_SetCommonClock(__LL_ADC_COMMON_INSTANCE(ADC1), LL_ADC_CLOCK_SYNC_PCLK_DIV2);
 
     // LL_DMA_SetPeriphRequest(DMA2, LL_DMA_CHANNEL_2, LL_DMAMUX_REQ_ADC1);
     // LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_CHANNEL_2,
@@ -70,8 +73,7 @@ hal::HalStatus hal::initBatteryPort() {
     ADC_CommonInitStruct.CommonClock = LL_ADC_CLOCK_ASYNC_DIV8;
     ADC_CommonInitStruct.Multimode = LL_ADC_MULTI_INDEPENDENT;
     LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC1), &ADC_CommonInitStruct);
-    LL_ADC_SetCommonPathInternalCh(__LL_ADC_COMMON_INSTANCE(ADC1),
-                                   LL_ADC_PATH_INTERNAL_NONE);
+    LL_ADC_SetCommonPathInternalCh(__LL_ADC_COMMON_INSTANCE(ADC1), LL_ADC_PATH_INTERNAL_NONE);
 
     /* Disable ADC deep power down (enabled by default after reset state) */
     LL_ADC_DisableDeepPowerDown(ADC1);
@@ -84,9 +86,7 @@ hal::HalStatus hal::initBatteryPort() {
     /* Note: If system core clock frequency is below 200kHz, wait time */
     /* is only a few CPU processing cycles. */
     uint32_t wait_loop_index;
-    wait_loop_index = ((LL_ADC_DELAY_INTERNAL_REGUL_STAB_US *
-                        (SystemCoreClock / (100000 * 2))) /
-                       10);
+    wait_loop_index = ((LL_ADC_DELAY_INTERNAL_REGUL_STAB_US * (SystemCoreClock / (100000 * 2))) / 10);
     while (wait_loop_index != 0) {
         wait_loop_index--;
     }
@@ -106,14 +106,13 @@ hal::HalStatus hal::initBatteryPort() {
     while (LL_ADC_IsActiveFlag_ADRDY(ADC1) == 0);
 
     LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_10);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_10,
-                                  LL_ADC_SAMPLINGTIME_24CYCLES_5);
+    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_10, LL_ADC_SAMPLINGTIME_24CYCLES_5);
     LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_10, LL_ADC_SINGLE_ENDED);
 
     return HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     // ADC1 PA0-WKUP -> ADC1_IN0 Initialize
     LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_ADC1);
@@ -141,28 +140,25 @@ hal::HalStatus hal::initBatteryPort() {
     auto status3 = LL_ADC_REG_Init(ADC1, &ADC_REG_InitStruct);
     LL_ADC_REG_SetFlagEndOfConversion(ADC1, LL_ADC_REG_FLAG_EOC_UNITARY_CONV);
     ADC_CommonInitStruct.CommonClock = LL_ADC_CLOCK_SYNC_PCLK_DIV2;
-    auto status4 = LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC1),
-                                     &ADC_CommonInitStruct);
+    auto status4 = LL_ADC_CommonInit(__LL_ADC_COMMON_INSTANCE(ADC1), &ADC_CommonInitStruct);
     LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_8);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_8,
-                                  LL_ADC_SAMPLINGTIME_3CYCLES);
+    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_8, LL_ADC_SAMPLINGTIME_3CYCLES);
     // 上記のコードは、他の ADC での設定変更の際に影響しないようにケア必要
 
-    if (status1 != SUCCESS || status2 != SUCCESS || status3 != SUCCESS ||
-        status4 != SUCCESS) {
+    if (status1 != SUCCESS || status2 != SUCCESS || status3 != SUCCESS || status4 != SUCCESS) {
         return hal::HalStatus::ERROR;
     }
 
     LL_ADC_Enable(ADC1);
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::deinitBatteryPort() {
+#ifdef LINUX
+    return HalStatus::SUCCESS;
+#endif  // ifdef LINUX
+
 #ifdef STM32L4P5xx
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef STM32L4P5xx
@@ -170,17 +166,20 @@ hal::HalStatus hal::deinitBatteryPort() {
 #ifdef STM32F411xE
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef STM32F411xE
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::getBatteryVoltageSync(float& voltage) {
+#ifdef LINUX
+    if (plt::Observer::getInstance()->getBatteryVoltage(voltage)) {
+        return hal::HalStatus::SUCCESS;
+    } else {
+        return hal::HalStatus::ERROR;
+    }
+#endif  // ifdef LINUX
+
 #ifdef STM32L4P5xx
     LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_10);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_10,
-                                  LL_ADC_SAMPLINGTIME_24CYCLES_5);
+    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_10, LL_ADC_SAMPLINGTIME_24CYCLES_5);
     LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_10, LL_ADC_SINGLE_ENDED);
 
     // if ((LL_ADC_IsEnabled(ADC1) == 1) && (LL_ADC_IsDisableOngoing(ADC1) == 0)
@@ -188,8 +187,7 @@ hal::HalStatus hal::getBatteryVoltageSync(float& voltage) {
     LL_ADC_REG_StartConversion(ADC1);
     while (LL_ADC_IsActiveFlag_EOC(ADC1) == RESET);
     LL_ADC_ClearFlag_EOC(ADC1);
-    voltage = 5.7f /*[R/R]*/ * LL_ADC_REG_ReadConversionData12(ADC1) /
-              4095.0f /*[12bit]*/ * 3.0f /*[V]*/;
+    voltage = 5.7f /*[R/R]*/ * LL_ADC_REG_ReadConversionData12(ADC1) / 4095.0f /*[12bit]*/ * 3.0f /*[V]*/;
     // }
     // FIXME: SamplingTime を調整する
     // TODO: 正確な分圧比をパラメータとして受け取る
@@ -199,23 +197,13 @@ hal::HalStatus hal::getBatteryVoltageSync(float& voltage) {
 
 #ifdef STM32F411xE
     LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_8);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_8,
-                                  LL_ADC_SAMPLINGTIME_480CYCLES);
+    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_8, LL_ADC_SAMPLINGTIME_480CYCLES);
     // FIXME: SamplingTime を調整する
     LL_ADC_REG_StartConversionSWStart(ADC1);
     while (LL_ADC_IsActiveFlag_EOCS(ADC1) == RESET);
     LL_ADC_ClearFlag_EOCS(ADC1);
-    voltage = 2.0f /*[R/R]*/ * LL_ADC_REG_ReadConversionData12(ADC1) /
-              4095.0f /*[12bit]*/ * 3.0f /*[V]*/;
+    voltage = 2.0f /*[R/R]*/ * LL_ADC_REG_ReadConversionData12(ADC1) / 4095.0f /*[12bit]*/ * 3.0f /*[V]*/;
     // TODO: 正確な分圧比をパラメータとして受け取る
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32F411xE
-
-#ifdef LINUX
-    if (plt::Observer::getInstance()->getBatteryVoltage(voltage)) {
-        return hal::HalStatus::SUCCESS;
-    } else {
-        return hal::HalStatus::ERROR;
-    }
-#endif  // ifdef LINUX
 }

@@ -10,16 +10,16 @@
 #include "mpl_debug.h"
 #include "mpl_encoder.h"
 #include "mpl_imu.h"
-#include "mpl_led.h"
+// #include "mpl_led.h"
 #include "mpl_motor.h"
-#include "mpl_speaker.h"
+// #include "mpl_speaker.h"
 #include "mpl_wallsensor.h"
 
 // 追加で必要なライブラリ : MLL
 #include "mll_localizer.h"
 #include "mll_logger.h"
 #include "mll_motor_controller.h"
-#include "mll_operation_controller.h"
+#include "mll_operation_coordinator.h"
 #include "mll_wall_analyser.h"
 
 void mpl::Timer::run1() {
@@ -53,8 +53,8 @@ void mpl::Timer::run3() {
     static auto localizer = mll::Localizer::getInstance();
     localizer->interruptPeriodic();
 
-    static auto operationcontroller = mll::OperationController::getInstance();
-    operationcontroller->interruptPeriodic();
+    static auto operationcoordinator = mll::OperationCoordinator::getInstance();
+    operationcoordinator->interruptPeriodic();
 
     static auto motorcontroller = mll::MotorController::getInstance();
     motorcontroller->interruptPeriodic();

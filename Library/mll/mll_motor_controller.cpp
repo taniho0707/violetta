@@ -5,6 +5,15 @@
 //******************************************************************************
 #include "mll_motor_controller.h"
 
+#ifdef STM32
+#include "arm_math.h"
+#endif
+
+#ifdef LINUX
+#include "arm_math_linux.h"
+using namespace plt;
+#endif
+
 #include "mpl_debug.h"
 #include "mpl_timer.h"
 #include "msg_format_battery.h"
@@ -13,8 +22,6 @@
 
 mll::MotorController::MotorController() {
     enabled = false;
-    target_velocity_translation = 0;
-    target_velocity_rotation = 0;
 }
 
 void mll::MotorController::init() {
@@ -22,6 +29,19 @@ void mll::MotorController::init() {
 
     msg_server = msg::MessageServer::getInstance();
     cmd_server = cmd::CommandServer::getInstance();
+}
+
+float mll::MotorController::calcDistanceToTarget(float current_x, float current_y, float target_x, float target_y) {
+    float dx = target_x - current_x;
+    float dy = target_y - current_y;
+    float distance;
+    arm_sqrt_f32(dx * dx + dy * dy, &distance);
+    return distance;
+}
+
+float mll::MotorController::calcAngleToTarget(float current_angle, float target_angle) {
+    // return target_angle - current_angle;
+    return current_angle - target_angle;
 }
 
 void mll::MotorController::startControl() {
@@ -40,17 +60,10 @@ void mll::MotorController::stopControl() {
     msg_server->sendMessage(msg::ModuleId::MOTOR, &msg_motor);
 }
 
-void mll::MotorController::setVelocityTransition(float velocity_transition) {
-    target_velocity_translation = velocity_transition;
-}
-
-void mll::MotorController::setVelocityRotation(float velocity_rotation) {
-    target_velocity_rotation = velocity_rotation;
-}
-
-void mll::MotorController::setVelocity(float velocity_transition, float velocity_rotation) {
-    setVelocityTransition(velocity_transition);
-    setVelocityRotation(velocity_rotation);
+void mll::MotorController::setTargetPosition(float target_x, float target_y, float target_angle) {
+    this->target_x = target_x;
+    this->target_y = target_y;
+    this->target_angle = target_angle;
 }
 
 void mll::MotorController::resetIntegralTransition() {
@@ -67,8 +80,9 @@ void mll::MotorController::resetIntegral() {
 }
 
 void mll::MotorController::setStay() {
+    msg_server->receiveMessage(msg::ModuleId::LOCALIZER, &msg_localizer);
     resetIntegral();
-    setVelocity(0, 0);
+    setTargetPosition(msg_localizer.position_x, msg_localizer.position_y, msg_localizer.position_theta);
     startControl();
 }
 
@@ -86,7 +100,7 @@ void mll::MotorController::interruptPeriodic() {
         stopControl();
         return;
     }
-    setVelocity(msg_motor_controller.velocity_translation, msg_motor_controller.velocity_rotation);
+    setTargetPosition(msg_motor_controller.target_x, msg_motor_controller.target_y, msg_motor_controller.target_angle);
 
     // TODO: msg::ModuleId::ERROR_CONTROL を受け、エラーが発生している場合はモーター制御を停止する
     if (integral_rotation > 300.f) {
@@ -94,10 +108,16 @@ void mll::MotorController::interruptPeriodic() {
         return;
     }
 
+    [[maybe_unused]]
     const uint8_t params_index = 0;  // FIXME: cmd か msg から取得する
 
     // translation 成分の計算、出力は電流 [mA]
-    const float error_translation = target_velocity_translation - msg_localizer.velocity_translation;
+    // const float error_translation = calcDistanceToTarget(msg_localizer.position_x, msg_localizer.position_y, target_x, target_y);
+    const auto error_vector =
+        misc::calcErrorVector(misc::Point<float>{msg_localizer.position_x, msg_localizer.position_y}, misc::Point<float>{target_x, target_y});
+    const auto direction_unit_vector = misc::calcDirectionUnitVector(msg_localizer.position_theta);
+    const auto error_translation = misc::calcProjectionToDirection(error_vector, direction_unit_vector);
+    // FIXME: モーター制御部分のみ速度制御に置き換える
     integral_translation += error_translation;  // FIXME: サンプリング周期をパラメータか固定値から読み出す
     const float error_diff_translation = error_translation - last_differential_translation;
     last_differential_translation = error_translation;
@@ -106,7 +126,7 @@ void mll::MotorController::interruptPeriodic() {
                                       params->motor_control_translation_kd * error_diff_translation;
 
     // rotation 成分の計算、出力は電流 [mA]
-    const float error_rotation = msg_localizer.velocity_rotation - target_velocity_rotation;  // FIXME: 逆になっているので戻す
+    const float error_rotation = calcAngleToTarget(msg_localizer.position_theta, target_angle);
     integral_rotation += error_rotation;  // FIXME: サンプリング周期をパラメータか固定値から読み出す
     const float error_diff_rotation = error_rotation - last_differential_rotation;
     last_differential_rotation = error_rotation;
@@ -122,10 +142,9 @@ void mll::MotorController::interruptPeriodic() {
 
     // static auto debug = mpl::Debug::getInstance();
     // cmd::CommandFormatDebugTx cmd_debug_tx = {};
-    // cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
-    //                                  "%10d, %f, %f\n",
-    //                                  mpl::Timer::getMicroTime(),
-    //                                  target_velocity_translation, target_velocity_rotation);
+    // cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "%10d, % 5.2f, % 5.2f, % 5.2f, % 5.2f, % 5.2f, % 5.2f, % 5.2f\n",
+    //                                  mpl::Timer::getMicroTime(), msg_localizer.position_x, msg_localizer.position_y, msg_localizer.position_theta,
+    //                                  error_vector.x, error_vector.y, error_translation, control_translation);
     // cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
 }
 

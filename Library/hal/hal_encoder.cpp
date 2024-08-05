@@ -19,6 +19,10 @@
 #endif  // ifdef STM32F411xE
 
 hal::HalStatus hal::initEncoderPort() {
+#ifdef LINUX
+    return HalStatus::SUCCESS;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_LAZULI
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -94,7 +98,7 @@ hal::HalStatus hal::initEncoderPort() {
     return HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -128,13 +132,11 @@ hal::HalStatus hal::initEncoderPort() {
     // NVIC_EnableIRQ(TIM2_IRQn);
 
     LL_TIM_SetEncoderMode(TIM2, LL_TIM_ENCODERMODE_X4_TI12);
-    LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH1,
-                             LL_TIM_ACTIVEINPUT_DIRECTTI);
+    LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ACTIVEINPUT_DIRECTTI);
     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ICPSC_DIV1);
     LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_FILTER_FDIV1);
     LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_POLARITY_RISING);
-    LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH2,
-                             LL_TIM_ACTIVEINPUT_DIRECTTI);
+    LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ACTIVEINPUT_DIRECTTI);
     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
     LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_FILTER_FDIV1);
     LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_POLARITY_RISING);
@@ -160,13 +162,11 @@ hal::HalStatus hal::initEncoderPort() {
     LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     LL_TIM_SetEncoderMode(TIM3, LL_TIM_ENCODERMODE_X4_TI12);
-    LL_TIM_IC_SetActiveInput(TIM3, LL_TIM_CHANNEL_CH1,
-                             LL_TIM_ACTIVEINPUT_DIRECTTI);
+    LL_TIM_IC_SetActiveInput(TIM3, LL_TIM_CHANNEL_CH1, LL_TIM_ACTIVEINPUT_DIRECTTI);
     LL_TIM_IC_SetPrescaler(TIM3, LL_TIM_CHANNEL_CH1, LL_TIM_ICPSC_DIV1);
     LL_TIM_IC_SetFilter(TIM3, LL_TIM_CHANNEL_CH1, LL_TIM_IC_FILTER_FDIV1);
     LL_TIM_IC_SetPolarity(TIM3, LL_TIM_CHANNEL_CH1, LL_TIM_IC_POLARITY_RISING);
-    LL_TIM_IC_SetActiveInput(TIM3, LL_TIM_CHANNEL_CH2,
-                             LL_TIM_ACTIVEINPUT_DIRECTTI);
+    LL_TIM_IC_SetActiveInput(TIM3, LL_TIM_CHANNEL_CH2, LL_TIM_ACTIVEINPUT_DIRECTTI);
     LL_TIM_IC_SetPrescaler(TIM3, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
     LL_TIM_IC_SetFilter(TIM3, LL_TIM_CHANNEL_CH2, LL_TIM_IC_FILTER_FDIV1);
     LL_TIM_IC_SetPolarity(TIM3, LL_TIM_CHANNEL_CH2, LL_TIM_IC_POLARITY_RISING);
@@ -191,13 +191,13 @@ hal::HalStatus hal::initEncoderPort() {
         return hal::HalStatus::ERROR;
     }
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::deinitEncoderPort() {
+#ifdef LINUX
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_LAZULI
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef MOUSE_LAZULI
@@ -205,27 +205,9 @@ hal::HalStatus hal::deinitEncoderPort() {
 #ifdef MOUSE_ZIRCONIA2KAI
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::getEncoderSync(EncoderData& data) {
-#ifdef MOUSE_LAZULI
-    data.LEFT = LL_TIM_GetCounter(TIM3);
-    data.RIGHT = LL_TIM_GetCounter(TIM4);
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef MOUSE_LAZULI
-
-#ifdef MOUSE_ZIRCONIA2KAI
-    data.LEFT = LL_TIM_GetCounter(TIM2) - 32768;
-    LL_TIM_SetCounter(TIM2, 32768);
-    data.RIGHT = LL_TIM_GetCounter(TIM3) - 32768;
-    LL_TIM_SetCounter(TIM3, 32768);
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef MOUSE_ZIRCONIA2KAI
-
 #ifdef LINUX
     if (plt::Observer::getInstance()->getEncoder(data)) {
         return hal::HalStatus::SUCCESS;
@@ -233,4 +215,18 @@ hal::HalStatus hal::getEncoderSync(EncoderData& data) {
         return hal::HalStatus::ERROR;
     }
 #endif  // ifdef LINUX
+
+#ifdef MOUSE_LAZULI
+    data.LEFT = LL_TIM_GetCounter(TIM3);
+    data.RIGHT = LL_TIM_GetCounter(TIM4);
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_LAZULI
+
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
+    data.LEFT = LL_TIM_GetCounter(TIM2) - 32768;
+    LL_TIM_SetCounter(TIM2, 32768);
+    data.RIGHT = LL_TIM_GetCounter(TIM3) - 32768;
+    LL_TIM_SetCounter(TIM3, 32768);
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef MOUSE_ZIRCONIA2KAI
 }

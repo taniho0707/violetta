@@ -5,6 +5,7 @@
 //******************************************************************************
 #pragma once
 
+#include "mll_position.h"
 #include "stdint.h"
 
 namespace mll {
@@ -38,18 +39,19 @@ class Trajectory {
     uint16_t t_2;    // 減速開始時刻 [ms]
     uint16_t t_end;  // 終了時刻 [ms]
 
-    bool availableConstantVelocity() const;  // 等速度区間が存在するか
-    bool include_constant_velocity;          // 等速度区間が存在するかのキャッシュ
+    bool availableConstantVelocity();  // 等速度区間が存在するか
+    bool include_constant_velocity;    // 等速度区間が存在するかのキャッシュ
 
    public:
     Trajectory();
 
-    void init(TrajectoryCalcType calc, TrajectoryFormType form,
-              float a, float d, float v_start, float v_max, float v_end);
+    void init(TrajectoryCalcType calc, TrajectoryFormType form, float a, float d, float v_start, float v_max, float v_end);
 
     float getAccel(const uint32_t t) const;
     float getVelocity(const uint32_t t) const;
     float getDistance(const uint32_t t) const;
+
+    MousePhysicalPosition getPosition(const MousePhysicalPosition start_position, const uint32_t t) const;
 
     bool isEnd(const uint32_t time) const;
 

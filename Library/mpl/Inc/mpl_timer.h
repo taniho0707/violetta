@@ -17,10 +17,10 @@
 // #include "stm32l4xx_ll_tim.h"
 // #endif  // ifdef STM32L4P5xx
 
-// #ifdef LINUX
-// #include <chrono>
-// #include <cstdint>
-// #endif
+#ifdef LINUX
+#include <chrono>
+#include <cstdint>
+#endif
 
 namespace mpl {
 

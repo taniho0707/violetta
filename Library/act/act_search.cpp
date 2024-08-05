@@ -8,7 +8,7 @@
 #include "cmd_server.h"
 #include "mll_localizer.h"
 #include "mll_motor_controller.h"
-#include "mll_operation_controller.h"
+#include "mll_operation_coordinator.h"
 #include "mll_wall_analyser.h"
 #include "mpl_battery.h"
 #include "mpl_debug.h"
@@ -102,8 +102,7 @@ Status SearchActivity::run() {
     auto localizer = mll::Localizer::getInstance();
     localizer->init();
 
-    auto operation_controller = mll::OperationController::getInstance();
-    operation_controller->init();
+    auto operation_coordinator = mll::OperationCoordinator::getInstance();
 
     static auto params_cache = misc::Params::getInstance()->getCachePointer();
     misc::Params::getInstance()->load(misc::ParameterDestinationType::HARDCODED);
@@ -125,9 +124,13 @@ Status SearchActivity::run() {
     motor_controller->setStay();
     mpl::Timer::sleepMs(2000);
 
-    auto cmd_format_operation_direction = cmd::CommandFormatOperationDirection();
-    cmd_format_operation_direction.type = cmd::OperationDirectionType::SEARCH;
-    cmd_server->push(cmd::CommandId::OPERATION_DIRECTION, &cmd_format_operation_direction);
+    // auto cmd_format_operation_direction = cmd::CommandFormatOperationDirection();
+    // cmd_format_operation_direction.type = cmd::OperationDirectionType::SEARCH;
+    // cmd_server->push(cmd::CommandId::OPERATION_DIRECTION, &cmd_format_operation_direction);
+
+    operation_coordinator->enableMotorControl();
+    operation_coordinator->runSearch(mll::AlgorithmType::LEFT_HAND);
+
     while (true);
 }
 

@@ -16,13 +16,16 @@
 #endif  // ifdef STM32F411xE
 
 hal::HalStatus hal::initTimer() {
+#ifdef LINUX
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
 
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM6);
 
-    NVIC_SetPriority(TIM6_DAC_IRQn,
-                     NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
+    NVIC_SetPriority(TIM6_DAC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
     NVIC_EnableIRQ(TIM6_DAC_IRQn);
 
     TIM_InitStruct.Prescaler = 1 - 1;
@@ -44,8 +47,7 @@ hal::HalStatus hal::initTimer() {
 
     // TIM5 の割り込みを有効化する
     // 割り込み周期：250us
-    NVIC_SetPriority(TIM5_IRQn,
-                     NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
+    NVIC_SetPriority(TIM5_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
     NVIC_EnableIRQ(TIM5_IRQn);
 
     TIM_InitStruct.Prescaler = 0;
@@ -64,15 +66,14 @@ hal::HalStatus hal::initTimer() {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
 
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM5);
 
     // TIM5 の割り込みを有効化する
     // 割り込み周期：250us
-    NVIC_SetPriority(TIM5_IRQn,
-                     NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
+    NVIC_SetPriority(TIM5_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 0, 0));
     NVIC_EnableIRQ(TIM5_IRQn);
 
     TIM_InitStruct.Prescaler = 0;
@@ -90,13 +91,13 @@ hal::HalStatus hal::initTimer() {
 
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return HalStatus::SUCCESS;
-#endif
 }
 
 uint32_t hal::getTimerCount() {
+#ifdef LINUX
+    return 0;
+#endif
+
 #ifdef MOUSE_VIOLETTA
     return 0;
 #endif  // ifdef MOUSE_VIOLETTA
@@ -105,13 +106,9 @@ uint32_t hal::getTimerCount() {
     return LL_TIM_GetCounter(TIM5);
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     return LL_TIM_GetCounter(TIM5);
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return 0;
-#endif
 }
 
 #ifdef LINUX

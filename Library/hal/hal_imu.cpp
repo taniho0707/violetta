@@ -24,6 +24,10 @@
 #endif  // ifdef STM32F411xE
 
 hal::HalStatus hal::initImuPort() {
+#ifdef LINUX
+    return HalStatus::SUCCESS;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_VIOLETTA
@@ -41,8 +45,7 @@ hal::HalStatus hal::initImuPort() {
     PB4 (NJTRST)   ------> SPI3_MISO
     PB5   ------> SPI3_MOSI
     */
-    GPIO_InitStruct.Pin =
-        IMU_FRAM_SCK_Pin | IMU_FRAM_MISO_Pin | IMU_FRAM_MOSI_Pin;
+    GPIO_InitStruct.Pin = IMU_FRAM_SCK_Pin | IMU_FRAM_MISO_Pin | IMU_FRAM_MOSI_Pin;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
     GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -196,13 +199,13 @@ hal::HalStatus hal::initImuPort() {
         return hal::HalStatus::ERROR;
     }
 #endif  // ifdef STM32F411xE
-
-#ifdef LINUX
-    return HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::deinitImuPort() {
+#ifdef LINUX
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef MOUSE_VIOLETTA
@@ -214,13 +217,13 @@ hal::HalStatus hal::deinitImuPort() {
 #ifdef STM32F411xE
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef STM32F411xE
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::read8bitImuSync(uint8_t address, uint8_t& data) {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_LAZULI
     LL_GPIO_ResetOutputPin(GPIOA, IMU_CS_Pin);
     uint8_t tx_data = address | 0x80;
@@ -239,7 +242,7 @@ hal::HalStatus hal::read8bitImuSync(uint8_t address, uint8_t& data) {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     // if (LL_SPI_IsActiveFlag_RXNE(SPI2)) LL_SPI_ReceiveData16(SPI2);
     // if (!LL_SPI_IsEnabled(SPI2)) LL_SPI_Enable(SPI2);
 
@@ -262,6 +265,10 @@ hal::HalStatus hal::read8bitImuSync(uint8_t address, uint8_t& data) {
 }
 
 hal::HalStatus hal::write8bitImuSync(uint8_t address, uint8_t data) {
+#ifdef LINUX
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_LAZULI
     LL_GPIO_ResetOutputPin(GPIOA, IMU_CS_Pin);
     uint8_t tx_data = address;
@@ -280,7 +287,7 @@ hal::HalStatus hal::write8bitImuSync(uint8_t address, uint8_t data) {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     // if (LL_SPI_IsActiveFlag_RXNE(SPI2)) LL_SPI_ReceiveData16(SPI2);
     // if (!LL_SPI_IsEnabled(SPI2)) LL_SPI_Enable(SPI2);
 
@@ -309,8 +316,7 @@ hal::HalStatus hal::whoamiImu() {
 
 #if defined(MOUSE_LAZULI) || defined(MOUSE_ZIRCONIA2KAI)
     uint8_t rx_data;
-    if (read8bitImuSync(static_cast<uint8_t>(hal::GyroCommands::WHO_AM_I),
-                        rx_data) == hal::HalStatus::SUCCESS) {
+    if (read8bitImuSync(static_cast<uint8_t>(hal::GyroCommands::WHO_AM_I), rx_data) == hal::HalStatus::SUCCESS) {
         if (rx_data == 0x6B) {
             return hal::HalStatus::SUCCESS;
         } else {
@@ -320,13 +326,13 @@ hal::HalStatus hal::whoamiImu() {
         return hal::HalStatus::ERROR;
     }
 #endif  // ifdef MOUSE_LAZULI || MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::setImuConfig() {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef MOUSE_VIOLETTA
@@ -372,7 +378,7 @@ hal::HalStatus hal::setImuConfig() {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     write8bitImuSync(static_cast<uint8_t>(GyroCommands::CTRL3_C),
                      0x01);  // Software reset
     LL_mDelay(100);
@@ -412,13 +418,17 @@ hal::HalStatus hal::setImuConfig() {
     //                  0x00);  // AccHPF Disable
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return hal::HalStatus::NOIMPLEMENT;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::getImuDataSync(ImuData& data) {
+#ifdef LINUX
+    if (plt::Observer::getInstance()->getImuData(data)) {
+        return hal::HalStatus::SUCCESS;
+    } else {
+        return hal::HalStatus::ERROR;
+    }
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_VIOLETTA
@@ -427,39 +437,25 @@ hal::HalStatus hal::getImuDataSync(ImuData& data) {
     uint8_t rx_data_l, rx_data_h;
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUT_TEMP_L), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUT_TEMP_H), rx_data_h);
-    data.OUT_TEMP =
-        static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) |
-                             (static_cast<uint16_t>(rx_data_l) & 0x00FF));
+    data.OUT_TEMP = static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_L_G), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_H_G), rx_data_h);
-    data.OUT_X_G =
-        static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) |
-                             (static_cast<uint16_t>(rx_data_l) & 0x00FF));
+    data.OUT_X_G = static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_L_G), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_H_G), rx_data_h);
-    data.OUT_Y_G =
-        static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) |
-                             (static_cast<uint16_t>(rx_data_l) & 0x00FF));
+    data.OUT_Y_G = static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_L_G), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_H_G), rx_data_h);
-    data.OUT_Z_G =
-        static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) |
-                             (static_cast<uint16_t>(rx_data_l) & 0x00FF));
+    data.OUT_Z_G = static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_L_A), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_H_A), rx_data_h);
-    data.OUT_X_A =
-        static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) |
-                             (static_cast<uint16_t>(rx_data_l) & 0x00FF));
+    data.OUT_X_A = static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_L_A), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_H_A), rx_data_h);
-    data.OUT_Y_A =
-        static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) |
-                             (static_cast<uint16_t>(rx_data_l) & 0x00FF));
+    data.OUT_Y_A = static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_L_A), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_H_A), rx_data_h);
-    data.OUT_Z_A =
-        static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) |
-                             (static_cast<uint16_t>(rx_data_l) & 0x00FF));
+    data.OUT_Z_A = static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF));
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
@@ -468,47 +464,25 @@ hal::HalStatus hal::getImuDataSync(ImuData& data) {
     uint8_t rx_data_l, rx_data_h;
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUT_TEMP_L), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUT_TEMP_H), rx_data_h);
-    data.OUT_TEMP = (static_cast<float>(static_cast<int16_t>(
-        (static_cast<uint16_t>(rx_data_h) << 8) |
-        (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
+    data.OUT_TEMP = (static_cast<float>(static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_L_G), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_H_G), rx_data_h);
-    data.OUT_X_G = (static_cast<float>(static_cast<int16_t>(
-        (static_cast<uint16_t>(rx_data_h) << 8) |
-        (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
+    data.OUT_X_G = (static_cast<float>(static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_L_G), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_H_G), rx_data_h);
-    data.OUT_Y_G = (static_cast<float>(static_cast<int16_t>(
-        (static_cast<uint16_t>(rx_data_h) << 8) |
-        (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
+    data.OUT_Y_G = (static_cast<float>(static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_L_G), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_H_G), rx_data_h);
-    data.OUT_Z_G = (static_cast<float>(static_cast<int16_t>(
-        (static_cast<uint16_t>(rx_data_h) << 8) |
-        (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
+    data.OUT_Z_G = (static_cast<float>(static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_L_A), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTX_H_A), rx_data_h);
-    data.OUT_X_A = (static_cast<float>(static_cast<int16_t>(
-        (static_cast<uint16_t>(rx_data_h) << 8) |
-        (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
+    data.OUT_X_A = (static_cast<float>(static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_L_A), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTY_H_A), rx_data_h);
-    data.OUT_Y_A = (static_cast<float>(static_cast<int16_t>(
-        (static_cast<uint16_t>(rx_data_h) << 8) |
-        (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
+    data.OUT_Y_A = (static_cast<float>(static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_L_A), rx_data_l);
     read8bitImuSync(static_cast<uint8_t>(GyroCommands::OUTZ_H_A), rx_data_h);
-    data.OUT_Z_A = (static_cast<float>(static_cast<int16_t>(
-        (static_cast<uint16_t>(rx_data_h) << 8) |
-        (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
+    data.OUT_Z_A = (static_cast<float>(static_cast<int16_t>((static_cast<uint16_t>(rx_data_h) << 8) | (static_cast<uint16_t>(rx_data_l) & 0x00FF))));
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    if (plt::Observer::getInstance()->getImuData(data)) {
-        return hal::HalStatus::SUCCESS;
-    } else {
-        return hal::HalStatus::ERROR;
-    }
-#endif  // ifdef LINUX
 }

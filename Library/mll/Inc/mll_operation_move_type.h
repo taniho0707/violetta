@@ -30,8 +30,8 @@ enum class OperationMoveType : uint8_t {
     TRAPACCEL,
     TRAPACCEL_STOP,
     PIVOTTURN,
-    TRAPDIAGO,
-    EXTRALENGTH,
+    // TRAPDIAGO,
+    // EXTRALENGTH,
     WAIT,
     LENGTH,
     UNDEFINED
@@ -40,6 +40,13 @@ enum class OperationMoveType : uint8_t {
 struct OperationMoveCombination {
     OperationMoveType type;
     float distance;  // 距離、角度、秒数など
+};
+
+enum class SlalomState : uint8_t {
+    BEFORE = 0,
+    TURN,
+    AFTER,
+    END,
 };
 
 }  // namespace mll

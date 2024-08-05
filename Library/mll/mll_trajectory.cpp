@@ -5,7 +5,15 @@
 //******************************************************************************
 #include "mll_trajectory.h"
 
+#ifdef STM32
 #include "arm_math.h"
+#endif
+
+#ifdef LINUX
+#include "arm_math_linux.h"
+using namespace plt;
+#endif
+
 #include "stdint.h"
 #include "util.h"
 
@@ -24,7 +32,8 @@ Trajectory::Trajectory() {
     t_end = 0;
 }
 
-bool Trajectory::availableConstantVelocity() const {
+// FIXME: キャッシュを更新する
+bool Trajectory::availableConstantVelocity() {
     if (form == TrajectoryFormType::TRAPEZOID) {
         if (v_start == v_end) {
             return (v_max * v_max - v_start * v_start) / misc::abs(accel) <= misc::abs(distance);
@@ -36,8 +45,7 @@ bool Trajectory::availableConstantVelocity() const {
     }
 }
 
-void Trajectory::init(TrajectoryCalcType calc, TrajectoryFormType form,
-                      float a, float d, float v_start, float v_max, float v_end) {
+void Trajectory::init(TrajectoryCalcType calc, TrajectoryFormType form, float a, float d, float v_start, float v_max, float v_end) {
     this->calc = calc;
     this->form = form;
 
@@ -104,6 +112,11 @@ float Trajectory::getVelocity(const uint32_t t) const {
 float Trajectory::getDistance(const uint32_t t) const {
     // TODO: IMPLEMENT
     return 0.0f;
+}
+
+mll::MousePhysicalPosition Trajectory::getPosition(const mll::MousePhysicalPosition start_position, const uint32_t t) const {
+    // TODO: Implement
+    return mll::MousePhysicalPosition();
 }
 
 bool Trajectory::isEnd(const uint32_t time) const {

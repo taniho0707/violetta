@@ -7,6 +7,14 @@
 
 #include "stdint.h"
 
+#ifdef STM32
+#include "arm_math.h"
+#endif
+
+#ifdef LINUX
+#include <cmath>
+#endif
+
 namespace misc {
 
 #undef PI
@@ -73,6 +81,30 @@ struct Point {
     T x;
     T y;
 };
+
+// 目標位置との差分ベクトルを計算する
+inline misc::Point<float> calcErrorVector(misc::Point<float> current_position, misc::Point<float> target_position) {
+    return misc::Point<float>{target_position.x - current_position.x, target_position.y - current_position.y};
+}
+
+// マウス進行方向の単位ベクトルを計算する
+inline misc::Point<float> calcDirectionUnitVector(float angle) {
+#ifdef STM32
+    return misc::Point<float>{arm_sin_f32(angle), arm_cos_f32(angle)};
+#else
+    return misc::Point<float>{sin(angle), cos(angle)};
+#endif
+}
+
+// マウス進行方向へのスカラー射影を計算する
+inline float calcProjectionToDirection(misc::Point<float> error_vector, misc::Point<float> direction_unit_vector) {
+    return error_vector.x * direction_unit_vector.x + error_vector.y * direction_unit_vector.y;
+}
+
+// マウス進行方向へのスカラー反射影を計算する
+inline float calcReflectionToDirection(misc::Point<float> error_vector, misc::Point<float> direction_unit_vector) {
+    return error_vector.x * direction_unit_vector.y - error_vector.y * direction_unit_vector.x;
+}
 
 // 優先度無しで、ヒープ領域を使用しないキュー
 template <typename T, uint16_t SIZE>

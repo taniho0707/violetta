@@ -5,7 +5,15 @@
 //******************************************************************************
 #include "mll_localizer.h"
 
+#ifdef STM32
 #include "arm_math.h"
+#endif
+
+#ifdef LINUX
+#include "arm_math_linux.h"
+using namespace plt;
+#endif
+
 #include "msg_format_encoder.h"
 #include "msg_format_imu.h"
 #include "msg_format_localizer.h"
@@ -47,7 +55,7 @@ void mll::Localizer::interruptPeriodic() {
     msg_server->receiveMessage(msg::ModuleId::WALLSENSOR, &msg_wallsensor);
 
     // ジャイロの値を使って角度方向を推定
-    float gyro_yaw_vel = msg_imu.gyro_yaw * PI / 180.f;                        // [radian/s]
+    float gyro_yaw_vel = msg_imu.gyro_yaw * misc::PI / 180.f;                  // [radian/s]
     float gyro_yaw_accel = (gyro_yaw_vel - current_status.velocity_rotation);  // [radian/s^2]
     float gyro_yaw_pos_delta = gyro_yaw_vel / 1000.f;                          // [radian]
     current_status.accel_rotation = gyro_yaw_accel;

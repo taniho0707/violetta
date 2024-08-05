@@ -27,8 +27,11 @@ class MotorController {
 
     misc::MouseParams* params;
 
-    float target_velocity_translation;
-    float target_velocity_rotation;
+    float target_x;
+    float target_y;
+    float target_dif_distance;
+    float target_angle;
+    float target_dif_angle;
 
     // MotorController によるモーター制御有効フラグ
     bool enabled;
@@ -41,6 +44,12 @@ class MotorController {
     float last_differential_translation;
     float last_differential_rotation;
 
+    // 【目標位置と現在位置の差分を計算】
+    // 目標距離に対して遅れている場合が正
+    float calcDistanceToTarget(float current_x, float current_y, float target_x, float target_y);
+    // 反時計回りが正
+    float calcAngleToTarget(float current_angle, float target_angle);
+
    public:
     void init();
 
@@ -49,10 +58,8 @@ class MotorController {
     // モーター制御を無効化
     void stopControl();
 
-    // 速度・角速度を設定する
-    void setVelocityTransition(float velocity_transition);
-    void setVelocityRotation(float velocity_rotation);
-    void setVelocity(float velocity_transition, float velocity_rotation);
+    // 目標位置を設定する
+    void setTargetPosition(float target_x, float target_y, float target_angle);
 
     //////////////////////////////////
     //  制御内部の状態に関する実装  //

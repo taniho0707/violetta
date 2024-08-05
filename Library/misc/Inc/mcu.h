@@ -27,4 +27,14 @@ inline uint8_t getUid(uint32_t* uid) {
 }
 #endif  // STM32
 
+#ifdef LINUX
+// FIXME: return dummy uid
+inline uint8_t getUid(uint32_t* uid) {
+    uid[0] = 0;
+    uid[1] = 0;
+    uid[2] = 0;
+    return 3;
+}
+#endif  // LINUX
+
 }  // namespace misc

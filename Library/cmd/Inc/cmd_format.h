@@ -82,6 +82,7 @@ struct CommandFormatDebugRx {
 
 enum class OperationDirectionType : uint8_t {
     STOP = 0,
+    STAY,
     SEARCH,
     RUN,
     SPECIFIC,

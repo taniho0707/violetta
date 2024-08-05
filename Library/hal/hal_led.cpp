@@ -20,6 +20,10 @@
 #endif  // ifdef STM32F411xE
 
 hal::HalStatus hal::initLedPort(InitializeType type) {
+#ifdef LINUX
+    return HalStatus::SUCCESS;
+#endif
+
 #ifdef MOUSE_VIOLETTA
     GPIO_TypeDef* gpio_port;
     uint16_t gpio_channel;
@@ -182,36 +186,22 @@ hal::HalStatus hal::initLedPort(InitializeType type) {
         return hal::HalStatus::SUCCESS;
     } else if (type == InitializeType::Dma) {
         LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_7, LL_DMAMUX_REQ_I2C1_RX);
-        LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_7,
-                                        LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-        LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_7,
-                                       LL_DMA_PRIORITY_LOW);
-        LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_7,
-                       LL_DMA_MODE_NORMAL);
-        LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_7,
-                                LL_DMA_PERIPH_NOINCREMENT);
-        LL_DMA_SetMemoryIncMode(DMA1,
-                                LL_DMA_CHANNEL_7, LL_DMA_MEMORY_INCREMENT);
-        LL_DMA_SetPeriphSize(DMA1,
-                             LL_DMA_CHANNEL_7, LL_DMA_PDATAALIGN_BYTE);
-        LL_DMA_SetMemorySize(DMA1,
-                             LL_DMA_CHANNEL_7, LL_DMA_MDATAALIGN_BYTE);
+        LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_7, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+        LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_7, LL_DMA_PRIORITY_LOW);
+        LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_7, LL_DMA_MODE_NORMAL);
+        LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_7, LL_DMA_PERIPH_NOINCREMENT);
+        LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_7, LL_DMA_MEMORY_INCREMENT);
+        LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_7, LL_DMA_PDATAALIGN_BYTE);
+        LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_7, LL_DMA_MDATAALIGN_BYTE);
 
         LL_DMA_SetPeriphRequest(DMA2, LL_DMA_CHANNEL_1, LL_DMAMUX_REQ_I2C1_TX);
-        LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_CHANNEL_1,
-                                        LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
-        LL_DMA_SetChannelPriorityLevel(DMA2, LL_DMA_CHANNEL_1,
-                                       LL_DMA_PRIORITY_LOW);
-        LL_DMA_SetMode(DMA2, LL_DMA_CHANNEL_1,
-                       LL_DMA_MODE_NORMAL);
-        LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_CHANNEL_1,
-                                LL_DMA_PERIPH_NOINCREMENT);
-        LL_DMA_SetMemoryIncMode(DMA2,
-                                LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT);
-        LL_DMA_SetPeriphSize(DMA2,
-                             LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_BYTE);
-        LL_DMA_SetMemorySize(DMA2,
-                             LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_BYTE);
+        LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_CHANNEL_1, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+        LL_DMA_SetChannelPriorityLevel(DMA2, LL_DMA_CHANNEL_1, LL_DMA_PRIORITY_LOW);
+        LL_DMA_SetMode(DMA2, LL_DMA_CHANNEL_1, LL_DMA_MODE_NORMAL);
+        LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_CHANNEL_1, LL_DMA_PERIPH_NOINCREMENT);
+        LL_DMA_SetMemoryIncMode(DMA2, LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT);
+        LL_DMA_SetPeriphSize(DMA2, LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_BYTE);
+        LL_DMA_SetMemorySize(DMA2, LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_BYTE);
 
         NVIC_SetPriority(DMA1_Channel7_IRQn, 7);
         NVIC_EnableIRQ(DMA1_Channel7_IRQn);
@@ -225,11 +215,9 @@ hal::HalStatus hal::initLedPort(InitializeType type) {
         LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_7);
         LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_1);
 
-        NVIC_SetPriority(I2C1_EV_IRQn,
-                         NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
+        NVIC_SetPriority(I2C1_EV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
         NVIC_EnableIRQ(I2C1_EV_IRQn);
-        NVIC_SetPriority(I2C1_ER_IRQn,
-                         NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
+        NVIC_SetPriority(I2C1_ER_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
         NVIC_EnableIRQ(I2C1_ER_IRQn);
 
         // I2C1 GPIO Configuration
@@ -322,13 +310,13 @@ hal::HalStatus hal::initLedPort(InitializeType type) {
 
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32F411xE
-
-#ifdef LINUX
-    return HalStatus::SUCCESS;
-#endif
 }
 
 hal::HalStatus hal::deinitLedPort() {
+#ifdef LINUX
+    return hal::HalStatus::SUCCESS;
+#endif
+
 #ifdef MOUSE_VIOLETTA
     switch (num) {
         case LedNumbers::FRONT1:
@@ -352,19 +340,17 @@ hal::HalStatus hal::deinitLedPort() {
 #ifdef STM32F411xE
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef STM32F411xE
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif
 }
 
-hal::HalStatus hal::transmitLedI2cData(uint8_t device_id, uint8_t* pdata,
-                                       uint8_t size) {
+hal::HalStatus hal::transmitLedI2cData(uint8_t device_id, uint8_t* pdata, uint8_t size) {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif
+
 #ifdef MOUSE_LAZULI
     while (LL_I2C_IsActiveFlag_BUSY(I2C1) == SET);
 
-    LL_I2C_HandleTransfer(I2C1, device_id, LL_I2C_ADDRSLAVE_7BIT, size,
-                          LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
+    LL_I2C_HandleTransfer(I2C1, device_id, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
 
     for (uint8_t i = 0; i < size; i++) {
         // while (LL_I2C_IsActiveFlag_TXE(I2C1) == RESET);
@@ -386,13 +372,15 @@ hal::HalStatus hal::transmitLedI2cData(uint8_t device_id, uint8_t* pdata,
     return hal::HalStatus::NOIMPLEMENT;
 }
 
-hal::HalStatus hal::receiveLedI2cData(uint8_t device_id, uint8_t* pdata,
-                                      uint8_t size) {
+hal::HalStatus hal::receiveLedI2cData(uint8_t device_id, uint8_t* pdata, uint8_t size) {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif
+
 #ifdef MOUSE_LAZULI
     while (LL_I2C_IsActiveFlag_BUSY(I2C1) == SET);
 
-    LL_I2C_HandleTransfer(I2C1, device_id, LL_I2C_ADDRSLAVE_7BIT, size,
-                          LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
+    LL_I2C_HandleTransfer(I2C1, device_id, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
 
     for (uint8_t i = 0; i < size; i++) {
         while (LL_I2C_IsActiveFlag_RXNE(I2C1) == RESET);
@@ -412,8 +400,11 @@ hal::HalStatus hal::receiveLedI2cData(uint8_t device_id, uint8_t* pdata,
     return hal::HalStatus::NOIMPLEMENT;
 }
 
-hal::HalStatus hal::transmitLedI2cDataDma(uint8_t device_id, uint8_t* pdata,
-                                          uint8_t size) {
+hal::HalStatus hal::transmitLedI2cDataDma(uint8_t device_id, uint8_t* pdata, uint8_t size) {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif
+
 #ifdef MOUSE_LAZULI
     static uint8_t transmit_buffer[10];  // FIXME: バッファーサイズを適切に設定する
     for (uint8_t i = 0; i < size; i++) {
@@ -423,14 +414,13 @@ hal::HalStatus hal::transmitLedI2cDataDma(uint8_t device_id, uint8_t* pdata,
     while (LL_I2C_IsActiveFlag_BUSY(I2C1) == SET);
 
     LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_1);
-    LL_I2C_HandleTransfer(I2C1, device_id, LL_I2C_ADDRSLAVE_7BIT, size,
-                          LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
+    LL_I2C_HandleTransfer(I2C1, device_id, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
     LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_1, size);
-    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_1, (uint32_t)pdata,
-                           (uint32_t)LL_I2C_DMA_GetRegAddr(I2C1, LL_I2C_DMA_REG_DATA_TRANSMIT),
+    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_1, (uint32_t)pdata, (uint32_t)LL_I2C_DMA_GetRegAddr(I2C1, LL_I2C_DMA_REG_DATA_TRANSMIT),
                            LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_7));
     LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_1, size);
-    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_1, (uint32_t)transmit_buffer, (uint32_t)LL_I2C_DMA_GetRegAddr(I2C1, LL_I2C_DMA_REG_DATA_TRANSMIT), LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_CHANNEL_1));
+    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_1, (uint32_t)transmit_buffer, (uint32_t)LL_I2C_DMA_GetRegAddr(I2C1, LL_I2C_DMA_REG_DATA_TRANSMIT),
+                           LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_CHANNEL_1));
 
     LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_1);
     LL_I2C_EnableDMAReq_TX(I2C1);
@@ -447,8 +437,7 @@ hal::HalStatus hal::transmitLedI2cDataDma(uint8_t device_id, uint8_t* pdata,
     return hal::HalStatus::NOIMPLEMENT;
 }
 
-hal::HalStatus hal::transmitLedI2cCommand(hal::LedDriverCommands cmd,
-                                          uint8_t data) {
+hal::HalStatus hal::transmitLedI2cCommand(hal::LedDriverCommands cmd, uint8_t data) {
     uint8_t tx_buffer[2];
     tx_buffer[0] = static_cast<uint8_t>(cmd);
     tx_buffer[1] = data;
@@ -456,8 +445,7 @@ hal::HalStatus hal::transmitLedI2cCommand(hal::LedDriverCommands cmd,
     return hal::HalStatus::SUCCESS;
 }
 
-hal::HalStatus hal::receiveLedI2cCommand(hal::LedDriverCommands cmd,
-                                         uint8_t* data) {
+hal::HalStatus hal::receiveLedI2cCommand(hal::LedDriverCommands cmd, uint8_t* data) {
     uint8_t tx_buffer = static_cast<uint8_t>(cmd);
     transmitLedI2cData(LED_DRIVER_ADDR, &tx_buffer, 1);
     receiveLedI2cData(LED_DRIVER_ADDR, data, 1);
@@ -466,6 +454,10 @@ hal::HalStatus hal::receiveLedI2cCommand(hal::LedDriverCommands cmd,
 
 // TODO: LedクラスをDMAに対応させる
 hal::HalStatus hal::setLedDma(LedNumbers* nums, uint8_t size) {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif
+
 #ifdef MOUSE_LAZULI
     uint8_t current_en;
     receiveLedI2cCommand(LedDriverCommands::LED_EN_IDVD, &current_en);
@@ -519,6 +511,10 @@ hal::HalStatus hal::setLedDma(LedNumbers* nums, uint8_t size) {
 }
 
 hal::HalStatus hal::onLed(hal::LedNumbers num) {
+#ifdef LINUX
+    return hal::HalStatus::SUCCESS;
+#endif
+
 #ifdef MOUSE_VIOLETTA
     GPIO_TypeDef* gpio_port;
     uint16_t gpio_channel;
@@ -553,36 +549,28 @@ hal::HalStatus hal::onLed(hal::LedNumbers num) {
             transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x01);
             break;
         case hal::LedNumbers::MIDDLE2:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en | 0x80);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x80);
             break;
         case hal::LedNumbers::MIDDLE3:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en | 0x40);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x40);
             break;
         case hal::LedNumbers::MIDDLE4:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en | 0x20);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x20);
             break;
         case hal::LedNumbers::MIDDLE5:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en | 0x10);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x10);
             break;
         case hal::LedNumbers::FRONTR:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en | 0x08);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x08);
             break;
         case hal::LedNumbers::FRONTL:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en | 0x04);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x04);
             break;
         case hal::LedNumbers::LEFT:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en | 0x02);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x02);
             break;
         case hal::LedNumbers::RIGHT:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en | 0x01);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x01);
             break;
         case hal::LedNumbers::FLAG:
             return hal::HalStatus::NOIMPLEMENT;
@@ -605,7 +593,7 @@ hal::HalStatus hal::onLed(hal::LedNumbers num) {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     switch (num) {
         case hal::LedNumbers::RED:
             LL_GPIO_SetOutputPin(LED3_GPIO_Port, LED3_Pin);
@@ -628,13 +616,13 @@ hal::HalStatus hal::onLed(hal::LedNumbers num) {
     }
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif
 }
 
 hal::HalStatus hal::offLed(hal::LedNumbers num) {
+#ifdef LINUX
+    return hal::HalStatus::SUCCESS;
+#endif
+
 #ifdef MOUSE_VIOLETTA
     GPIO_TypeDef* gpio_port;
     uint16_t gpio_channel;
@@ -669,36 +657,28 @@ hal::HalStatus hal::offLed(hal::LedNumbers num) {
             transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x00);
             break;
         case hal::LedNumbers::MIDDLE2:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en & 0x7F);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0x7F);
             break;
         case hal::LedNumbers::MIDDLE3:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en & 0xBF);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xBF);
             break;
         case hal::LedNumbers::MIDDLE4:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en & 0xDF);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xDF);
             break;
         case hal::LedNumbers::MIDDLE5:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en & 0xEF);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xEF);
             break;
         case hal::LedNumbers::FRONTR:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en & 0xF7);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xF7);
             break;
         case hal::LedNumbers::FRONTL:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en & 0xFB);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xFB);
             break;
         case hal::LedNumbers::LEFT:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en & 0xFD);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xFD);
             break;
         case hal::LedNumbers::RIGHT:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD,
-                                  current_en & 0xFE);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xFE);
             break;
         case hal::LedNumbers::FLAG:
             return hal::HalStatus::NOIMPLEMENT;
@@ -721,7 +701,7 @@ hal::HalStatus hal::offLed(hal::LedNumbers num) {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     switch (num) {
         case hal::LedNumbers::RED:
             LL_GPIO_ResetOutputPin(LED3_GPIO_Port, LED3_Pin);
@@ -744,8 +724,4 @@ hal::HalStatus hal::offLed(hal::LedNumbers num) {
     }
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif
 }

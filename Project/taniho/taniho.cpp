@@ -67,8 +67,8 @@ int main(void) {
     SystemClock_Config();
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
 
-    // auto activity = act::Manager(act::Activities::DEBUG);
-    auto activity = act::Manager(act::Activities::SEARCH);
+    auto activity = act::Manager(act::Activities::DEBUG);
+    // auto activity = act::Manager(act::Activities::SEARCH);
     // auto activity = act::Manager(act::Activities::WALLSENSOR_CHECK);
     activity.run();
 }

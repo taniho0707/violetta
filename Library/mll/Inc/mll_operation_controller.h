@@ -58,10 +58,17 @@ class OperationController {
     // FIXME: 適切なクラスに移管する
     MouseSectionPosition section_position;
 
+    // 目標位置を更新する
+    MousePhysicalPosition target_physical_position;
+
     MazeSolver* solver;
 
     misc::MouseParams* params;
     misc::SlalomParams* slalom_params;
+
+    // 位置フィードバック制御に関する変数
+    // 目標位置を更新する
+    void updateTargetPosition(float velocity_translation, float velocity_rotation);
 
     // スラロームの初期設定
     // current_operation_move に正しい値が入っている前提で動く

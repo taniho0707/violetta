@@ -5,12 +5,21 @@
 //******************************************************************************
 #include "mll_operation_controller.h"
 
+#ifdef STM32
+#include "arm_math.h"
+#endif
+
+#ifdef LINUX
+#include "arm_math_linux.h"
+using namespace plt;
+#endif
 #include "cmd_server.h"
 #include "mpl_timer.h"
 #include "msg_format_localizer.h"
 #include "msg_format_motor_controller.h"
 #include "msg_format_wall_analyser.h"
 #include "msg_server.h"
+#include "util.h"
 
 mll::OperationController::OperationController() {
     current_operation_direction = cmd::OperationDirectionType::STOP;
@@ -33,6 +42,10 @@ mll::OperationController::OperationController() {
     section_position.x = 0;
     section_position.y = 1;
     section_position.d = CardinalDirection::NORTH;
+
+    target_physical_position.x = 45;
+    target_physical_position.y = 45;
+    target_physical_position.angle = 0;
 
     solver = mll::MazeSolver::getInstance();
     solver->clearFootmap();
@@ -62,6 +75,12 @@ void mll::OperationController::setNextOperation(OperationMoveType next, float di
     is_operation_move_changed = true;
 }
 
+void mll::OperationController::updateTargetPosition(float velocity_translation, float velocity_rotation) {
+    target_physical_position.x -= velocity_translation * arm_sin_f32(target_physical_position.angle) * 0.001f;
+    target_physical_position.y += velocity_translation * arm_cos_f32(target_physical_position.angle) * 0.001f;
+    target_physical_position.angle += velocity_rotation * 0.001f;
+}
+
 void mll::OperationController::initSlalom(float rightleft) {
     trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID,
                     rightleft * slalom_params[static_cast<uint8_t>(current_operation_move)].acc_rad,
@@ -73,17 +92,21 @@ void mll::OperationController::initSlalom(float rightleft) {
 
 void mll::OperationController::runSlalom(msg::MsgFormatMotorController& msg) {
     if (slalom_state == SlalomState::BEFORE) {
-        msg.velocity_translation = target_velocity_translation;
-        msg.velocity_rotation = 0.0f;
+        updateTargetPosition(target_velocity_translation, 0);
+        msg.target_x = target_physical_position.x;
+        msg.target_y = target_physical_position.y;
+        msg.target_angle = target_physical_position.angle;
         msg.is_controlled = true;
+        latest_start_time = mpl::Timer::getMilliTime();
         if (latest_move_distance >= slalom_params[static_cast<uint8_t>(current_operation_move)].d_before) {
             slalom_state = SlalomState::TURN;
         }
-        latest_start_time = mpl::Timer::getMilliTime();
     }
     if (slalom_state == SlalomState::TURN) {
-        msg.velocity_translation = target_velocity_translation;
-        msg.velocity_rotation = trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time);
+        updateTargetPosition(target_velocity_translation, trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time));
+        msg.target_x = target_physical_position.x;
+        msg.target_y = target_physical_position.y;
+        msg.target_angle = target_physical_position.angle;
         msg.is_controlled = true;
         latest_move_distance = 0.f;
         if (trajectory.isEnd(mpl::Timer::getMilliTime() - latest_start_time)) {
@@ -91,8 +114,10 @@ void mll::OperationController::runSlalom(msg::MsgFormatMotorController& msg) {
         }
     }
     if (slalom_state == SlalomState::AFTER) {
-        msg.velocity_translation = target_velocity_translation;
-        msg.velocity_rotation = 0.0f;
+        updateTargetPosition(target_velocity_translation, 0);
+        msg.target_x = target_physical_position.x;
+        msg.target_y = target_physical_position.y;
+        msg.target_angle = target_physical_position.angle;
         msg.is_controlled = true;
         if (latest_move_distance >= slalom_params[static_cast<uint8_t>(current_operation_move)].d_after) {
             slalom_state = SlalomState::END;
@@ -124,7 +149,8 @@ void mll::OperationController::interruptPeriodic() {
         cmd_server->pop(cmd::CommandId::OPERATION_DIRECTION, &cmd_format_operation_direction);
         switch (current_operation_direction) {
             case cmd::OperationDirectionType::STOP:
-                if (cmd_format_operation_direction.type == cmd::OperationDirectionType::SEARCH) {
+                if (cmd_format_operation_direction.type == cmd::OperationDirectionType::STAY) {
+                } else if (cmd_format_operation_direction.type == cmd::OperationDirectionType::SEARCH) {
                     next_operation_move = OperationMoveType::TRAPACCEL;
                     target_move_distance = 45.f;
                     solver->destination.add(1, 0);
@@ -157,39 +183,18 @@ void mll::OperationController::interruptPeriodic() {
     // OperationMoveTypeがSTOPならモーターを止める
     // ただし動作開始前の場合はスキップして次の処理に移る
     if (!is_operation_move_changed && current_operation_move == OperationMoveType::STOP) {
-        msg_format_motor_controller.velocity_translation = 0.0f;
-        msg_format_motor_controller.velocity_rotation = 0.0f;
+        msg_format_motor_controller.target_x = msg_format_localizer.position_x;
+        msg_format_motor_controller.target_y = msg_format_localizer.position_y;
+        msg_format_motor_controller.target_angle = msg_format_localizer.position_theta;
         msg_format_motor_controller.is_controlled = false;
         msg_server->sendMessage(msg::ModuleId::MOTORCONTROLLER, &msg_format_motor_controller);
         return;
     }
 
-    // MoveTypeの更新が必要か確認
-    // TODO: スラロームのときにも同じ処理をする？
-    if ((current_operation_move == OperationMoveType::TRAPACCEL || current_operation_move == OperationMoveType::TRAPACCEL_STOP ||
-         current_operation_move == OperationMoveType::EXTRALENGTH || current_operation_move == OperationMoveType::TRAPDIAGO) &&
-        trajectory.getTimeStartDeceleration() <= mpl::Timer::getMilliTime() - latest_start_time) {
-        // 減速開始時刻を過ぎ、終端速度以下になろうとしていれば終端距離まで維持する
-        float target_velocity = target_velocity_translation;
-        // if (current_operation_move == OperationMoveType::PIVOTTURN) {
-        //     target_velocity = misc::max(target_velocity, velocity_slowest_rotation);
-        // } else {
-        target_velocity = misc::max(target_velocity, velocity_slowest_translation);
-        // }
-        if (trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time) <= target_velocity) {
-            target_velocity_translation = target_velocity;
-            if (current_operation_move != OperationMoveType::EXTRALENGTH) {
-                last_operation_move = current_operation_move;
-            }
-            current_operation_move = OperationMoveType::EXTRALENGTH;
-        }
-    }
-
-    // 終了条件: 軌跡が終了した or EXTRALENGTH で目標距離に達した or SlalomState::END
+    // 終了条件: 軌跡が終了した or SlalomState::END
     if (((current_operation_move == OperationMoveType::TRAPACCEL || current_operation_move == OperationMoveType::TRAPACCEL_STOP ||
           current_operation_move == OperationMoveType::PIVOTTURN) &&
          trajectory.isEnd(mpl::Timer::getMilliTime() - latest_start_time)) ||
-        (current_operation_move == OperationMoveType::EXTRALENGTH && target_move_distance <= latest_move_distance) ||
         slalom_state == SlalomState::END || current_operation_move == OperationMoveType::STOP) {
         //
         if (current_operation_direction == cmd::OperationDirectionType::SPECIFIC) {
@@ -349,8 +354,10 @@ void mll::OperationController::interruptPeriodic() {
     // 動作指令を更新
     switch (current_operation_move) {
         case OperationMoveType::STOP:
-            msg_format_motor_controller.velocity_translation = 0.0f;
-            msg_format_motor_controller.velocity_rotation = 0.0f;
+            // 現状維持でいい気がする？
+            // msg_format_motor_controller.target_x = msg_format_localizer.position_x;
+            // msg_format_motor_controller.target_y = msg_format_localizer.position_y;
+            // msg_format_motor_controller.target_angle = msg_format_localizer.position_theta;
             msg_format_motor_controller.is_controlled = true;
             break;
         case OperationMoveType::SLALOM90SML_RIGHT:
@@ -388,32 +395,29 @@ void mll::OperationController::interruptPeriodic() {
         case OperationMoveType::SLALOM90OBL_LEFT:
             break;
         case OperationMoveType::TRAPACCEL:
-            msg_format_motor_controller.velocity_translation = trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time);
-            msg_format_motor_controller.velocity_rotation = -1 * params->motor_control_kabe_kp * msg_format_wall_analyser.distance_from_center;
+            updateTargetPosition(trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time), 0);
+            msg_format_motor_controller.target_x = target_physical_position.x;
+            msg_format_motor_controller.target_y = target_physical_position.y;
+            msg_format_motor_controller.target_angle = target_physical_position.angle;
             msg_format_motor_controller.is_controlled = true;
             break;
         case OperationMoveType::TRAPACCEL_STOP:
-            msg_format_motor_controller.velocity_translation = trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time);
-            msg_format_motor_controller.velocity_rotation = 0.0f;
+            updateTargetPosition(trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time), 0);
+            msg_format_motor_controller.target_x = target_physical_position.x;
+            msg_format_motor_controller.target_y = target_physical_position.y;
+            msg_format_motor_controller.target_angle = target_physical_position.angle;
             msg_format_motor_controller.is_controlled = true;
             break;
         case OperationMoveType::PIVOTTURN:
-            msg_format_motor_controller.velocity_translation = 0.0f;
-            msg_format_motor_controller.velocity_rotation = trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time);
+            updateTargetPosition(0, trajectory.getVelocity(mpl::Timer::getMilliTime() - latest_start_time));
+            msg_format_motor_controller.target_x = target_physical_position.x;
+            msg_format_motor_controller.target_y = target_physical_position.y;
+            msg_format_motor_controller.target_angle = target_physical_position.angle;
             msg_format_motor_controller.is_controlled = true;
             break;
         case OperationMoveType::TRAPDIAGO:
             break;
-        case OperationMoveType::EXTRALENGTH:
-            if (last_operation_move == OperationMoveType::PIVOTTURN) {
-                msg_format_motor_controller.velocity_translation = 0.0f;
-                msg_format_motor_controller.velocity_rotation = target_velocity_translation;
-                msg_format_motor_controller.is_controlled = true;
-            } else {
-                msg_format_motor_controller.velocity_translation = target_velocity_translation;
-                msg_format_motor_controller.velocity_rotation = 0.0f;
-                msg_format_motor_controller.is_controlled = true;
-            }
+        case mll::OperationMoveType::WAIT:
             break;
         case OperationMoveType::LENGTH:
         case OperationMoveType::UNDEFINED:

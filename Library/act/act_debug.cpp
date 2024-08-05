@@ -9,7 +9,7 @@
 #include "mll_localizer.h"
 #include "mll_logger.h"
 #include "mll_motor_controller.h"
-#include "mll_operation_controller.h"
+#include "mll_operation_coordinator.h"
 #include "mll_wall_analyser.h"
 #include "mpl_battery.h"
 #include "mpl_debug.h"
@@ -17,7 +17,7 @@
 #include "mpl_imu.h"
 #include "mpl_led.h"
 #include "mpl_motor.h"
-#include "mpl_speaker.h"
+// #include "mpl_speaker.h"
 #include "mpl_timer.h"
 #include "mpl_wallsensor.h"
 #include "msg_format_imu.h"
@@ -261,9 +261,9 @@ Status DebugActivity::run() {
     auto localizer = mll::Localizer::getInstance();
     localizer->init();
 
-    auto operation_controller = mll::OperationController::getInstance();
-    operation_controller->init();
+    auto operation_coordinator = mll::OperationCoordinator::getInstance();
 
+    [[maybe_unused]]
     static auto params_cache = misc::Params::getInstance()->getCachePointer();
     misc::Params::getInstance()->load(misc::ParameterDestinationType::HARDCODED);
 
@@ -357,18 +357,20 @@ Status DebugActivity::run() {
 
     // HOGE になったら UART にログ出力する
 
-    // OperationController のテスト
+    // OperationCoordinator のテスト
     mpl::Timer::sleepMs(3000);
-    motor_controller->setStay();
+    operation_coordinator->resetPosition(mll::MousePhysicalPosition{45.0f, 45.0f, 0.0f});
+    operation_coordinator->enableMotorControl();
+    while (true);
     mpl::Timer::sleepMs(2000);
 
     // 【壁センサの値をロギング】
     // 48KB の RAM を確保、センサ値 2Bytes、時間 4Bytes、合計 12Bytes なので、4096 カウントのデータを保存できる
     // 1ms 周期で 4.096 秒間保存する
-    uint16_t wallsensor_frontleft[4096] = {0};
-    uint16_t wallsensor_left[4096] = {0};
-    uint16_t wallsensor_right[4096] = {0};
-    uint16_t wallsensor_frontright[4096] = {0};
+    // uint16_t wallsensor_frontleft[4096] = {0};
+    // uint16_t wallsensor_left[4096] = {0};
+    // uint16_t wallsensor_right[4096] = {0};
+    // uint16_t wallsensor_frontright[4096] = {0};
 
     // auto start_time = mpl::Timer::getMicroTime();
     // int encoder_log_index = 0;
@@ -385,54 +387,49 @@ Status DebugActivity::run() {
     //     }
     // }
 
-    const uint32_t WALLSENSOR_LOG_LENGTH = 4096;
-    mll::LogFormatWallsensor log_test[WALLSENSOR_LOG_LENGTH] = {{0}};
-    auto logger = mll::Logger::getInstance();
-    auto logconfig = mll::LogConfig{mll::LogType::WALLSENSOR, mll::LogDestinationType::INTERNAL_RAM, WALLSENSOR_LOG_LENGTH, (uint32_t)(&log_test)};
-    logger->init(logconfig);
+    // const uint32_t WALLSENSOR_LOG_LENGTH = 4096;
+    // mll::LogFormatWallsensor log_test[WALLSENSOR_LOG_LENGTH] = {{0}};
+    // auto logger = mll::Logger::getInstance();
+    // auto logconfig = mll::LogConfig{mll::LogType::WALLSENSOR, mll::LogDestinationType::INTERNAL_RAM, WALLSENSOR_LOG_LENGTH,
+    // (uintptr_t)(&log_test)}; logger->init(logconfig);
 
     mll::OperationMoveCombination move_array[] = {
         // {     mll::OperationMoveType::TRAPACCEL, 90.f},
         // {mll::OperationMoveType::TRAPACCEL_STOP, 90.f},
         // {mll::OperationMoveType::PIVOTTURN, misc::PI},
-        {     mll::OperationMoveType::TRAPACCEL,     45.f},
+        {     mll::OperationMoveType::TRAPACCEL, 45.f},
         // {mll::OperationMoveType::TRAPACCEL_STOP,     45.f},
         // {     mll::OperationMoveType::PIVOTTURN, misc::PI},
-        {     mll::OperationMoveType::TRAPACCEL, 90.f * 3},
-        {mll::OperationMoveType::TRAPACCEL_STOP,     45.f},
+        // {     mll::OperationMoveType::TRAPACCEL, 90.f * 3},
+        {mll::OperationMoveType::TRAPACCEL_STOP, 45.f},
     };
-    auto cmd_format_operation_move_array = cmd::CommandFormatOperationMoveArray();
-    cmd_format_operation_move_array.move_array = (void *)move_array;
-    cmd_format_operation_move_array.length = sizeof(move_array) / sizeof(mll::OperationMoveCombination);
-    cmd_server->push(cmd::CommandId::OPERATION_MOVE_ARRAY, &cmd_format_operation_move_array);
+    uint16_t move_array_length = sizeof(move_array) / sizeof(mll::OperationMoveCombination);
+    operation_coordinator->runSpecific(move_array, move_array_length);
 
-    auto cmd_format_operation_direction = cmd::CommandFormatOperationDirection();
-    cmd_format_operation_direction.type = cmd::OperationDirectionType::SPECIFIC;
-    cmd_server->push(cmd::CommandId::OPERATION_DIRECTION, &cmd_format_operation_direction);
-
-    logger->startPeriodic(mll::LogType::WALLSENSOR, 1);
-    mpl::Timer::sleepMs(WALLSENSOR_LOG_LENGTH + 10000);
-
-    for (int i = 0; i < 30; i++) {
-        led->on(hal::LedNumbers::BLUE);
-        mpl::Timer::sleepMs(500);
-        led->off(hal::LedNumbers::BLUE);
-        mpl::Timer::sleepMs(500);
-    }
-    for (int i = 0; i < 10; i++) {
-        led->on(hal::LedNumbers::BLUE);
-        mpl::Timer::sleepMs(250);
-        led->off(hal::LedNumbers::BLUE);
-        mpl::Timer::sleepMs(250);
-    }
-    mll::LogFormatWallsensor log_item = {0};
-    for (int i = 0; i < WALLSENSOR_LOG_LENGTH; ++i) {
-        logger->read(logconfig, i, (void *)(&log_item));
-        cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Log[%d]: %d, %d, %d, %d, %d\n", i, log_item.time, log_item.frontleft, log_item.left,
-                                         log_item.right, log_item.frontright);
-        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
-        mpl::Timer::sleepMs(2);
-    }
+    // logger->startPeriodic(mll::LogType::WALLSENSOR, 1);
+    // mpl::Timer::sleepMs(WALLSENSOR_LOG_LENGTH + 10000);
+    //
+    // for (int i = 0; i < 30; i++) {
+    //     led->on(hal::LedNumbers::BLUE);
+    //     mpl::Timer::sleepMs(500);
+    //     led->off(hal::LedNumbers::BLUE);
+    //     mpl::Timer::sleepMs(500);
+    // }
+    // for (int i = 0; i < 10; i++) {
+    //     led->on(hal::LedNumbers::BLUE);
+    //     mpl::Timer::sleepMs(250);
+    //     led->off(hal::LedNumbers::BLUE);
+    //     mpl::Timer::sleepMs(250);
+    // }
+    // mll::LogFormatWallsensor log_item = {0};
+    // for (int i = 0; i < WALLSENSOR_LOG_LENGTH; ++i) {
+    //     logger->read(logconfig, i, (void *)(&log_item));
+    //     cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Log[%d]: %d, %d, %d, %d, %d\n", i, log_item.time, log_item.frontleft,
+    //     log_item.left,
+    //                                      log_item.right, log_item.frontright);
+    //     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    //     mpl::Timer::sleepMs(2);
+    // }
 
     while (true);
 

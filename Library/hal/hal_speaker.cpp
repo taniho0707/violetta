@@ -23,6 +23,10 @@
 #endif  // ifdef MOUSE_LAZULI
 
 hal::HalStatus hal::initSpeakerPort() {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_LAZULI
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
@@ -85,6 +89,10 @@ hal::HalStatus hal::initSpeakerPort() {
 }
 
 hal::HalStatus hal::deinitSpeakerPort() {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_LAZULI
 #endif  // ifdef MOUSE_LAZULI
 
@@ -92,6 +100,10 @@ hal::HalStatus hal::deinitSpeakerPort() {
 }
 
 hal::HalStatus hal::setSpeakerFrequency(uint16_t freq) {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_LAZULI
     uint32_t system_clock = 100000000;  // FIXME: hal_conf.hで定義した値を使う
     uint32_t value = system_clock / SPEAKER_TIMER_MAX / freq - 1;
@@ -105,6 +117,10 @@ hal::HalStatus hal::setSpeakerFrequency(uint16_t freq) {
 }
 
 hal::HalStatus hal::offSpeaker() {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_LAZULI
     // TODO: 使用しない場合にはクロックを止める
     LL_TIM_OC_SetCompareCH1(TIM15, 0);
