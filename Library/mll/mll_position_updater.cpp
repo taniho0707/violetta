@@ -16,8 +16,10 @@ PositionUpdater::PositionUpdater() {
     slalom_params_cache = misc::Params::getInstance()->getCacheSlalomPointer(300);
     trajectory = Trajectory();
     current_move = OperationMoveType::STOP;
+    current_velocity_translation_end = 0.f;
     // NOTE: スタート位置に初期値を設定
     reset(MousePhysicalPosition{45, 45, 0});
+    reset(MouseVelocity{0, 0});
 }
 
 void PositionUpdater::updateTargetPosition(const float velocity_translation, const float velocity_rotation) {
@@ -38,22 +40,22 @@ void PositionUpdater::initSlalom(const float rightleft) {
 
 void PositionUpdater::runSlalom() {
     if (slalom_state == SlalomState::BEFORE) {
-        updateTargetPosition(current_velocity_translation, 0);
-        slalom_move_distance += current_velocity_translation * 0.001f;
+        updateTargetPosition(current_velocity.translation, 0);
+        slalom_move_distance += current_velocity.translation * 0.001f;
         if (slalom_move_distance >= slalom_params_cache[static_cast<uint8_t>(current_move)].d_before) {
             slalom_start_time = mpl::Timer::getMilliTime();
             slalom_state = SlalomState::TURN;
         }
     }
     if (slalom_state == SlalomState::TURN) {
-        updateTargetPosition(current_velocity_translation, trajectory.getVelocity(mpl::Timer::getMilliTime() - slalom_start_time));
+        updateTargetPosition(current_velocity.translation, trajectory.getVelocity(mpl::Timer::getMilliTime() - slalom_start_time));
         if (trajectory.isEnd(mpl::Timer::getMilliTime() - slalom_start_time)) {
             slalom_move_distance = 0.f;
             slalom_state = SlalomState::AFTER;
         }
     }
     if (slalom_state == SlalomState::AFTER) {
-        updateTargetPosition(current_velocity_translation, 0);
+        updateTargetPosition(current_velocity.translation, 0);
         if (slalom_move_distance >= slalom_params_cache[static_cast<uint8_t>(current_move)].d_after) {
             slalom_state = SlalomState::END;
         }
@@ -63,8 +65,8 @@ void PositionUpdater::runSlalom() {
 void PositionUpdater::initMove() {
     switch (current_move) {
         case OperationMoveType::STOP:
-            current_velocity_translation = 0.f;
-            current_velocity_rotation = 0.f;
+            current_velocity.translation = 0.f;
+            current_velocity.rotation = 0.f;
             break;
         case OperationMoveType::SLALOM90SML_RIGHT:
             initSlalom(SLALOM_RIGHT);
@@ -102,13 +104,18 @@ void PositionUpdater::initMove() {
             break;
         case OperationMoveType::TRAPACCEL:
             // FIXME: 最高速、終端速を適切にする
-            trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID, 2000.f, current_move_distance, current_velocity_translation,
-                            300.f, current_velocity_translation_end);
-            current_velocity_rotation = 0.f;
+            trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID, 2000.f, current_move_distance, current_velocity.translation,
+                            300.f, 300.f);
+            current_velocity.rotation = 0.f;
+            break;
+        case mll::OperationMoveType::TRAPACCEL_STOP:
+            trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID, 2000.f, current_move_distance, current_velocity.translation,
+                            300.f, 0.f);
+            current_velocity.rotation = 0.f;
             break;
         case OperationMoveType::PIVOTTURN:
             trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID, 100.f, current_move_distance, 0.0f, 15.f, 0);
-            current_velocity_translation = 0.f;
+            current_velocity.translation = 0.f;
             break;
         case OperationMoveType::LENGTH:
         case OperationMoveType::UNDEFINED:
@@ -161,6 +168,9 @@ void PositionUpdater::update() {
         case OperationMoveType::TRAPACCEL:
             updateTargetPosition(trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time), 0);
             break;
+        case mll::OperationMoveType::TRAPACCEL_STOP:
+            updateTargetPosition(trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time), 0);
+            break;
         case OperationMoveType::PIVOTTURN:
             updateTargetPosition(0, trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time));
             break;
@@ -177,6 +187,10 @@ void PositionUpdater::update() {
 
 const MousePhysicalPosition PositionUpdater::getTargetPhysicalPosition() const {
     return target_physical_position;
+}
+
+const MouseVelocity PositionUpdater::getTargetVelocity() const {
+    return MouseVelocity{current_velocity.translation, current_velocity.rotation};
 }
 
 bool PositionUpdater::isNextWallReady() {
@@ -211,6 +225,11 @@ void PositionUpdater::reset(const MousePhysicalPosition& position) {
     start_time = 0;
     current_move = OperationMoveType::STOP;
     current_move_distance = 0;
+}
+
+void PositionUpdater::reset(const MouseVelocity& velocity) {
+    current_velocity.translation = velocity.translation;
+    current_velocity.rotation = velocity.rotation;
 }
 
 PositionUpdater* PositionUpdater::getInstance() {

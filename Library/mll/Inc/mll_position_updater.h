@@ -22,9 +22,8 @@ class PositionUpdater {
     // マウスの現在の動作
     OperationMoveType current_move;
     float current_move_distance;
-    float current_velocity_translation;
-    float current_velocity_rotation;
-    float current_velocity_translation_end;
+    MouseVelocity current_velocity;
+    float current_velocity_translation_end;  // ?
     SlalomState slalom_state;
     float slalom_rightleft;
 
@@ -65,6 +64,8 @@ class PositionUpdater {
 
     // マウスの目標物理座標を取得する
     const MousePhysicalPosition getTargetPhysicalPosition() const;
+    // マウスの目標速度と角速度を取得する
+    const MouseVelocity getTargetVelocity() const;
 
     // マウスの次の壁情報を取得できるタイミングかどうかを返す
     // 制御周期ごとに値を更新している
@@ -80,6 +81,8 @@ class PositionUpdater {
 
     // パラメータをリセットし、目標物理座標を強制的に上書きする
     void reset(const MousePhysicalPosition& position);
+    // パラメータをリセットし、目標速度を強制的に上書きする
+    void reset(const MouseVelocity& velocity);
 
     static PositionUpdater* getInstance();
 };

@@ -17,9 +17,8 @@ class MsgFormatMotorController : public MsgFormat {
 
     void update(void* from) override;
 
-    float target_x;
-    float target_y;
-    float target_angle;
+    float velocity_translation;
+    float velocity_rotation;
 
     // 計算用、直線距離 [mm]
     float position_translation;

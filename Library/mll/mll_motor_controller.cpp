@@ -66,6 +66,11 @@ void mll::MotorController::setTargetPosition(float target_x, float target_y, flo
     this->target_angle = target_angle;
 }
 
+void mll::MotorController::setTargetVelocity(float target_velocity_translation, float target_velocity_rotation) {
+    this->target_velocity_translation = target_velocity_translation;
+    this->target_velocity_rotation = target_velocity_rotation;
+}
+
 void mll::MotorController::resetIntegralTransition() {
     integral_translation = 0;
 }
@@ -100,7 +105,7 @@ void mll::MotorController::interruptPeriodic() {
         stopControl();
         return;
     }
-    setTargetPosition(msg_motor_controller.target_x, msg_motor_controller.target_y, msg_motor_controller.target_angle);
+    setTargetVelocity(msg_motor_controller.velocity_translation, msg_motor_controller.velocity_rotation);
 
     // TODO: msg::ModuleId::ERROR_CONTROL を受け、エラーが発生している場合はモーター制御を停止する
     if (integral_rotation > 300.f) {
@@ -113,11 +118,12 @@ void mll::MotorController::interruptPeriodic() {
 
     // translation 成分の計算、出力は電流 [mA]
     // const float error_translation = calcDistanceToTarget(msg_localizer.position_x, msg_localizer.position_y, target_x, target_y);
-    const auto error_vector =
-        misc::calcErrorVector(misc::Point<float>{msg_localizer.position_x, msg_localizer.position_y}, misc::Point<float>{target_x, target_y});
-    const auto direction_unit_vector = misc::calcDirectionUnitVector(msg_localizer.position_theta);
-    const auto error_translation = misc::calcProjectionToDirection(error_vector, direction_unit_vector);
-    // FIXME: モーター制御部分のみ速度制御に置き換える
+    // const auto error_vector =
+    //     misc::calcErrorVector(misc::Point<float>{msg_localizer.position_x, msg_localizer.position_y}, misc::Point<float>{target_x, target_y});
+    // const auto direction_unit_vector = misc::calcDirectionUnitVector(msg_localizer.position_theta);
+    // const auto error_translation = misc::calcProjectionToDirection(error_vector, direction_unit_vector);
+    const float error_translation = target_velocity_translation - msg_localizer.velocity_translation;
+
     integral_translation += error_translation;  // FIXME: サンプリング周期をパラメータか固定値から読み出す
     const float error_diff_translation = error_translation - last_differential_translation;
     last_differential_translation = error_translation;
@@ -126,7 +132,9 @@ void mll::MotorController::interruptPeriodic() {
                                       params->motor_control_translation_kd * error_diff_translation;
 
     // rotation 成分の計算、出力は電流 [mA]
-    const float error_rotation = calcAngleToTarget(msg_localizer.position_theta, target_angle);
+    // const float error_rotation = calcAngleToTarget(msg_localizer.position_theta, target_angle);
+    const float error_rotation = target_velocity_rotation - msg_localizer.velocity_rotation;
+
     integral_rotation += error_rotation;  // FIXME: サンプリング周期をパラメータか固定値から読み出す
     const float error_diff_rotation = error_rotation - last_differential_rotation;
     last_differential_rotation = error_rotation;
@@ -135,8 +143,8 @@ void mll::MotorController::interruptPeriodic() {
 
     // モーターに指令を送る
     static msg::MsgFormatMotor msg_motor;
-    msg_motor.duty_l = (control_translation + control_rotation) / 1000.f / msg_battery.battery;
-    msg_motor.duty_r = (control_translation - control_rotation) / 1000.f / msg_battery.battery;
+    msg_motor.duty_l = (control_translation - control_rotation) / 1000.f / msg_battery.battery;
+    msg_motor.duty_r = (control_translation + control_rotation) / 1000.f / msg_battery.battery;
     msg_motor.duty_suction = 0;  // TODO: 吸引ファンを使う
     msg_server->sendMessage(msg::ModuleId::MOTOR, &msg_motor);
 

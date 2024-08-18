@@ -361,7 +361,7 @@ Status DebugActivity::run() {
     mpl::Timer::sleepMs(3000);
     operation_coordinator->resetPosition(mll::MousePhysicalPosition{45.0f, 45.0f, 0.0f});
     operation_coordinator->enableMotorControl();
-    while (true);
+    // while (true);
     mpl::Timer::sleepMs(2000);
 
     // 【壁センサの値をロギング】
@@ -405,6 +405,14 @@ Status DebugActivity::run() {
     };
     uint16_t move_array_length = sizeof(move_array) / sizeof(mll::OperationMoveCombination);
     operation_coordinator->runSpecific(move_array, move_array_length);
+    while (operation_coordinator->state() == mll::OperationCoordinatorResult::RUNNING_SPECIFIC) {
+        mpl::Timer::sleepMs(100);
+    }
+
+    led->off(hal::LedNumbers::BLUE);
+    led->off(hal::LedNumbers::GREEN);
+    led->off(hal::LedNumbers::RED);
+    led->off(hal::LedNumbers::YELLOW);
 
     // logger->startPeriodic(mll::LogType::WALLSENSOR, 1);
     // mpl::Timer::sleepMs(WALLSENSOR_LOG_LENGTH + 10000);

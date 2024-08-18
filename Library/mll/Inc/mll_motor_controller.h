@@ -6,6 +6,7 @@
 #pragma once
 
 #include "cmd_server.h"
+#include "mll_position.h"
 #include "msg_format_localizer.h"
 #include "msg_format_motor_controller.h"
 #include "msg_server.h"
@@ -27,11 +28,16 @@ class MotorController {
 
     misc::MouseParams* params;
 
+    // 位置制御時の目標位置
     float target_x;
     float target_y;
     float target_dif_distance;
     float target_angle;
     float target_dif_angle;
+
+    // 速度制御時の目標速度
+    float target_velocity_translation;
+    float target_velocity_rotation;
 
     // MotorController によるモーター制御有効フラグ
     bool enabled;
@@ -60,6 +66,8 @@ class MotorController {
 
     // 目標位置を設定する
     void setTargetPosition(float target_x, float target_y, float target_angle);
+    // 目標速度を設定する
+    void setTargetVelocity(float target_velocity_translation, float target_velocity_rotation);
 
     //////////////////////////////////
     //  制御内部の状態に関する実装  //

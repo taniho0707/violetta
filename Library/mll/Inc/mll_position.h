@@ -49,6 +49,11 @@ struct MousePhysicalPosition {
     float angle;
 };
 
+struct MouseVelocity {
+    float translation;
+    float rotation;
+};
+
 // マウスの論理位置を定義
 struct MouseSectionPosition {
     int16_t x;

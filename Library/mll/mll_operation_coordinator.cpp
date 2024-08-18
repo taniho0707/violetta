@@ -87,10 +87,9 @@ void OperationCoordinator::interruptPeriodic() {
     }
 
     if (enabled_motor_control) {
-        auto target = position_updater->getTargetPhysicalPosition();
-        msg_format_motor_controller.target_x = target.x;
-        msg_format_motor_controller.target_y = target.y;
-        msg_format_motor_controller.target_angle = target.angle;
+        auto target = position_updater->getTargetVelocity();
+        msg_format_motor_controller.velocity_translation = target.translation;
+        msg_format_motor_controller.velocity_rotation = target.rotation;
         msg_format_motor_controller.is_controlled = true;
         msg_server->sendMessage(msg::ModuleId::MOTORCONTROLLER, &msg_format_motor_controller);
     } else {
