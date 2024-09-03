@@ -34,6 +34,14 @@ make
 cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=STM32 -DMOUSE=Zirconia2kai -DTARGET_GROUP=taniho -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=on
 ninja
 ```
+
+- taniho を Lazuli STM32L4P5CET 向けにビルド
+
+```
+cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=STM32 -DMOUSE=Lazuli -DTARGET_GROUP=taniho -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=on
+ninja
+```
+
 - UnitTest を Zirconia2kai Linux 向けにビルド
 
 ```

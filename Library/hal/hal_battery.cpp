@@ -28,7 +28,7 @@ hal::HalStatus hal::initBatteryPort() {
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC);
-    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
 
     /**ADC1 GPIO Configuration
     PA5   ------> ADC1_IN10 : BATTERY
@@ -36,7 +36,7 @@ hal::HalStatus hal::initBatteryPort() {
     GPIO_InitStruct.Pin = BATTERY_Pin;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    LL_GPIO_Init(BATTERY_GPIO_Port, &GPIO_InitStruct);
 
     LL_RCC_SetADCClockSource(LL_RCC_ADC_CLKSOURCE_PLLSAI1);
     LL_ADC_SetCommonClock(__LL_ADC_COMMON_INSTANCE(ADC1), LL_ADC_CLOCK_SYNC_PCLK_DIV2);
@@ -105,9 +105,9 @@ hal::HalStatus hal::initBatteryPort() {
     LL_ADC_Enable(ADC1);
     while (LL_ADC_IsActiveFlag_ADRDY(ADC1) == 0);
 
-    LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_10);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_10, LL_ADC_SAMPLINGTIME_24CYCLES_5);
-    LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_10, LL_ADC_SINGLE_ENDED);
+    LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_15);
+    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_15, LL_ADC_SAMPLINGTIME_24CYCLES_5);
+    LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_15, LL_ADC_SINGLE_ENDED);
 
     return HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
@@ -178,19 +178,19 @@ hal::HalStatus hal::getBatteryVoltageSync(float& voltage) {
 #endif  // ifdef LINUX
 
 #ifdef STM32L4P5xx
-    LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_10);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_10, LL_ADC_SAMPLINGTIME_24CYCLES_5);
-    LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_10, LL_ADC_SINGLE_ENDED);
+    LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_15);
+    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_15, LL_ADC_SAMPLINGTIME_24CYCLES_5);
+    LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_15, LL_ADC_SINGLE_ENDED);
 
     // if ((LL_ADC_IsEnabled(ADC1) == 1) && (LL_ADC_IsDisableOngoing(ADC1) == 0)
     // && (LL_ADC_REG_IsConversionOngoing(ADC1) == 0)) {
     LL_ADC_REG_StartConversion(ADC1);
     while (LL_ADC_IsActiveFlag_EOC(ADC1) == RESET);
     LL_ADC_ClearFlag_EOC(ADC1);
-    voltage = 5.7f /*[R/R]*/ * LL_ADC_REG_ReadConversionData12(ADC1) / 4095.0f /*[12bit]*/ * 3.0f /*[V]*/;
+    voltage = BATTERY_RATIO /*[R/R]*/ * LL_ADC_REG_ReadConversionData12(ADC1) / 4095.0f /*[12bit]*/ * 3.0f /*[V]*/;
     // }
     // FIXME: SamplingTime を調整する
-    // TODO: 正確な分圧比をパラメータとして受け取る
+    // TODO: 正確な電圧をパラメータとして受け取る
     // TODO: 他の ADC での設定変更の際に影響しないようにケア必要
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef STM32L4P5xx

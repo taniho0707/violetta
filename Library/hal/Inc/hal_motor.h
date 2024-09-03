@@ -8,7 +8,6 @@
 #include "hal_conf.h"
 
 #ifdef STM32L4P5xx
-#include "stm32l4xx_ll_adc.h"
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE
@@ -26,6 +25,7 @@
 namespace hal {
 
 #ifdef MOUSE_LAZULI
+// FIXME: hal_conf に移動させる
 const uint32_t MOTOR_TIMER_MAXCOUNT = 262144;
 #endif  // ifdef MOUSE_LAZULI
 

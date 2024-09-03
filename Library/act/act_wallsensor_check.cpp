@@ -26,7 +26,9 @@ using namespace act;
 void WallsensorCheckActivity::init() {}
 
 #ifdef MOUSE_LAZULI
-Status DebugActivity::run() {}
+Status WallsensorCheckActivity::run() {
+    return Status::NOIMPLEMENT;
+}
 #endif  // MOUSE_LAZULI
 
 #ifdef MOUSE_ZIRCONIA2KAI

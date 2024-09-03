@@ -67,6 +67,8 @@ Status SearchActivity::run() {
     battery->scanSync(battery_data);
     cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "%1.2f\n", battery_data);
     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+
+#ifdef MOUSE_ZIRCONIA2KAI
     if (battery_data > 4.f) {
         led->on(hal::LedNumbers::BLUE);
         led->on(hal::LedNumbers::GREEN);
@@ -84,6 +86,31 @@ Status SearchActivity::run() {
     } else {
         while (true);
     }
+#endif  // MOUSE_ZIRCONIA2KAI
+#ifdef MOUSE_LAZULI
+    if (battery_data > 4.f) {
+        led->on(hal::LedNumbers::MIDDLE1);
+        led->on(hal::LedNumbers::MIDDLE2);
+        led->on(hal::LedNumbers::MIDDLE3);
+        led->on(hal::LedNumbers::MIDDLE4);
+        led->on(hal::LedNumbers::MIDDLE5);
+    } else if (battery_data > 3.8f) {
+        led->on(hal::LedNumbers::MIDDLE1);
+        led->on(hal::LedNumbers::MIDDLE2);
+        led->on(hal::LedNumbers::MIDDLE3);
+        led->on(hal::LedNumbers::MIDDLE4);
+    } else if (battery_data > 3.6f) {
+        led->on(hal::LedNumbers::MIDDLE1);
+        led->on(hal::LedNumbers::MIDDLE2);
+        led->on(hal::LedNumbers::MIDDLE3);
+    } else if (battery_data > 3.4f) {
+        led->on(hal::LedNumbers::MIDDLE1);
+        led->on(hal::LedNumbers::MIDDLE2);
+    } else {
+        led->on(hal::LedNumbers::MIDDLE1);
+        while (true);
+    }
+#endif  // MOUSE_LAZULI
 
     auto encoder = mpl::Encoder::getInstance();
     encoder->initPort();

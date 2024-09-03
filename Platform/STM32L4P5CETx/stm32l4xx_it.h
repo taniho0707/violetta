@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    stm32l4xx_it.h
-  * @brief   This file contains the headers of the interrupt handlers.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
  ******************************************************************************
-  */
+ * @file    stm32l4xx_it.h
+ * @brief   This file contains the headers of the interrupt handlers.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -22,7 +22,7 @@
 #define __STM32L4xx_IT_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* Private includes ----------------------------------------------------------*/
@@ -64,15 +64,21 @@ void DMA1_Channel5_IRQHandler(void);
 void DMA1_Channel6_IRQHandler(void);
 void DMA1_Channel7_IRQHandler(void);
 void ADC1_2_IRQHandler(void);
-void I2C1_EV_IRQHandler(void);
-void I2C1_ER_IRQHandler(void);
+void TIM1_TRG_COM_TIM17_IRQHandler(void);
+void TIM2_IRQHandler(void);
+void TIM3_IRQHandler(void);
+void TIM4_IRQHandler(void);
+void I2C2_EV_IRQHandler(void);
+void I2C2_ER_IRQHandler(void);
+void SPI1_IRQHandler(void);
 void SPI2_IRQHandler(void);
 void USART1_IRQHandler(void);
 void TIM5_IRQHandler(void);
 void SPI3_IRQHandler(void);
 void DMA2_Channel1_IRQHandler(void);
 void DMA2_Channel2_IRQHandler(void);
-void FPU_IRQHandler(void);
+void DMA2_Channel3_IRQHandler(void);
+void DMA2_Channel4_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

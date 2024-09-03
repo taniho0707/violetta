@@ -9,7 +9,6 @@
 
 #ifdef STM32L4P5xx
 // STM32LL
-#include "stm32l4xx_ll_gpio.h"
 #endif  // ifdef STM32L4P5xx
 
 #ifdef STM32F411xE

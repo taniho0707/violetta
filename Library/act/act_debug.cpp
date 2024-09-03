@@ -17,7 +17,7 @@
 #include "mpl_imu.h"
 #include "mpl_led.h"
 #include "mpl_motor.h"
-// #include "mpl_speaker.h"
+#include "mpl_speaker.h"
 #include "mpl_timer.h"
 #include "mpl_wallsensor.h"
 #include "msg_format_imu.h"
@@ -58,17 +58,17 @@ Status DebugActivity::run() {
 
     auto debug = mpl::Debug::getInstance();
     debug->init(hal::InitializeType::Dma);
-    cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Hello Lazuli! %d\n", 1);
+    cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Hello Lazuli!\n");
     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
 
-    auto led = mpl::Led::getInstance();
-    auto mplstatus = led->initPort(hal::InitializeType::Sync);
-    if (mplstatus == mpl::MplStatus::SUCCESS) {
-        cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "LED: Initialization SUCCESS\n");
-        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
-    } else {
-        while (true);
-    }
+    // auto led = mpl::Led::getInstance();
+    // auto mplstatus = led->initPort(hal::InitializeType::Sync);
+    // if (mplstatus == mpl::MplStatus::SUCCESS) {
+    //     cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "LED: Initialization SUCCESS\n");
+    //     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    // } else {
+    //     while (true);
+    // }
 
     auto imu = mpl::Imu::getInstance();
     imu->setConfig();
@@ -93,27 +93,27 @@ Status DebugActivity::run() {
     battery->scanSync(battery_data);
     cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "%1.2f\n", battery_data);
     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
-    if (battery_data > 8.2f) {
-        led->on(hal::LedNumbers::MIDDLE1);
-        led->on(hal::LedNumbers::MIDDLE2);
-        led->on(hal::LedNumbers::MIDDLE3);
-        led->on(hal::LedNumbers::MIDDLE4);
-        led->on(hal::LedNumbers::MIDDLE5);
-    } else if (battery_data > 7.8f) {
-        led->on(hal::LedNumbers::MIDDLE2);
-        led->on(hal::LedNumbers::MIDDLE3);
-        led->on(hal::LedNumbers::MIDDLE4);
-        led->on(hal::LedNumbers::MIDDLE5);
-    } else if (battery_data > 7.4f) {
-        led->on(hal::LedNumbers::MIDDLE3);
-        led->on(hal::LedNumbers::MIDDLE4);
-        led->on(hal::LedNumbers::MIDDLE5);
-    } else if (battery_data > 7.0f) {
-        led->on(hal::LedNumbers::MIDDLE4);
-        led->on(hal::LedNumbers::MIDDLE5);
-    } else if (battery_data > 6.6f) {
-        led->on(hal::LedNumbers::MIDDLE5);
-    }
+    // if (battery_data > 8.2f) {
+    //     led->on(hal::LedNumbers::MIDDLE1);
+    //     led->on(hal::LedNumbers::MIDDLE2);
+    //     led->on(hal::LedNumbers::MIDDLE3);
+    //     led->on(hal::LedNumbers::MIDDLE4);
+    //     led->on(hal::LedNumbers::MIDDLE5);
+    // } else if (battery_data > 7.8f) {
+    //     led->on(hal::LedNumbers::MIDDLE2);
+    //     led->on(hal::LedNumbers::MIDDLE3);
+    //     led->on(hal::LedNumbers::MIDDLE4);
+    //     led->on(hal::LedNumbers::MIDDLE5);
+    // } else if (battery_data > 7.4f) {
+    //     led->on(hal::LedNumbers::MIDDLE3);
+    //     led->on(hal::LedNumbers::MIDDLE4);
+    //     led->on(hal::LedNumbers::MIDDLE5);
+    // } else if (battery_data > 7.0f) {
+    //     led->on(hal::LedNumbers::MIDDLE4);
+    //     led->on(hal::LedNumbers::MIDDLE5);
+    // } else if (battery_data > 6.6f) {
+    //     led->on(hal::LedNumbers::MIDDLE5);
+    // }
 
     auto encoder = mpl::Encoder::getInstance();
     encoder->initPort();
@@ -122,20 +122,36 @@ Status DebugActivity::run() {
     wallsensor->initPort();
     // hal::WallSensorData wallsensor_data = {0};
 
-    // // Motor Test code
-    // auto motor = mpl::Motor::getInstance();
+    auto wallanalyser = mll::WallAnalyser::getInstance();
+    wallanalyser->init();
+
+    [[maybe_unused]]
+    auto motor = mpl::Motor::getInstance();
     // debug->printf("Motor: 25%% ON...");
     // motor->setDuty(+0.05, -0.05);
     // LL_mDelay(1000);
     // debug->printf("OFF\n");
     // motor->setFloat();
 
+    auto motor_controller = mll::MotorController::getInstance();
+    motor_controller->init();
+
+    auto localizer = mll::Localizer::getInstance();
+    localizer->init();
+
+    [[maybe_unused]]
+    auto operation_coordinator = mll::OperationCoordinator::getInstance();
+
+    [[maybe_unused]]
+    static auto params_cache = misc::Params::getInstance()->getCachePointer();
+    misc::Params::getInstance()->load(misc::ParameterDestinationType::HARDCODED);
+
     mpl::Timer::init();
 
     auto speaker = mpl::Speaker::getInstance();
     speaker->initPort();
-    // speaker->playToneSync(mpl::MusicTone::A5, 200);
-    // speaker->playToneAsync(mpl::MusicTone::D6, 400);
+    speaker->playToneSync(mpl::MusicTone::A5, 200);
+    speaker->playToneAsync(mpl::MusicTone::D6, 400);
 
     auto message = msg::MessageServer::getInstance();
     msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();

@@ -12,7 +12,7 @@
 #include "mpl_imu.h"
 // #include "mpl_led.h"
 #include "mpl_motor.h"
-// #include "mpl_speaker.h"
+#include "mpl_speaker.h"
 #include "mpl_wallsensor.h"
 
 // 追加で必要なライブラリ : MLL

@@ -43,7 +43,7 @@ elseif(${MOUSE} STREQUAL Lazuli)
         -DSTM32L4P5
         -DSTM32L4P5xx
         -DARM_MATH_CM4
-        -D__FPU_PRESENT
+        -D__FPU_PRESENT=1
         -DUSE_FULL_LL_DRIVER
         -DPREFETCH_ENABLE=1
         -DINSTRUCTION_CACHE_ENABLE=1

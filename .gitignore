@@ -38,10 +38,14 @@
 Generate/violetta/*
 Generate/zirconia2kai/*
 Generate/Lazuli/*
+Generate/LazuliSensor/*
+Generate/OldLazuli/*
 # ただし CMakeLists.txt は含む
 !Generate/violetta/CMakeLists.txt
 !Generate/zirconia2kai/CMakeLists.txt
 !Generate/Lazuli/CMakeLists.txt
+!Generate/LazuliSensor/CMakeLists.txt
+!Generate/OldLazuli/CMakeLists.txt
 
 # arm-none-eabiは除外 (共有サーバ、または公式からダウンロード)
 gcc-arm-11.2-2022.02-x86_64-arm-none-eabi.tar.xz

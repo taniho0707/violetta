@@ -5,7 +5,7 @@
 //******************************************************************************
 #include "mpl_wallsensor.h"
 
-#include "mpl_timer.h"
+#include "hal_wallsensor.h"
 #include "msg_format_wallsensor.h"
 #include "msg_server.h"
 
@@ -25,93 +25,17 @@ void mpl::WallSensor::deinitPort() {
 mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
     // 順番にすべてのチャンネルをスキャン
     hal::WallSensorData buffer_bundle = {0};
-    uint16_t buffer_single = 0;
-    uint16_t buffer_none = 0;
     hal::HalStatus result;
 
 #ifdef MOUSE_LAZULI
-    // FRONTLEFT
-    hal::setWallSensorChargeStart();
-    // mpl::Timer::sleepNs(50);
-    // hal::setWallSensorChargeStop();
-
-    hal::setWallSensorAdcSelect(hal::WallSensorNumbers::FRONTLEFT);
-    mpl::Timer::sleepNs(50);
-    hal::startWallSensorConversion();
-    mpl::Timer::sleepNs(600);
-    hal::getWallSensorSingleSync(buffer_single);  // 破棄
-
-    hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTLEFT);
-    mpl::Timer::sleepNs(50);
-    hal::startWallSensorConversion();
-    // hal::setWallSensorLedOff(hal::WallSensorNumbers::FRONTLEFT);
-    mpl::Timer::sleepNs(600);
-    result = hal::getWallSensorSingleSync(buffer_single);
-    mpl::Timer::sleepNs(50);
-    buffer_bundle.FRONTLEFT = buffer_single;
-
-    // LEFT
-    // hal::setWallSensorChargeStart();
-    // mpl::Timer::sleepNs(50);
-    // hal::setWallSensorChargeStop();
-
-    hal::setWallSensorAdcSelect(hal::WallSensorNumbers::LEFT);
-    mpl::Timer::sleepNs(50);
-    hal::startWallSensorConversion();
-    mpl::Timer::sleepNs(600);
-    hal::getWallSensorSingleSync(buffer_single);  // 破棄
-
-    hal::setWallSensorLedOn(hal::WallSensorNumbers::LEFT);
-    mpl::Timer::sleepNs(50);
-    hal::startWallSensorConversion();
-    hal::setWallSensorLedOff(hal::WallSensorNumbers::LEFT);
-    mpl::Timer::sleepNs(600);
-    result = hal::getWallSensorSingleSync(buffer_single);
-    mpl::Timer::sleepNs(50);
-    buffer_bundle.LEFT = buffer_single;
-
-    // RIGHT
-    // hal::setWallSensorChargeStart();
-    // mpl::Timer::sleepNs(50);
-    // hal::setWallSensorChargeStop();
-
-    hal::setWallSensorAdcSelect(hal::WallSensorNumbers::RIGHT);
-    mpl::Timer::sleepNs(50);
-    hal::startWallSensorConversion();
-    mpl::Timer::sleepNs(600);
-    hal::getWallSensorSingleSync(buffer_single);  // 破棄
-
-    hal::setWallSensorLedOn(hal::WallSensorNumbers::RIGHT);
-    mpl::Timer::sleepNs(50);
-    hal::startWallSensorConversion();
-    hal::setWallSensorLedOff(hal::WallSensorNumbers::RIGHT);
-    mpl::Timer::sleepNs(600);
-    result = hal::getWallSensorSingleSync(buffer_single);
-    mpl::Timer::sleepNs(50);
-    buffer_bundle.RIGHT = buffer_single;
-
-    // FRONTRIGHT
-    // hal::setWallSensorChargeStart();
-    // mpl::Timer::sleepNs(50);
-    // hal::setWallSensorChargeStop();
-
-    hal::setWallSensorAdcSelect(hal::WallSensorNumbers::FRONTRIGHT);
-    mpl::Timer::sleepNs(50);
-    hal::startWallSensorConversion();
-    mpl::Timer::sleepNs(600);
-    hal::getWallSensorSingleSync(buffer_single);  // 破棄
-
-    hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTRIGHT);
-    mpl::Timer::sleepNs(50);
-    hal::startWallSensorConversion();
-    hal::setWallSensorLedOff(hal::WallSensorNumbers::FRONTRIGHT);
-    mpl::Timer::sleepNs(600);
-    result = hal::getWallSensorSingleSync(buffer_single);
-    mpl::Timer::sleepNs(50);
-    buffer_bundle.FRONTRIGHT = buffer_single;
+    uint16_t buffer_bundle_array[WALLSENSOR_NUMS] = {0};
+    result = hal::getWallSensorAllSync(buffer_bundle_array);
 #endif  // MOUSE_LAZULI
 
 #ifdef MOUSE_ZIRCONIA2KAI
+    uint16_t buffer_single = 0;
+    uint16_t buffer_none = 0;
+
     // FRONTLEFT
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::FRONTLEFT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTLEFT);
@@ -157,10 +81,11 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
         data.FRONTRIGHT = buffer[4];
 #endif
 #ifdef MOUSE_LAZULI
-        data.FRONTLEFT = buffer_bundle.FRONTLEFT;
-        data.LEFT = buffer_bundle.LEFT;
-        data.RIGHT = buffer_bundle.RIGHT;
-        data.FRONTRIGHT = buffer_bundle.FRONTRIGHT;
+        buffer_bundle.FRONTLEFT = buffer_bundle_array[0];
+        buffer_bundle.LEFT = buffer_bundle_array[1];
+        buffer_bundle.CENTER = buffer_bundle_array[2];
+        buffer_bundle.RIGHT = buffer_bundle_array[3];
+        buffer_bundle.FRONTRIGHT = buffer_bundle_array[4];
 #endif
 #ifdef MOUSE_ZIRCONIA2KAI
         data.FRONTLEFT = buffer_bundle.FRONTLEFT;
@@ -177,10 +102,18 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
 void mpl::WallSensor::interruptPeriodic() {
     scanAllSync(last);
 
+#ifdef MOUSE_LAZULI
+    msg_format.frontleft = last.FRONTLEFT;
+    msg_format.left = last.LEFT;
+    msg_format.center = last.CENTER;
+    msg_format.right = last.RIGHT;
+    msg_format.frontright = last.FRONTRIGHT;
+#elif defined(MOUSE_ZIRCONIA2KAI)
     msg_format.frontleft = last.FRONTLEFT;
     msg_format.left = last.LEFT;
     msg_format.right = last.RIGHT;
     msg_format.frontright = last.FRONTRIGHT;
+#endif
     msg_server->sendMessage(msg::ModuleId::WALLSENSOR, &msg_format);
 }
 

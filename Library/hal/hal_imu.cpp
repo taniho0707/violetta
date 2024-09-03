@@ -41,11 +41,12 @@ hal::HalStatus hal::initImuPort() {
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
 
     /** SPI3 GPIO Configuration
+    PA15 (JTDI) ------> GPIO_Output
     PB3 (JTDO/TRACESWO)   ------> SPI3_SCK
     PB4 (NJTRST)   ------> SPI3_MISO
     PB5   ------> SPI3_MOSI
     */
-    GPIO_InitStruct.Pin = IMU_FRAM_SCK_Pin | IMU_FRAM_MISO_Pin | IMU_FRAM_MOSI_Pin;
+    GPIO_InitStruct.Pin = IMU_SCK_Pin | IMU_MISO_Pin | IMU_MOSI_Pin;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
     GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;

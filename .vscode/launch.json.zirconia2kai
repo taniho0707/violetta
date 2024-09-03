@@ -59,19 +59,21 @@
             // "servertype": "stlink",
             "servertype": "openocd",
             "configFiles": [
-                "interface/cmsis-dap.cfg",
-                // "target/stm32f4x.cfg"
-                "target/stm32l4x.cfg"
+                "interface/stlink-v2-1.cfg",
+                // "interface/cmsis-dap.cfg",
+                "target/stm32f4x.cfg"
+                // "target/stm32l4x.cfg"
             ],
-            "openOCDLaunchCommands": [
-                "cmsis_dap_backend hid"
-            ],
-            // "device": "STM32F411CE",
-            "device": "STM32L4P5",
+            // "openOCDLaunchCommands": [
+            //     "cmsis_dap_backend hid"
+            // ],
+            "device": "STM32F411CE",
+            // "device": "STM32L4P5",
             "interface": "swd",
 
             // for Peripheral Viewer extension
-            "svdFile": "${workspaceRoot}/Platform/STM32L4P5CETx/STM32L4x5.svd",
+            "svdFile": "${workspaceRoot}/Platform/STM32F411xE/STM32F411.svd",
+            // "svdFile": "${workspaceRoot}/Platform/STM32L4P5CETx/STM32L4x5.svd",
         },
     ],
 }
