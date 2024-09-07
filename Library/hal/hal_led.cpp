@@ -122,8 +122,8 @@ hal::HalStatus hal::initLedPort(InitializeType type) {
         transmitLedI2cCommand(LedDriverCommands::LED5_SET, 0x03);  // FRIGHT BLUE 2mA
         transmitLedI2cCommand(LedDriverCommands::LED6_SET, 0x09);  // WHITE 5mA
         transmitLedI2cCommand(LedDriverCommands::LED7_SET, 0x03);  // 2mA
-        transmitLedI2cCommand(LedDriverCommands::LED8_SET, 0x05);  // 3mA
-        transmitLedI2cCommand(LedDriverCommands::LED9_SET, 0x00);  // GREEN 0.5mA
+        transmitLedI2cCommand(LedDriverCommands::LED8_SET, 0x00);  // GREEN 0.5mA
+        transmitLedI2cCommand(LedDriverCommands::LED9_SET, 0x03);  // BLUE 2mA
 
         return hal::HalStatus::SUCCESS;
     } else if (type == InitializeType::Async) {
@@ -347,20 +347,20 @@ hal::HalStatus hal::transmitLedI2cData(uint8_t device_id, uint8_t* pdata, uint8_
 #endif
 
 #ifdef MOUSE_LAZULI
-    while (LL_I2C_IsActiveFlag_BUSY(I2C1) == SET);
+    while (LL_I2C_IsActiveFlag_BUSY(I2C2) == SET);
 
-    LL_I2C_HandleTransfer(I2C1, device_id, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
+    LL_I2C_HandleTransfer(I2C2, device_id, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
 
     for (uint8_t i = 0; i < size; i++) {
         // while (LL_I2C_IsActiveFlag_TXE(I2C1) == RESET);
-        while (LL_I2C_IsActiveFlag_TXIS(I2C1) == RESET);
-        LL_I2C_TransmitData8(I2C1, pdata[i]);
+        while (LL_I2C_IsActiveFlag_TXIS(I2C2) == RESET);
+        LL_I2C_TransmitData8(I2C2, pdata[i]);
     }
 
-    while (LL_I2C_IsActiveFlag_STOP(I2C1) == RESET);
-    LL_I2C_ClearFlag_STOP(I2C1);
+    while (LL_I2C_IsActiveFlag_STOP(I2C2) == RESET);
+    LL_I2C_ClearFlag_STOP(I2C2);
 
-    // (I2C1->CR2 &=
+    // (I2C2->CR2 &=
     //  (uint32_t) ~((uint32_t)(I2C_CR2_SADD | I2C_CR2_HEAD10R | I2C_CR2_NBYTES
     //  |
     //                          I2C_CR2_RELOAD | I2C_CR2_RD_WRN)));
@@ -377,17 +377,17 @@ hal::HalStatus hal::receiveLedI2cData(uint8_t device_id, uint8_t* pdata, uint8_t
 #endif
 
 #ifdef MOUSE_LAZULI
-    while (LL_I2C_IsActiveFlag_BUSY(I2C1) == SET);
+    while (LL_I2C_IsActiveFlag_BUSY(I2C2) == SET);
 
-    LL_I2C_HandleTransfer(I2C1, device_id, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
+    LL_I2C_HandleTransfer(I2C2, device_id, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
 
     for (uint8_t i = 0; i < size; i++) {
-        while (LL_I2C_IsActiveFlag_RXNE(I2C1) == RESET);
-        pdata[i] = LL_I2C_ReceiveData8(I2C1);
+        while (LL_I2C_IsActiveFlag_RXNE(I2C2) == RESET);
+        pdata[i] = LL_I2C_ReceiveData8(I2C2);
     }
 
-    while (LL_I2C_IsActiveFlag_STOP(I2C1) == RESET);
-    LL_I2C_ClearFlag_STOP(I2C1);
+    while (LL_I2C_IsActiveFlag_STOP(I2C2) == RESET);
+    LL_I2C_ClearFlag_STOP(I2C2);
 
     // (I2C1->CR2 &=
     //  (uint32_t) ~((uint32_t)(I2C_CR2_SADD | I2C_CR2_HEAD10R | I2C_CR2_NBYTES
@@ -410,19 +410,19 @@ hal::HalStatus hal::transmitLedI2cDataDma(uint8_t device_id, uint8_t* pdata, uin
         transmit_buffer[i] = pdata[i];
     }
 
-    while (LL_I2C_IsActiveFlag_BUSY(I2C1) == SET);
+    while (LL_I2C_IsActiveFlag_BUSY(I2C2) == SET);
 
-    LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_1);
-    LL_I2C_HandleTransfer(I2C1, device_id, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
-    LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_1, size);
-    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_1, (uint32_t)pdata, (uint32_t)LL_I2C_DMA_GetRegAddr(I2C1, LL_I2C_DMA_REG_DATA_TRANSMIT),
-                           LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_7));
-    LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_1, size);
-    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_1, (uint32_t)transmit_buffer, (uint32_t)LL_I2C_DMA_GetRegAddr(I2C1, LL_I2C_DMA_REG_DATA_TRANSMIT),
-                           LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_CHANNEL_1));
+    LL_DMA_DisableChannel(DMA2, LL_DMA_CHANNEL_3);
+    LL_I2C_HandleTransfer(I2C2, device_id, LL_I2C_ADDRSLAVE_7BIT, size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
+    LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_3, size);
+    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_3, (uint32_t)pdata, (uint32_t)LL_I2C_DMA_GetRegAddr(I2C2, LL_I2C_DMA_REG_DATA_TRANSMIT),
+                           LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_CHANNEL_4));
+    LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_3, size);
+    LL_DMA_ConfigAddresses(DMA2, LL_DMA_CHANNEL_3, (uint32_t)transmit_buffer, (uint32_t)LL_I2C_DMA_GetRegAddr(I2C2, LL_I2C_DMA_REG_DATA_TRANSMIT),
+                           LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_CHANNEL_3));
 
-    LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_1);
-    LL_I2C_EnableDMAReq_TX(I2C1);
+    LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_3);
+    LL_I2C_EnableDMAReq_TX(I2C2);
 
     // while (LL_DMA_IsActiveFlag_TC1(DMA2) == RESET);
     // LL_DMA_ClearFlag_TC1(DMA2);
@@ -464,32 +464,33 @@ hal::HalStatus hal::setLedDma(LedNumbers* nums, uint8_t size) {
     uint8_t en = 0;
     for (uint8_t i = 0; i < size; i++) {
         switch (nums[i]) {
-            case hal::LedNumbers::MIDDLE1:
+            case hal::LedNumbers::LEFT:
                 en |= 0x80;
                 break;
-            case hal::LedNumbers::MIDDLE2:
+            case hal::LedNumbers::FRONT:
                 en |= 0x40;
                 break;
-            case hal::LedNumbers::MIDDLE3:
+            case hal::LedNumbers::RIGHT:
                 en |= 0x20;
                 break;
-            case hal::LedNumbers::MIDDLE4:
+            case hal::LedNumbers::FRONTR:
                 en |= 0x10;
                 break;
-            case hal::LedNumbers::MIDDLE5:
+            case hal::LedNumbers::MIDDLE1:
                 en |= 0x08;
                 break;
-            case hal::LedNumbers::FRONTR:
+            case hal::LedNumbers::MIDDLE2:
                 en |= 0x04;
                 break;
-            case hal::LedNumbers::FRONTL:
+            case hal::LedNumbers::MIDDLE3:
                 en |= 0x02;
                 break;
-            case hal::LedNumbers::LEFT:
+            case hal::LedNumbers::MIDDLE4:
                 en |= 0x01;
                 break;
-            case hal::LedNumbers::RIGHT:
+            case hal::LedNumbers::FRONTL:
                 en |= 0x00;
+                // TODO: これだけレジスタが違うため修正
                 break;
             case hal::LedNumbers::FLAG:
                 return hal::HalStatus::NOIMPLEMENT;
@@ -544,46 +545,39 @@ hal::HalStatus hal::onLed(hal::LedNumbers num) {
     receiveLedI2cCommand(LedDriverCommands::LED_EN_IDVD, &current_en);
 
     switch (num) {
-        case hal::LedNumbers::MIDDLE1:
+        case hal::LedNumbers::FRONTL:
             transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x01);
             break;
-        case hal::LedNumbers::MIDDLE2:
+        case hal::LedNumbers::LEFT:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x80);
             break;
-        case hal::LedNumbers::MIDDLE3:
+        case hal::LedNumbers::FRONT:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x40);
             break;
-        case hal::LedNumbers::MIDDLE4:
+        case hal::LedNumbers::RIGHT:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x20);
             break;
-        case hal::LedNumbers::MIDDLE5:
+        case hal::LedNumbers::FRONTR:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x10);
             break;
-        case hal::LedNumbers::FRONTR:
+        case hal::LedNumbers::MIDDLE1:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x08);
             break;
-        case hal::LedNumbers::FRONTL:
+        case hal::LedNumbers::MIDDLE2:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x04);
             break;
-        case hal::LedNumbers::LEFT:
+        case hal::LedNumbers::MIDDLE3:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x02);
             break;
-        case hal::LedNumbers::RIGHT:
+        case hal::LedNumbers::MIDDLE4:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x01);
             break;
         case hal::LedNumbers::FLAG:
             return hal::HalStatus::NOIMPLEMENT;
             break;
         case hal::LedNumbers::ALL:
-            hal::onLed(hal::LedNumbers::MIDDLE1);
-            hal::onLed(hal::LedNumbers::MIDDLE2);
-            hal::onLed(hal::LedNumbers::MIDDLE3);
-            hal::onLed(hal::LedNumbers::MIDDLE4);
-            hal::onLed(hal::LedNumbers::MIDDLE5);
-            hal::onLed(hal::LedNumbers::FRONTR);
-            hal::onLed(hal::LedNumbers::FRONTL);
-            hal::onLed(hal::LedNumbers::LEFT);
-            hal::onLed(hal::LedNumbers::RIGHT);
+            transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x01);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, 0xFF);
             break;
         default:
             return hal::HalStatus::INVALID_PARAMS;
@@ -652,46 +646,39 @@ hal::HalStatus hal::offLed(hal::LedNumbers num) {
     receiveLedI2cCommand(LedDriverCommands::LED_EN_IDVD, &current_en);
 
     switch (num) {
-        case hal::LedNumbers::MIDDLE1:
+        case hal::LedNumbers::FRONTL:
             transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x00);
             break;
-        case hal::LedNumbers::MIDDLE2:
+        case hal::LedNumbers::LEFT:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0x7F);
             break;
-        case hal::LedNumbers::MIDDLE3:
+        case hal::LedNumbers::FRONT:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xBF);
             break;
-        case hal::LedNumbers::MIDDLE4:
+        case hal::LedNumbers::RIGHT:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xDF);
             break;
-        case hal::LedNumbers::MIDDLE5:
+        case hal::LedNumbers::FRONTR:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xEF);
             break;
-        case hal::LedNumbers::FRONTR:
+        case hal::LedNumbers::MIDDLE1:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xF7);
             break;
-        case hal::LedNumbers::FRONTL:
+        case hal::LedNumbers::MIDDLE2:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xFB);
             break;
-        case hal::LedNumbers::LEFT:
+        case hal::LedNumbers::MIDDLE3:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xFD);
             break;
-        case hal::LedNumbers::RIGHT:
+        case hal::LedNumbers::MIDDLE4:
             transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xFE);
             break;
         case hal::LedNumbers::FLAG:
             return hal::HalStatus::NOIMPLEMENT;
             break;
         case hal::LedNumbers::ALL:
-            hal::offLed(hal::LedNumbers::MIDDLE1);
-            hal::offLed(hal::LedNumbers::MIDDLE2);
-            hal::offLed(hal::LedNumbers::MIDDLE3);
-            hal::offLed(hal::LedNumbers::MIDDLE4);
-            hal::offLed(hal::LedNumbers::MIDDLE5);
-            hal::offLed(hal::LedNumbers::FRONTR);
-            hal::offLed(hal::LedNumbers::FRONTL);
-            hal::offLed(hal::LedNumbers::LEFT);
-            hal::offLed(hal::LedNumbers::RIGHT);
+            transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x00);
+            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, 0x00);
             break;
         default:
             return hal::HalStatus::INVALID_PARAMS;

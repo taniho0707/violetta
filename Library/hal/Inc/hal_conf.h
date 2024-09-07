@@ -63,15 +63,15 @@ struct WallSensorData {
 #ifdef MOUSE_LAZULI
 #define LED_NUMS 10
 enum class LedNumbers : uint8_t {
-    LEFT = 0,
+    FRONTL = 0,
+    LEFT,
+    FRONT,
     RIGHT,
-    FRONTL,
     FRONTR,
     MIDDLE1,
     MIDDLE2,
     MIDDLE3,
     MIDDLE4,
-    MIDDLE5,
     FLAG,
     ALL = 255,
 };

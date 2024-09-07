@@ -88,26 +88,21 @@ Status SearchActivity::run() {
     }
 #endif  // MOUSE_ZIRCONIA2KAI
 #ifdef MOUSE_LAZULI
-    if (battery_data > 4.f) {
+    if (battery_data > 8.2f) {
         led->on(hal::LedNumbers::MIDDLE1);
         led->on(hal::LedNumbers::MIDDLE2);
         led->on(hal::LedNumbers::MIDDLE3);
         led->on(hal::LedNumbers::MIDDLE4);
-        led->on(hal::LedNumbers::MIDDLE5);
-    } else if (battery_data > 3.8f) {
-        led->on(hal::LedNumbers::MIDDLE1);
+    } else if (battery_data > 7.8f) {
         led->on(hal::LedNumbers::MIDDLE2);
         led->on(hal::LedNumbers::MIDDLE3);
         led->on(hal::LedNumbers::MIDDLE4);
-    } else if (battery_data > 3.6f) {
-        led->on(hal::LedNumbers::MIDDLE1);
-        led->on(hal::LedNumbers::MIDDLE2);
+    } else if (battery_data > 7.4f) {
         led->on(hal::LedNumbers::MIDDLE3);
-    } else if (battery_data > 3.4f) {
-        led->on(hal::LedNumbers::MIDDLE1);
-        led->on(hal::LedNumbers::MIDDLE2);
-    } else {
-        led->on(hal::LedNumbers::MIDDLE1);
+        led->on(hal::LedNumbers::MIDDLE4);
+    } else if (battery_data > 7.0f) {
+        led->on(hal::LedNumbers::MIDDLE4);
+    } else if (battery_data > 6.6f) {
         while (true);
     }
 #endif  // MOUSE_LAZULI
