@@ -7,8 +7,12 @@
 
 #include "stdint.h"
 
-#ifdef STM32
+#if defined(STM32)
+#ifndef STM32C011xx
 #include "arm_math.h"
+#else
+#include "math.h"
+#endif
 #endif
 
 #ifdef LINUX
@@ -90,7 +94,11 @@ inline misc::Point<float> calcErrorVector(misc::Point<float> current_position, m
 // マウス進行方向の単位ベクトルを計算する
 inline misc::Point<float> calcDirectionUnitVector(float angle) {
 #ifdef STM32
+#ifndef STM32C011xx
     return misc::Point<float>{arm_sin_f32(angle), arm_cos_f32(angle)};
+#else
+    return misc::Point<float>{sinf(angle), cosf(angle)};
+#endif
 #else
     return misc::Point<float>{sin(angle), cos(angle)};
 #endif

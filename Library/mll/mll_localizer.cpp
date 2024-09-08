@@ -5,8 +5,12 @@
 //******************************************************************************
 #include "mll_localizer.h"
 
-#ifdef STM32
+#if defined(STM32)
+#ifndef STM32C011xx
 #include "arm_math.h"
+#else
+#include "math.h"
+#endif
 #endif
 
 #ifdef LINUX
@@ -86,8 +90,18 @@ void mll::Localizer::interruptPeriodic() {
     current_status.position_translation = ALPHA * encoder_status.position_translation + (1 - ALPHA) * imu_status.position_translation;
 
     // 2軸の移動量から現在位置を推定
+#if defined(STM32)
+#ifndef STM32C011xx
     float dif_x = encoder_status.position_translation * arm_sin_f32(current_status.position_theta);
     float dif_y = encoder_status.position_translation * arm_cos_f32(current_status.position_theta);
+#else
+    float dif_x = encoder_status.position_translation * sinf(current_status.position_theta);
+    float dif_y = encoder_status.position_translation * cosf(current_status.position_theta);
+#endif
+#elif defined(LINUX)
+    float dif_x = encoder_status.position_translation * sin(current_status.position_theta);
+    float dif_y = encoder_status.position_translation * cos(current_status.position_theta);
+#endif
     current_status.position_x += dif_x;
     current_status.position_y += dif_y;
 

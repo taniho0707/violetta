@@ -19,6 +19,7 @@ enum class Activities : uint8_t {
     NONE = 0x00,              // 何もしない 使わない想定
     SEARCH = 0x01,            // 探索モード
     SHORTRUN = 0x02,          // 最短経路モード
+    WALLSENSOR_RUN = 0xA1,    // 壁センサ単体モード for LazuliSensor Only
     SELECT_NEXT = 0xD1,       // 次のアクティビティを選択
     WALLSENSOR_CHECK = 0xE0,  // 壁センサチェック
     PARAMTUNE_MOTOR = 0xE1,   // モーターパラメータ調整

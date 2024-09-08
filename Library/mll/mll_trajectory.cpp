@@ -5,8 +5,12 @@
 //******************************************************************************
 #include "mll_trajectory.h"
 
-#ifdef STM32
+#if defined(STM32)
+#ifndef STM32C011xx
 #include "arm_math.h"
+#else
+#include "math.h"
+#endif
 #endif
 
 #ifdef LINUX
@@ -66,7 +70,15 @@ void Trajectory::init(TrajectoryCalcType calc, TrajectoryFormType form, float a,
             t_2 = (x_2 / misc::abs(v_max)) * 1000 + t_1;
             t_end = ((v_max - v_end) / accel) * 1000 + t_2;
         } else {
+#if defined(STM32)
+#ifndef STM32C011xx
             arm_sqrt_f32((misc::abs(2 * accel * distance) + v_start * v_start + v_end * v_end) / 2, &this->v_max);
+#else
+            this->v_max = sqrtf((misc::abs(2 * accel * distance) + v_start * v_start + v_end * v_end) / 2);
+#endif
+#elif defined(LINUX)
+            this->v_max = sqrt((misc::abs(2 * accel * distance) + v_start * v_start + v_end * v_end) / 2);
+#endif
             // float x_1 = (v_max * v_max - v_start * v_start) / (2 * accel);
             // float x_3 = (v_max * v_max - v_end * v_end) / (2 * accel);
             t_1 = ((v_max - v_start) / accel) * 1000;

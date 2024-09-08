@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 include_directories(
-    Drivers/STM32L4xx_HAL_Driver/Inc
+    Drivers/STM32C0xx_HAL_Driver/Inc
     Drivers/CMSIS/Include
     Drivers/CMSIS/Device/ST/STM32C0xx/Include
 )
@@ -17,5 +17,5 @@ add_library(STM32HAL STATIC
     Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_ll_spi.c
     Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_ll_tim.c
     # Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_ll_usart.c
-    # Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_ll_utils.c
+    Drivers/STM32C0xx_HAL_Driver/Src/stm32c0xx_ll_utils.c
 )

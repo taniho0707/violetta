@@ -1,6 +1,6 @@
 Configuration	Lazuli2Sensor
 STM32CubeMX 	6.12.0
-Date	08/06/2024
+Date	09/07/2024
 MCU	STM32C011F4Ux
 
 
@@ -88,7 +88,7 @@ SOFTWARE PROJECT
 
 Project Settings : 
 Project Name : Lazuli2Sensor
-Project Folder : S:\nextcloud\MicroMouse2\Project\lazuli\STM32CubeMX\Lazuli2Sensor\Lazuli2Sensor
+Project Folder : /home/nonoho/Downloads/lazuli2/Lazuli2Sensor/Lazuli2Sensor
 Toolchain / IDE : Makefile
 Firmware Package Name and Version : STM32Cube FW_C0 V1.2.0
 

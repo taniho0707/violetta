@@ -5,14 +5,18 @@
 //******************************************************************************
 #include "act_manager.h"
 
+#ifndef MOUSE_LAZULI_SENSOR
 #include "act_debug.h"
 #include "act_module_test.h"
-#include "act_none.h"
 #include "act_paramtune_motor.h"
 #include "act_search.h"
 #include "act_select_next.h"
 #include "act_shortrun.h"
 #include "act_wallsensor_check.h"
+#endif  // ifndef MOUSE_LAZULI_SENSOR
+
+#include "act_none.h"
+#include "act_wallsensor_run.h"
 
 using namespace act;
 
@@ -23,6 +27,7 @@ Manager::Manager(Activities first_activity) {
 
 IActivity* Manager::createActivity(Activities next_activity) {
     switch (next_activity) {
+#ifndef MOUSE_LAZULI_SENSOR
         case Activities::SEARCH:
             return new SearchActivity();
         case Activities::SHORTRUN:
@@ -37,6 +42,9 @@ IActivity* Manager::createActivity(Activities next_activity) {
             return new DebugActivity();
         case Activities::WALLSENSOR_CHECK:
             return new WallsensorCheckActivity();
+#endif  // ifndef MOUSE_LAZULI_SENSOR
+        case Activities::WALLSENSOR_RUN:
+            return new WallsensorRunActivity();
         default:
             return new NoneActivity();
     }

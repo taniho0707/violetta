@@ -1,9 +1,8 @@
 #include "taniho.h"
 
-#include "stm32l4xx_ll_bus.h"
-
 #ifdef STM32L4P5xx
 // LL Library
+#include "stm32l4xx_ll_bus.h"
 #include "stm32l4xx_ll_pwr.h"
 #include "stm32l4xx_ll_rcc.h"
 #include "stm32l4xx_ll_system.h"
@@ -11,6 +10,14 @@
 // HAL Library
 #include "stm32l4xx_hal_rcc.h"
 #endif  // ifdef STM32L4P5xx
+
+#ifdef STM32C011xx
+#include "stm32c0xx_ll_bus.h"
+#include "stm32c0xx_ll_pwr.h"
+#include "stm32c0xx_ll_rcc.h"
+#include "stm32c0xx_ll_system.h"
+#include "stm32c0xx_ll_utils.h"
+#endif  // ifdef STM32C011xx
 
 #ifdef STM32F411xE
 #include "stm32f4xx_ll_bus.h"
@@ -57,6 +64,15 @@ int main(void) {
     PeriphCommonClock_Config();
 #endif  // ifdef MOUSE_LAZULI
 
+#ifdef MOUSE_LAZULI_SENSOR
+    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
+    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+
+    for (int i = 0; i < 30000; ++i);
+
+    SystemClock_Config();
+#endif  // ifdef MOUSE_LAZULI_SENSOR
+
 #ifdef MOUSE_ZIRCONIA2KAI
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
@@ -64,10 +80,15 @@ int main(void) {
     SystemClock_Config();
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
 
+#ifdef MOUSE_LAZULI_SENSOR
+    auto activity = act::Manager(act::Activities::WALLSENSOR_RUN);
+    activity.run();
+#else
     auto activity = act::Manager(act::Activities::DEBUG);
     // auto activity = act::Manager(act::Activities::SEARCH);
     // auto activity = act::Manager(act::Activities::WALLSENSOR_CHECK);
     activity.run();
+#endif  // ifndef MOUSE_LAZULI_SENSOR
 }
 
 #ifdef MOUSE_VIOLETTA
@@ -183,6 +204,31 @@ void PeriphCommonClock_Config(void) {
     while (LL_RCC_PLLSAI1_IsReady() != 1) {}
 }
 #endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_LAZULI_SENSOR
+void SystemClock_Config(void) {
+    LL_FLASH_EnablePrefetch();
+
+    LL_FLASH_SetLatency(LL_FLASH_LATENCY_1);
+
+    /* HSE configuration and activation */
+    LL_RCC_HSE_Enable();
+    while (LL_RCC_HSE_IsReady() != 1) {}
+
+    /* Set AHB prescaler*/
+    LL_RCC_SetAHBPrescaler(LL_RCC_HCLK_DIV_1);
+
+    /* Sysclk activation on the HSE */
+    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSE);
+    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE) {}
+
+    /* Set APB1 prescaler*/
+    LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
+    LL_Init1msTick(25000000);
+    /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
+    LL_SetSystemCoreClock(25000000);
+}
+#endif  // ifdef MOUSE_LAZULI_SENSOR
 
 #ifdef MOUSE_ZIRCONIA2KAI
 /**

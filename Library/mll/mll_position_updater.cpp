@@ -23,8 +23,18 @@ PositionUpdater::PositionUpdater() {
 }
 
 void PositionUpdater::updateTargetPosition(const float velocity_translation, const float velocity_rotation) {
+#if defined(STM32)
+#ifndef STM32C011xx
     target_physical_position.x -= velocity_translation * arm_sin_f32(target_physical_position.angle) * 0.001f;
     target_physical_position.y += velocity_translation * arm_cos_f32(target_physical_position.angle) * 0.001f;
+#else
+    target_physical_position.x -= velocity_translation * sinf(target_physical_position.angle) * 0.001f;
+    target_physical_position.y += velocity_translation * cosf(target_physical_position.angle) * 0.001f;
+#endif
+#elif defined(LINUX)
+    target_physical_position.x -= velocity_translation * sin(target_physical_position.angle) * 0.001f;
+    target_physical_position.y += velocity_translation * cos(target_physical_position.angle) * 0.001f;
+#endif
     target_physical_position.angle += velocity_rotation * 0.001f;
 }
 

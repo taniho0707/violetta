@@ -191,6 +191,12 @@ Status DebugActivity::run() {
 }
 #endif  // MOUSE_LAZULI
 
+#ifdef MOUSE_LAZULI_SENSOR
+Status DebugActivity::run() {
+    return Status::ERROR;
+}
+#endif  // MOUSE_LAZULI_SENSOR
+
 #ifdef MOUSE_ZIRCONIA2KAI
 Status DebugActivity::run() {
     auto cmd_server = cmd::CommandServer::getInstance();

@@ -5,8 +5,12 @@
 //******************************************************************************
 #include "mll_operation_controller.h"
 
-#ifdef STM32
+#if defined(STM32)
+#ifndef STM32C011xx
 #include "arm_math.h"
+#else
+#include "math.h"
+#endif
 #endif
 
 #ifdef LINUX

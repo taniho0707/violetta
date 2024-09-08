@@ -60,7 +60,7 @@ struct WallSensorData {
 };
 #endif  // ifdef MOUSE_VIOLETTA
 
-#ifdef MOUSE_LAZULI
+#if defined(MOUSE_LAZULI)
 #define LED_NUMS 10
 enum class LedNumbers : uint8_t {
     FRONTL = 0,
@@ -181,6 +181,40 @@ enum class InternalFlashSector : uint8_t {
 #define SPEAKER_PWM_Pin        LL_GPIO_PIN_9
 #define SPEAKER_PWM_GPIO_Port  GPIOB
 #endif  // ifdef MOUSE_LAZULI
+
+#ifdef MOUSE_LAZULI_SENSOR
+const uint32_t TIMER_COUNT_INTERVAL = 250;  // [us]
+const uint32_t TIMER_COUNT_MAX = 12500;     // 1 カウントあたり ? [us] = ? [ns]
+
+#define WALLSENSOR_NUMS 5
+enum class WallSensorNumbers : uint8_t {
+    FRONTLEFT = 0,
+    LEFT,
+    CENTER,
+    RIGHT,
+    FRONTRIGHT,
+    ALL = 255,
+};
+
+struct WallSensorData {
+    uint16_t FRONTLEFT;
+    uint16_t LEFT;
+    uint16_t CENTER;
+    uint16_t RIGHT;
+    uint16_t FRONTRIGHT;
+} __attribute__((packed));
+
+#define GPIO_0_Pin       LL_GPIO_PIN_2
+#define GPIO_0_GPIO_Port GPIOF
+#define GPIO_4_Pin       LL_GPIO_PIN_11
+#define GPIO_4_GPIO_Port GPIOA
+#define GPIO_3_Pin       LL_GPIO_PIN_12
+#define GPIO_3_GPIO_Port GPIOA
+#define GPIO_2_Pin       LL_GPIO_PIN_6
+#define GPIO_2_GPIO_Port GPIOB
+#define GPIO_1_Pin       LL_GPIO_PIN_7
+#define GPIO_1_GPIO_Port GPIOB
+#endif  // ifdef MOUSE_LAZULI_SENSOR
 
 #ifdef MOUSE_ZIRCONIA2KAI
 #define LED_NUMS 4

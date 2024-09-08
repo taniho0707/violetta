@@ -17,7 +17,7 @@ class MsgFormatWallsensor : public MsgFormat {
 
     void update(void* from) override;
 
-#if defined(MOUSE_LAZULI)
+#if defined(MOUSE_LAZULI) || defined(MOUSE_LAZULI_SENSOR)
     uint16_t frontleft;
     uint16_t left;
     uint16_t center;

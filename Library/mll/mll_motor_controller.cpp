@@ -5,8 +5,12 @@
 //******************************************************************************
 #include "mll_motor_controller.h"
 
-#ifdef STM32
+#if defined(STM32)
+#ifndef STM32C011xx
 #include "arm_math.h"
+#else
+#include "math.h"
+#endif
 #endif
 
 #ifdef LINUX
@@ -35,7 +39,15 @@ float mll::MotorController::calcDistanceToTarget(float current_x, float current_
     float dx = target_x - current_x;
     float dy = target_y - current_y;
     float distance;
+#if defined(STM32)
+#ifndef STM32C011xx
     arm_sqrt_f32(dx * dx + dy * dy, &distance);
+#else
+    distance = sqrtf(dx * dx + dy * dy);
+#endif
+#elif defined(LINUX)
+    distance = sqrt(dx * dx + dy * dy);
+#endif
     return distance;
 }
 

@@ -77,6 +77,34 @@ elseif(${MOUSE} STREQUAL Lazuli)
     enable_language(ASM)
 
     set(STARTUP_ASM_FILE Platform/STM32L4P5CETx/startup_stm32l4p5xx.s)
+elseif(${MOUSE} STREQUAL LazuliSensor)
+    message("[BUILD MOUSE] LazuliSensor")
+    add_definitions(
+        -DMOUSE_LAZULI_SENSOR
+        -DSTM32C011
+        -DSTM32C011xx
+        -DUSE_FULL_LL_DRIVER
+        -DHSE_VALUE=25000000
+        -DVDD_VALUE=3000
+    )
+    include_directories(
+        Generate/LazuliSensor/Drivers/CMSIS/Device/ST/STM32C0xx/Include
+        Generate/LazuliSensor/Drivers/CMSIS/Include
+        Generate/LazuliSensor/Drivers/STM32C0xx_HAL_Driver/Inc
+    )
+    add_compile_options(
+        -ffunction-sections
+        -fdata-sections
+        -fstack-usage
+        --specs=nano.specs
+    )
+    set(CMAKE_C_FLAGS "-mcpu=cortex-m0plus -mthumb -std=gnu11")
+    set(CMAKE_CXX_FLAGS "-mcpu=cortex-m0plus -mthumb -fno-use-cxa-atexit -std=c++17")
+    set(CMAKE_AS_FLAGS "-mcpu=cortex-m0plus -mthumb -x assembler-with-cpp")
+    set(CMAKE_EXE_LINKER_FLAGS "-mcpu=cortex-m0plus -T${CMAKE_CURRENT_SOURCE_DIR}/Platform/STM32C011xx/STM32C011F4Ux_FLASH.ld -Wl,-Map=${CMAKE_CURRENT_SOURCE_DIR}/build/${TARGET}.map,--cref -Wl,--gc-sections -static --specs=nano.specs --specs=nosys.specs -mthumb -Wl,--start-group -lnosys -lc -lm -lstdc++ -lsupc++ -Wl,--end-group -Wl,--no-warn-rwx-segment")
+    enable_language(ASM)
+
+    set(STARTUP_ASM_FILE Platform/STM32C011xx/startup_stm32c011xx.s)
 elseif(${MOUSE} STREQUAL Zirconia2kai)
     message("[BUILD MOUSE] Zirconia2kai")
     add_definitions(
@@ -125,7 +153,7 @@ elseif(${MOUSE} STREQUAL Zirconia2kai)
 
     # STM32 and Linux compile options
 else()
-    message(FATAL_ERROR "[BUILD MOUSE] Invalid or unspecified micromouse name. Please specify it as -DMOUSE=[Violetta,Zirconia2kai,Lazuli]")
+    message(FATAL_ERROR "[BUILD MOUSE] Invalid or unspecified micromouse name. Please specify it as -DMOUSE=[Violetta,Zirconia2kai,Lazuli,LazuliSensor]")
 endif()
 
 ########################

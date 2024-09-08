@@ -11,6 +11,10 @@
 #include "stm32l4xx_ll_utils.h"
 #endif  // ifdef STM32L4P5xx
 
+#ifdef STM32C011xx
+#include "stm32c0xx_ll_utils.h"
+#endif  // ifdef STM32C011xx
+
 #ifdef STM32F411xE
 #include "stm32f4xx_ll_utils.h"
 #endif  // ifdef STM32F411xE
