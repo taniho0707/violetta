@@ -56,22 +56,16 @@
             "cwd": "${workspaceRoot}",
             "executable": "${workspaceRoot}/build/debug_taniho_binary.elf",
             "serverpath": "openocd",
-            // "servertype": "stlink",
             "servertype": "openocd",
             "configFiles": [
-                "interface/cmsis-dap.cfg",
-                // "target/stm32f4x.cfg"
-                "target/stm32l4x.cfg"
+                "interface/stlink.cfg",
+                "target/stm32c0x.cfg"
             ],
-            "openOCDLaunchCommands": [
-                "cmsis_dap_backend hid"
-            ],
-            // "device": "STM32F411CE",
-            "device": "STM32L4P5",
+            "device": "STM32F411CE",
             "interface": "swd",
 
             // for Peripheral Viewer extension
-            "svdFile": "${workspaceRoot}/Platform/STM32L4P5CETx/STM32L4x5.svd",
+            "svdFile": "${workspaceRoot}/Platform/STM32C011xx/STM32C011.svd",
         },
     ],
 }
