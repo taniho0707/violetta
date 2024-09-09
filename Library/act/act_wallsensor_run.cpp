@@ -33,11 +33,17 @@ Status WallsensorRunActivity::run() {
 
     // mpl::Timer::init();
 
+    // for Debug
+    // uint32_t count = 0;
+
     // 【壁センサの値を取るための無限ループ】
     while (1) {
         wallsensor->interruptPeriodic();
         wallanalyser->interruptPeriodic();
         // for (int i = 0; i < 1000; i++);
+
+        // for Debug
+        // ++count;
     }
 
     return Status::ERROR;

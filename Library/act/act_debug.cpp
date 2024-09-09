@@ -175,10 +175,11 @@ Status DebugActivity::run() {
         //                                  msg_imu.temperature);
         cmd_debug_tx.len = debug->format(
             cmd_debug_tx.message,
-            "T: %10d B: %1.2f | IMU: %8d, %10d, % 6.2f, % 5.1f, % 5.1f, % 5.1f | WALL: % 4d,% 4d,% 4d,% 4d | STAT: Max.[%2.0f|%2.0f|%2.0f|%2.0f] "
+            "T: %10d B: %1.2f | IMU: %8d, %10d, % 8.2f, % 7.1f, % 7.1f, % 7.1f | WALL: % 4d,% 4d,% 4d,% 4d,% 4d | STAT: "
+            "Max.[%2.0f|%2.0f|%2.0f|%2.0f] "
             "Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n",
             mpl::Timer::getMicroTime(), msg_battery.battery, msg_imu.getCount(), msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.acc_x / 1000,
-            msg_imu.acc_y / 1000, msg_imu.acc_z / 1000, msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.right,
+            msg_imu.acc_y / 1000, msg_imu.acc_z / 1000, msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.center, msg_wallsensor.right,
             msg_wallsensor.frontright, float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX,
             float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX,
             float(timer_statistics.count4_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX,

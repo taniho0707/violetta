@@ -35,42 +35,47 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
 #ifdef MOUSE_LAZULI_SENSOR
     uint16_t buffer_single = 0;
     uint16_t buffer_none = 0;
-    uint16_t buffer_bundle_array[WALLSENSOR_NUMS] = {0};
+    // uint16_t buffer_bundle_array[WALLSENSOR_NUMS] = {0};
 
-    result = hal::getWallSensorSingleSync(buffer_bundle_array[static_cast<uint16_t>(hal::WallSensorNumbers::FRONTLEFT)],
-                                          hal::WallSensorNumbers::FRONTLEFT);
+    const uint16_t WAIT_TIME = 10000;  // params から取得する
+
+    result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::FRONTLEFT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTLEFT);
-    for (int i = 0; i < 10000; ++i);
+    for (int i = 0; i < WAIT_TIME; ++i);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::FRONTLEFT);
+    hal::setWallSensorLedOff();
     buffer_bundle.FRONTLEFT = buffer_single - buffer_none;
     if (buffer_bundle.FRONTLEFT > 4096) buffer_bundle.FRONTLEFT = 0;
 
-    result = hal::getWallSensorSingleSync(buffer_bundle_array[static_cast<uint16_t>(hal::WallSensorNumbers::LEFT)], hal::WallSensorNumbers::LEFT);
+    result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::LEFT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::LEFT);
-    for (int i = 0; i < 10000; ++i);
+    for (int i = 0; i < WAIT_TIME; ++i);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::LEFT);
+    hal::setWallSensorLedOff();
     buffer_bundle.LEFT = buffer_single - buffer_none;
     if (buffer_bundle.LEFT > 4096) buffer_bundle.LEFT = 0;
 
-    result = hal::getWallSensorSingleSync(buffer_bundle_array[static_cast<uint16_t>(hal::WallSensorNumbers::CENTER)], hal::WallSensorNumbers::CENTER);
+    result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::CENTER);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::CENTER);
-    for (int i = 0; i < 10000; ++i);
+    for (int i = 0; i < WAIT_TIME; ++i);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::CENTER);
+    hal::setWallSensorLedOff();
     buffer_bundle.CENTER = buffer_single - buffer_none;
     if (buffer_bundle.CENTER > 4096) buffer_bundle.CENTER = 0;
 
-    result = hal::getWallSensorSingleSync(buffer_bundle_array[static_cast<uint16_t>(hal::WallSensorNumbers::RIGHT)], hal::WallSensorNumbers::RIGHT);
+    result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::RIGHT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::RIGHT);
-    for (int i = 0; i < 10000; ++i);
+    for (int i = 0; i < WAIT_TIME; ++i);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::RIGHT);
+    hal::setWallSensorLedOff();
     buffer_bundle.RIGHT = buffer_single - buffer_none;
     if (buffer_bundle.RIGHT > 4096) buffer_bundle.RIGHT = 0;
 
-    result = hal::getWallSensorSingleSync(buffer_bundle_array[static_cast<uint16_t>(hal::WallSensorNumbers::FRONTRIGHT)],
-                                          hal::WallSensorNumbers::FRONTRIGHT);
+    result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::FRONTRIGHT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTRIGHT);
-    for (int i = 0; i < 10000; ++i);
+    for (int i = 0; i < WAIT_TIME; ++i);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::FRONTRIGHT);
+    hal::setWallSensorLedOff();
     buffer_bundle.FRONTRIGHT = buffer_single - buffer_none;
     if (buffer_bundle.FRONTRIGHT > 4096) buffer_bundle.FRONTRIGHT = 0;
 #endif  // MOUSE_LAZULI_SENSOR
@@ -124,18 +129,18 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
         data.FRONTRIGHT = buffer[4];
 #endif
 #ifdef MOUSE_LAZULI
-        buffer_bundle.FRONTLEFT = buffer_bundle_array[0];
-        buffer_bundle.LEFT = buffer_bundle_array[1];
-        buffer_bundle.CENTER = buffer_bundle_array[2];
-        buffer_bundle.RIGHT = buffer_bundle_array[3];
-        buffer_bundle.FRONTRIGHT = buffer_bundle_array[4];
+        data.FRONTLEFT = buffer_bundle_array[0];
+        data.LEFT = buffer_bundle_array[1];
+        data.CENTER = buffer_bundle_array[2];
+        data.RIGHT = buffer_bundle_array[3];
+        data.FRONTRIGHT = buffer_bundle_array[4];
 #endif
 #ifdef MOUSE_LAZULI_SENSOR
-        buffer_bundle.FRONTLEFT = buffer_bundle_array[0];
-        buffer_bundle.LEFT = buffer_bundle_array[1];
-        buffer_bundle.CENTER = buffer_bundle_array[2];
-        buffer_bundle.RIGHT = buffer_bundle_array[3];
-        buffer_bundle.FRONTRIGHT = buffer_bundle_array[4];
+        data.FRONTLEFT = buffer_bundle.FRONTLEFT;
+        data.LEFT = buffer_bundle.LEFT;
+        data.CENTER = buffer_bundle.CENTER;
+        data.RIGHT = buffer_bundle.RIGHT;
+        data.FRONTRIGHT = buffer_bundle.FRONTRIGHT;
 #endif
 #ifdef MOUSE_ZIRCONIA2KAI
         data.FRONTLEFT = buffer_bundle.FRONTLEFT;

@@ -6,9 +6,9 @@
                 "${default}",
                 ".includes",
                 "Generate/Lazuli/Core/Inc",
-                "Generate/Lazuli/Drivers/STM32L4xx_HAL_Driver/Inc",
+                "Generate/Lazuli/Drivers/STM32C0xx_HAL_Driver/Inc",
                 "Generate/Lazuli/Drivers/CMSIS/Include",
-                "Generate/Lazuli/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
+                "Generate/Lazuli/Drivers/CMSIS/Device/ST/STM32C0xx/Include",
                 "Project/taniho/Inc",
                 "${workspaceFolder}/**"
             ],
@@ -17,9 +17,9 @@
             ],
             "defines": [
                 "USE_FULL_LL_DRIVER",
-                "STM32L4P5CET6",
-                "STM32L4P5xx",
-                "MOUSE_LAZULI"
+                "STM32C011F4Ux",
+                "STM32C011xx",
+                "MOUSE_LAZULI_SENSOR"
             ],
             "windowsSdkVersion": "10.0.19041.0",
             "compilerPath": "${workspaceFolder}/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-g++.exe",
@@ -32,9 +32,9 @@
                     "${default}",
                     ".includes",
                     "Generate/Lazuli/Core/Inc",
-                    "Generate/Lazuli/Drivers/STM32L4xx_HAL_Driver/Inc",
+                    "Generate/Lazuli/Drivers/STM32C0xx_HAL_Driver/Inc",
                     "Generate/Lazuli/Drivers/CMSIS/Include",
-                    "Generate/Lazuli/Drivers/CMSIS/Device/ST/STM32L4xx/Include",
+                    "Generate/Lazuli/Drivers/CMSIS/Device/ST/STM32C0xx/Include",
                     "Project/taniho/Inc",
                     "${workspaceFolder}/**"
                 ],

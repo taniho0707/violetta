@@ -88,7 +88,7 @@ hal::HalStatus hal::initWallSensorPort() {
     SPI_InitStruct.ClockPolarity = LL_SPI_POLARITY_HIGH;
     SPI_InitStruct.ClockPhase = LL_SPI_PHASE_2EDGE;
     SPI_InitStruct.NSS = LL_SPI_NSS_SOFT;
-    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV2;
+    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV8;
     SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
     SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
     SPI_InitStruct.CRCPoly = 7;
@@ -253,7 +253,11 @@ hal::HalStatus hal::initWallSensorPort() {
     // NVIC_SetPriority(DMA1_Channel2_3_IRQn, 0);
     // NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
     NVIC_SetPriority(SPI1_IRQn, 0);
-    NVIC_EnableIRQ(SPI1_IRQn);
+    // NVIC_EnableIRQ(SPI1_IRQn);
+
+    LL_SPI_EnableIT_RXNE(SPI1);  // こいつを有効にすると送信も同時に開始する
+    LL_SPI_EnableIT_ERR(SPI1);
+    // LL_SPI_EnableIT_TXE(SPI1);
 
     // SPI Configuration
     /* SPI1_RX Init */
@@ -285,6 +289,7 @@ hal::HalStatus hal::initWallSensorPort() {
     SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
     SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
     SPI_InitStruct.CRCPoly = 7;
+    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV4;
     LL_SPI_Init(SPI1, &SPI_InitStruct);
     LL_SPI_SetStandard(SPI1, LL_SPI_PROTOCOL_MOTOROLA);
     LL_SPI_DisableNSSPulseMgt(SPI1);
@@ -683,7 +688,10 @@ hal::HalStatus hal::getWallSensorAllSync(uint16_t* data) {
     uint16_t data_buf;
     for (int i = 0; i < WALLSENSOR_NUMS; i++) {
         hal::readwriteWallSensorSpiSync(0x0000, data_buf);
-        data[data_buf >> 12] = (data_buf & 0x0FFF);
+        uint8_t channel = (data_buf >> 12);
+        if (channel < WALLSENSOR_NUMS) {  // NOTE: WALLSENSOR_NUMS 以上であった場合は不正なデータと判断
+            data[channel] = (data_buf & 0x0FFF);
+        }
     }
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
@@ -754,9 +762,13 @@ hal::HalStatus hal::readwriteWallSensorSpiSync(uint16_t tx, uint16_t& rx) {
 
 hal::HalStatus hal::sendWallSensorDataSpiSync(uint16_t& data) {
 #ifdef MOUSE_LAZULI_SENSOR
-    while (LL_SPI_IsActiveFlag_TXE(SPI1) == RESET);
+    // for Debug
+    // static uint16_t count = 0;
+    // ++count;
+
+    // while (LL_SPI_IsActiveFlag_TXE(SPI1) == RESET);
     LL_SPI_TransmitData16(SPI1, data);
-    while (LL_SPI_IsActiveFlag_RXNE(SPI1) == RESET);
+    // while (LL_SPI_IsActiveFlag_RXNE(SPI1) == RESET);
 
     // LL_SPI_ReceiveData16(SPI1);  // dummy read
     // while (LL_SPI_IsActiveFlag_BSY(SPI1) == SET);
