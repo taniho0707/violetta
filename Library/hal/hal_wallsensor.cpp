@@ -88,7 +88,7 @@ hal::HalStatus hal::initWallSensorPort() {
     SPI_InitStruct.ClockPolarity = LL_SPI_POLARITY_HIGH;
     SPI_InitStruct.ClockPhase = LL_SPI_PHASE_2EDGE;
     SPI_InitStruct.NSS = LL_SPI_NSS_SOFT;
-    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV8;
+    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV32;
     SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
     SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
     SPI_InitStruct.CRCPoly = 7;
@@ -128,9 +128,9 @@ hal::HalStatus hal::initWallSensorPort() {
 
     LL_GPIO_ResetOutputPin(GPIO_4_GPIO_Port, GPIO_4_Pin);
     // LL_GPIO_ResetOutputPin(GPIO_3_GPIO_Port, GPIO_3_Pin);
-    LL_GPIO_ResetOutputPin(GPIO_2_GPIO_Port, GPIO_2_Pin);
-    LL_GPIO_ResetOutputPin(GPIO_1_GPIO_Port, GPIO_1_Pin);
-    LL_GPIO_ResetOutputPin(GPIO_0_GPIO_Port, GPIO_0_Pin);
+    LL_GPIO_SetOutputPin(GPIO_2_GPIO_Port, GPIO_2_Pin);
+    LL_GPIO_SetOutputPin(GPIO_1_GPIO_Port, GPIO_1_Pin);
+    LL_GPIO_SetOutputPin(GPIO_0_GPIO_Port, GPIO_0_Pin);
 
     // GPIOx Pin Configuration
     GPIO_InitStruct.Pin = GPIO_0_Pin;
@@ -253,7 +253,7 @@ hal::HalStatus hal::initWallSensorPort() {
     // NVIC_SetPriority(DMA1_Channel2_3_IRQn, 0);
     // NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
     NVIC_SetPriority(SPI1_IRQn, 0);
-    // NVIC_EnableIRQ(SPI1_IRQn);
+    NVIC_EnableIRQ(SPI1_IRQn);
 
     LL_SPI_EnableIT_RXNE(SPI1);  // こいつを有効にすると送信も同時に開始する
     LL_SPI_EnableIT_ERR(SPI1);
@@ -289,13 +289,15 @@ hal::HalStatus hal::initWallSensorPort() {
     SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
     SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
     SPI_InitStruct.CRCPoly = 7;
-    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV4;
+    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV8;
     LL_SPI_Init(SPI1, &SPI_InitStruct);
     LL_SPI_SetStandard(SPI1, LL_SPI_PROTOCOL_MOTOROLA);
     LL_SPI_DisableNSSPulseMgt(SPI1);
 
     LL_SPI_SetRxFIFOThreshold(SPI1, LL_SPI_RX_FIFO_TH_HALF);
     LL_SPI_Enable(SPI1);
+
+    LL_SPI_TransmitData16(SPI1, 0x0000);
 
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI_SENSOR
@@ -629,19 +631,19 @@ hal::HalStatus hal::getWallSensorSingleSync(uint16_t& data, WallSensorNumbers n)
     uint32_t channel;
     switch (n) {
         case WallSensorNumbers::FRONTLEFT:  // D3=ADC_IN2
-            channel = LL_ADC_CHANNEL_2;
-            break;
-        case WallSensorNumbers::LEFT:  // D2=ADC_IN1
-            channel = LL_ADC_CHANNEL_1;
-            break;
-        case WallSensorNumbers::CENTER:  // D5=ADC_IN4
             channel = LL_ADC_CHANNEL_4;
             break;
-        case WallSensorNumbers::RIGHT:  // D1=ADC_IN0
+        case WallSensorNumbers::LEFT:  // D2=ADC_IN1
+            channel = LL_ADC_CHANNEL_3;
+            break;
+        case WallSensorNumbers::CENTER:  // D5=ADC_IN4
             channel = LL_ADC_CHANNEL_0;
             break;
+        case WallSensorNumbers::RIGHT:  // D1=ADC_IN0
+            channel = LL_ADC_CHANNEL_1;
+            break;
         case WallSensorNumbers::FRONTRIGHT:  // D4=ADC_IN3
-            channel = LL_ADC_CHANNEL_3;
+            channel = LL_ADC_CHANNEL_2;
             break;
         default:
             return hal::HalStatus::ERROR;
@@ -686,7 +688,7 @@ hal::HalStatus hal::getWallSensorSingleSync(uint16_t& data, WallSensorNumbers n)
 hal::HalStatus hal::getWallSensorAllSync(uint16_t* data) {
 #ifdef MOUSE_LAZULI
     uint16_t data_buf;
-    for (int i = 0; i < WALLSENSOR_NUMS; i++) {
+    for (int i = 0; i < WALLSENSOR_NUMS + 1; i++) {
         hal::readwriteWallSensorSpiSync(0x0000, data_buf);
         uint8_t channel = (data_buf >> 12);
         if (channel < WALLSENSOR_NUMS) {  // NOTE: WALLSENSOR_NUMS 以上であった場合は不正なデータと判断
@@ -768,6 +770,7 @@ hal::HalStatus hal::sendWallSensorDataSpiSync(uint16_t& data) {
 
     // while (LL_SPI_IsActiveFlag_TXE(SPI1) == RESET);
     LL_SPI_TransmitData16(SPI1, data);
+    // LL_SPI_TransmitData16(SPI1, 0x55AA);
     // while (LL_SPI_IsActiveFlag_RXNE(SPI1) == RESET);
 
     // LL_SPI_ReceiveData16(SPI1);  // dummy read

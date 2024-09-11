@@ -146,8 +146,8 @@ Status DebugActivity::run() {
 
     auto speaker = mpl::Speaker::getInstance();
     speaker->initPort();
-    speaker->playToneSync(mpl::MusicTone::A5, 200);
-    speaker->playToneAsync(mpl::MusicTone::D6, 400);
+    // speaker->playToneSync(mpl::MusicTone::A5, 200);
+    // speaker->playToneAsync(mpl::MusicTone::D6, 400);
 
     auto message = msg::MessageServer::getInstance();
     msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
@@ -158,7 +158,8 @@ Status DebugActivity::run() {
     mpl::TimerStatistics timer_statistics;
 
     while (1) {
-        mpl::Timer::sleepMs(500);
+        // mpl::Timer::sleepMs(500);
+        mpl::Timer::sleepMs(1);
         mpl::Timer::getStatistics(timer_statistics);
         message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
         message->receiveMessage(msg::ModuleId::ENCODER, &msg_encoder);

@@ -37,11 +37,11 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
     uint16_t buffer_none = 0;
     // uint16_t buffer_bundle_array[WALLSENSOR_NUMS] = {0};
 
-    const uint16_t WAIT_TIME = 10000;  // params から取得する
+    const uint32_t WAIT_TIME = 100000;  // params から取得する
 
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::FRONTLEFT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTLEFT);
-    for (int i = 0; i < WAIT_TIME; ++i);
+    for (uint32_t i = 0; i < WAIT_TIME; ++i);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::FRONTLEFT);
     hal::setWallSensorLedOff();
     buffer_bundle.FRONTLEFT = buffer_single - buffer_none;
@@ -49,7 +49,7 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
 
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::LEFT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::LEFT);
-    for (int i = 0; i < WAIT_TIME; ++i);
+    for (uint32_t i = 0; i < WAIT_TIME; ++i);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::LEFT);
     hal::setWallSensorLedOff();
     buffer_bundle.LEFT = buffer_single - buffer_none;
@@ -57,7 +57,7 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
 
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::CENTER);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::CENTER);
-    for (int i = 0; i < WAIT_TIME; ++i);
+    for (uint32_t i = 0; i < WAIT_TIME; ++i);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::CENTER);
     hal::setWallSensorLedOff();
     buffer_bundle.CENTER = buffer_single - buffer_none;
@@ -65,7 +65,7 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
 
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::RIGHT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::RIGHT);
-    for (int i = 0; i < WAIT_TIME; ++i);
+    for (uint32_t i = 0; i < WAIT_TIME; ++i);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::RIGHT);
     hal::setWallSensorLedOff();
     buffer_bundle.RIGHT = buffer_single - buffer_none;
@@ -73,7 +73,7 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
 
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::FRONTRIGHT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTRIGHT);
-    for (int i = 0; i < WAIT_TIME; ++i);
+    for (uint32_t i = 0; i < WAIT_TIME; ++i);
     result = hal::getWallSensorSingleSync(buffer_single, hal::WallSensorNumbers::FRONTRIGHT);
     hal::setWallSensorLedOff();
     buffer_bundle.FRONTRIGHT = buffer_single - buffer_none;

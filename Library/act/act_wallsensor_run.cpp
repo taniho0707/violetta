@@ -5,6 +5,7 @@
 //******************************************************************************
 #include "act_wallsensor_run.h"
 
+#include "hal_wallsensor.h"
 #include "mll_wall_analyser.h"
 #include "mpl_wallsensor.h"
 #include "msg_format_wall_analyser.h"
