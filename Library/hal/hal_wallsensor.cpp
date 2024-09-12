@@ -689,6 +689,7 @@ hal::HalStatus hal::getWallSensorAllSync(uint16_t* data) {
 #ifdef MOUSE_LAZULI
     uint16_t data_buf;
     for (int i = 0; i < WALLSENSOR_NUMS + 1; i++) {
+        for (int i = 0; i < 100; ++i);  // SPI 通信を連続すると LazuliSensor 側が応答しなくなるため適当なウェイトを入れる
         hal::readwriteWallSensorSpiSync(0x0000, data_buf);
         uint8_t channel = (data_buf >> 12);
         if (channel < WALLSENSOR_NUMS) {  // NOTE: WALLSENSOR_NUMS 以上であった場合は不正なデータと判断
