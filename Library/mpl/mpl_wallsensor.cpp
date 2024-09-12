@@ -37,7 +37,7 @@ mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
     uint16_t buffer_none = 0;
     // uint16_t buffer_bundle_array[WALLSENSOR_NUMS] = {0};
 
-    const uint32_t WAIT_TIME = 100000;  // params から取得する
+    const uint32_t WAIT_TIME = 1000;  // params から取得する
 
     result = hal::getWallSensorSingleSync(buffer_none, hal::WallSensorNumbers::FRONTLEFT);
     hal::setWallSensorLedOn(hal::WallSensorNumbers::FRONTLEFT);
