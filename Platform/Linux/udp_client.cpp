@@ -1,19 +1,19 @@
 //******************************************************************************
 // @addtogroup PLT
-// @file       tcp_client.cpp
-// @brief      シミュレータと通信するクライアントライブラリ
+// @file       udp_client.cpp
+// @brief      シミュレータ HagoniwaMouse と通信するクライアントライブラリ
 //******************************************************************************
 
-#include "tcp_client.h"
+#include "udp_client.h"
 
 using namespace std;
 
-plt::TcpClient::TcpClient() {}
+plt::UdpClient::UdpClient() {}
 
-plt::TcpClient::~TcpClient() {}
+plt::UdpClient::~UdpClient() {}
 
-bool plt::TcpClient::connectServer() {
-    client_socket = socket(AF_INET, SOCK_STREAM, 0);
+bool plt::UdpClient::connectServer() {
+    client_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (client_socket < 0) {
         perror("Error at opening new client socket\n");
         return false;
@@ -30,7 +30,7 @@ bool plt::TcpClient::connectServer() {
     return true;
 }
 
-bool plt::TcpClient::disconnectServer() {
+bool plt::UdpClient::disconnectServer() {
     if (close(client_socket) == -1) {
         return false;
     } else {
@@ -38,7 +38,7 @@ bool plt::TcpClient::disconnectServer() {
     }
 }
 
-bool plt::TcpClient::getImuData(hal::ImuData& data) {
+bool plt::UdpClient::getImuData(hal::ImuData& data) {
     char send_data[] = {0x00, 0x00, 0x00, 0x01, 0x41};
     ssize_t bytes_sent = send(client_socket, send_data, sizeof(send_data), 0);
     if (bytes_sent == -1) {
@@ -75,7 +75,7 @@ bool plt::TcpClient::getImuData(hal::ImuData& data) {
     }
 }
 
-bool plt::TcpClient::getBatteryVoltage(float& voltage) {
+bool plt::UdpClient::getBatteryVoltage(float& voltage) {
     char send_data[] = {0x00, 0x00, 0x00, 0x01, 0x42};
     ssize_t bytes_sent = send(client_socket, send_data, sizeof(send_data), 0);
     if (bytes_sent == -1) {
@@ -106,7 +106,7 @@ bool plt::TcpClient::getBatteryVoltage(float& voltage) {
     }
 }
 
-bool plt::TcpClient::getWallSensorData(uint16_t* data) {
+bool plt::UdpClient::getWallSensorData(uint16_t* data) {
     char send_data[] = {0x00, 0x00, 0x00, 0x01, 0x40};
     ssize_t bytes_sent = send(client_socket, send_data, sizeof(send_data), 0);
     if (bytes_sent == -1) {
@@ -140,7 +140,7 @@ bool plt::TcpClient::getWallSensorData(uint16_t* data) {
     }
 }
 
-bool plt::TcpClient::getEncoder(hal::EncoderData& data) {
+bool plt::UdpClient::getEncoder(hal::EncoderData& data) {
     char send_data[] = {0x00, 0x00, 0x00, 0x01, 0x43};
     ssize_t bytes_sent = send(client_socket, send_data, sizeof(send_data), 0);
     if (bytes_sent == -1) {
@@ -173,7 +173,7 @@ bool plt::TcpClient::getEncoder(hal::EncoderData& data) {
     }
 }
 
-plt::TcpClient* plt::TcpClient::getInstance() {
-    static plt::TcpClient instance;
+plt::UdpClient* plt::UdpClient::getInstance() {
+    static plt::UdpClient instance;
     return &instance;
 }

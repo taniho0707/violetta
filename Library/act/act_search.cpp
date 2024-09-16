@@ -154,6 +154,8 @@ Status SearchActivity::run() {
     operation_coordinator->runSearch(mll::AlgorithmType::LEFT_HAND);
 
     while (true);
+
+    return Status::ERROR;
 }
 
 void SearchActivity::finalize() {}

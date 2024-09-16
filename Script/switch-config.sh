@@ -14,12 +14,17 @@ elif [ "$1" = "LazuliSensor" ]; then
 	cp ../.vscode/c_cpp_properties.json.lazulisensor ../.vscode/c_cpp_properties.json
 	cp ../.vscode/launch.json.lazulisensor ../.vscode/launch.json
 	rm -R ../build
+elif [ "$1" = "LazuliLinux" ]; then
+	echo "Config switched to LazuliLinux"
+	cp ../.vscode/c_cpp_properties.json.lazulilinux ../.vscode/c_cpp_properties.json
+	cp ../.vscode/launch.json.lazulilinux ../.vscode/launch.json
+	rm -R ../build
 elif [ "$1" = "Zirconia2kai" ]; then
 	echo "Config switched to Zirconia2kai"
 	cp ../.vscode/c_cpp_properties.json.zirconia2kai ../.vscode/c_cpp_properties.json
 	cp ../.vscode/launch.json.zirconia2kai ../.vscode/launch.json
 	rm -R ../build
 else
-	echo "Argument required: Lazuli/LazuliSensor/Zirconia2kai"
+	echo "Argument required: Lazuli/LazuliSensor/LazuliLinux/Zirconia2kai"
 fi
 

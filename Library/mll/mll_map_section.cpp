@@ -49,7 +49,9 @@ void Map::setWall(int8_t x, int8_t y, CardinalDirection angle, Walldata wall) {
 }
 
 void Map::addSingleWall(int8_t x, int8_t y, CardinalDirection angle) {
-    if ((x == 0 && angle == CardinalDirection::WEST) || (x == 31 && angle == CardinalDirection::EAST) || (y == 0 && angle == CardinalDirection::SOUTH) || (y == 31 && angle == CardinalDirection::NORTH)) return;
+    if ((x == 0 && angle == CardinalDirection::WEST) || (x == 31 && angle == CardinalDirection::EAST) ||
+        (y == 0 && angle == CardinalDirection::SOUTH) || (y == 31 && angle == CardinalDirection::NORTH))
+        return;
     if (angle == CardinalDirection::NORTH) {
         row[y] |= (0x80000000 >> x);
     } else if (angle == CardinalDirection::EAST) {
@@ -62,7 +64,9 @@ void Map::addSingleWall(int8_t x, int8_t y, CardinalDirection angle) {
 }
 
 void Map::setSingleWall(int8_t x, int8_t y, CardinalDirection angle, bool wall) {
-    if ((x == 0 && angle == CardinalDirection::WEST) || (x == 31 && angle == CardinalDirection::EAST) || (y == 0 && angle == CardinalDirection::SOUTH) || (y == 31 && angle == CardinalDirection::NORTH)) return;
+    if ((x == 0 && angle == CardinalDirection::WEST) || (x == 31 && angle == CardinalDirection::EAST) ||
+        (y == 0 && angle == CardinalDirection::SOUTH) || (y == 31 && angle == CardinalDirection::NORTH))
+        return;
     if (wall) {
         addSingleWall(x, y, angle);
     } else {
@@ -98,7 +102,9 @@ Walldata Map::getKnownWalldata(int8_t x, int8_t y) {
 
 bool Map::isExistWall(int8_t x, int8_t y, CardinalDirection angle) {
     uint32_t ans = 0;
-    if ((x == 0 && angle == CardinalDirection::WEST) || (x == 31 && angle == CardinalDirection::EAST) || (y == 0 && angle == CardinalDirection::SOUTH) || (y == 31 && angle == CardinalDirection::NORTH)) return true;
+    if ((x == 0 && angle == CardinalDirection::WEST) || (x == 31 && angle == CardinalDirection::EAST) ||
+        (y == 0 && angle == CardinalDirection::SOUTH) || (y == 31 && angle == CardinalDirection::NORTH))
+        return true;
     if (x < 0 || x > 31 || y < 0 || y > 31) return true;
     if (angle == CardinalDirection::NORTH) {
         ans = row[y] & (0x80000000 >> x);
@@ -149,16 +155,14 @@ bool Map::hasWatched(int8_t x, int8_t y, CardinalDirection angle) {
     switch (angle) {
         case CardinalDirection::NORTH:
             return (hasReached(x, y) || hasReached(x, y + 1));
-            break;
         case CardinalDirection::EAST:
             return (hasReached(x, y) || hasReached(x + 1, y));
-            break;
         case CardinalDirection::SOUTH:
             return (hasReached(x, y) || hasReached(x, y - 1));
-            break;
         case CardinalDirection::WEST:
             return (hasReached(x, y) || hasReached(x - 1, y));
-            break;
+        default:
+            return false;
     }
 }
 

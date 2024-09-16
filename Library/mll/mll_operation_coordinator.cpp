@@ -29,9 +29,13 @@ OperationCoordinatorResult OperationCoordinator::disableMotorControl() {
     return OperationCoordinatorResult::SUCCESS;
 }
 
-OperationCoordinatorResult OperationCoordinator::runSearch(AlgorithmType type, SearchOptions opt) {}
+OperationCoordinatorResult OperationCoordinator::runSearch(AlgorithmType type, SearchOptions opt) {
+    return OperationCoordinatorResult::FATAL_ERROR;
+}
 
-OperationCoordinatorResult OperationCoordinator::runShort(ShortOptions opt) {}
+OperationCoordinatorResult OperationCoordinator::runShort(ShortOptions opt) {
+    return OperationCoordinatorResult::FATAL_ERROR;
+}
 
 OperationCoordinatorResult OperationCoordinator::runSpecific(OperationMoveCombination* moves, uint16_t length) {
     // 他の動作中は命令を受け付けない

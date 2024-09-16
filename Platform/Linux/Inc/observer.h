@@ -5,13 +5,13 @@
 //******************************************************************************
 #pragma once
 
-#include "tcp_client.h"
+#include "udp_client.h"
 
 namespace plt {
 
 class Observer {
    private:
-    plt::TcpClient* tcp;
+    plt::UdpClient* udp;
 
    public:
     Observer();

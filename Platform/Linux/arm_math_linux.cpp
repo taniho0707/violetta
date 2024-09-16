@@ -3,8 +3,6 @@
 // @file       arm_math_linux.cpp
 // @brief      arm_math.h のあれ
 //******************************************************************************
-#pragma once
-
 #include "arm_math_linux.h"
 
 #include <cmath>

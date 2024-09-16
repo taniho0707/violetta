@@ -6,7 +6,7 @@
 
 #include "hal_battery.h"
 
-#ifdef MOUSE_LAZULI
+#if defined(MOUSE_LAZULI) && defined(STM32L4P5xx)
 #include "stm32l4xx_ll_adc.h"
 #include "stm32l4xx_ll_bus.h"
 #include "stm32l4xx_ll_dma.h"
