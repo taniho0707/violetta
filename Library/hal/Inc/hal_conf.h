@@ -79,7 +79,8 @@ enum class LedNumbers : uint8_t {
 const float BATTERY_RATIO = 5.7f;
 
 const uint32_t TIMER_COUNT_INTERVAL = 250;  // [us]
-const uint32_t TIMER_COUNT_MAX = 12500;     // 1 カウントあたり ? [us] = ? [ns]
+// const uint32_t TIMER_COUNT_MAX = 12500;     // 1 カウントあたり ? [us] = ? [ns]
+const uint32_t TIMER_COUNT_MAX = 25000;  // 1カウントあたり 0.01 [us] = 10 [ns]
 
 [[deprecated]]
 const uint16_t IMU_TSEN = 256;  // [LSB/°C]

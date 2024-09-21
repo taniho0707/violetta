@@ -217,8 +217,8 @@ hal::HalStatus hal::getEncoderSync(EncoderData& data) {
 #endif  // ifdef LINUX
 
 #ifdef MOUSE_LAZULI
-    data.LEFT = LL_TIM_GetCounter(TIM3);
-    data.RIGHT = LL_TIM_GetCounter(TIM4);
+    data.LEFT = -1 * LL_TIM_GetCounter(TIM4);
+    data.RIGHT = -1 * LL_TIM_GetCounter(TIM3);
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 

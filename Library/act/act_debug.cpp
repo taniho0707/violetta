@@ -146,8 +146,8 @@ Status DebugActivity::run() {
 
     auto speaker = mpl::Speaker::getInstance();
     speaker->initPort();
-    // speaker->playToneSync(mpl::MusicTone::A5, 200);
-    // speaker->playToneAsync(mpl::MusicTone::D6, 400);
+    speaker->playToneSync(mpl::MusicTone::A5, 100);
+    speaker->playToneAsync(mpl::MusicTone::D6, 200);
 
     auto message = msg::MessageServer::getInstance();
     msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
@@ -156,6 +156,17 @@ Status DebugActivity::run() {
     msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
 
     mpl::TimerStatistics timer_statistics;
+
+    mpl::Timer::sleepMs(5000);
+    led->off(hal::LedNumbers::MIDDLE2);
+    led->off(hal::LedNumbers::MIDDLE3);
+    motor->setDuty(0.1, 0.1);
+    // motor->setDutySuction(0.2);
+    mpl::Timer::sleepMs(3000);
+    led->on(hal::LedNumbers::MIDDLE2);
+    led->on(hal::LedNumbers::MIDDLE3);
+    motor->setDutySuction(0.0);
+    motor->setFloat();
 
     while (1) {
         // mpl::Timer::sleepMs(500);
@@ -174,12 +185,24 @@ Status DebugActivity::run() {
         //                                  msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.gyro_roll,
         //                                  msg_imu.gyro_pitch, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
         //                                  msg_imu.temperature);
+        // cmd_debug_tx.len = debug->format(
+        //     cmd_debug_tx.message,
+        //     "T: %10d B: %1.2f | IMU: %8d, %10d, % 8.2f, % 7.1f, % 7.1f, % 7.1f | WALL: % 4d,% 4d,% 4d,% 4d,% 4d | STAT: "
+        //     "Max.[%2.0f|%2.0f|%2.0f|%2.0f] "
+        //     "Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n",
+        //     mpl::Timer::getMicroTime(), msg_battery.battery, msg_imu.getCount(), msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.acc_x / 1000,
+        //     msg_imu.acc_y / 1000, msg_imu.acc_z / 1000, msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.center, msg_wallsensor.right,
+        //     msg_wallsensor.frontright, float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX,
+        //     float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX,
+        //     float(timer_statistics.count4_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX,
+        //     float(timer_statistics.count2_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_avg) * 100 / hal::TIMER_COUNT_MAX,
+        //     float(timer_statistics.count4_avg) * 100 / hal::TIMER_COUNT_MAX);
         cmd_debug_tx.len = debug->format(
             cmd_debug_tx.message,
-            "T: %10d B: %1.2f | IMU: %8d, %10d, % 8.2f, % 7.1f, % 7.1f, % 7.1f | WALL: % 4d,% 4d,% 4d,% 4d,% 4d | STAT: "
+            "T: %10d B: %1.2f | L: % 6.4f R: % 6.4f | IMU: % 8.2f, % 7.1f, % 7.1f, % 7.1f | WALL: % 4d,% 4d,% 4d,% 4d,% 4d | STAT: "
             "Max.[%2.0f|%2.0f|%2.0f|%2.0f] "
             "Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n",
-            mpl::Timer::getMicroTime(), msg_battery.battery, msg_imu.getCount(), msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.acc_x / 1000,
+            mpl::Timer::getMicroTime(), msg_battery.battery, msg_encoder.left, msg_encoder.right, msg_imu.gyro_yaw, msg_imu.acc_x / 1000,
             msg_imu.acc_y / 1000, msg_imu.acc_z / 1000, msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.center, msg_wallsensor.right,
             msg_wallsensor.frontright, float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX,
             float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX,

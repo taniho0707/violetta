@@ -76,7 +76,7 @@ bool plt::UdpClient::getImuData(hal::ImuData& data) {
 }
 
 bool plt::UdpClient::getBatteryVoltage(float& voltage) {
-    char send_data[] = {0x00, 0x00, 0x00, 0x01, 0x42};
+    char send_data[] = {0x00, 0x01, 0x42};
     ssize_t bytes_sent = send(client_socket, send_data, sizeof(send_data), 0);
     if (bytes_sent == -1) {
         perror("Error at sending Battery voltage request\n");
@@ -98,8 +98,8 @@ bool plt::UdpClient::getBatteryVoltage(float& voltage) {
 
     printf("%ld bytes received from Battery\n", bytes_recv);
 
-    if (bytes_recv == 5) {
-        voltage = static_cast<float>(static_cast<uint32_t>(recv_data[1] << 24) | (recv_data[2] << 16) | (recv_data[3] << 8) | recv_data[4]);
+    if (bytes_recv == 5 + 2) {
+        voltage = static_cast<float>(static_cast<uint32_t>(recv_data[3] << 24) | (recv_data[4] << 16) | (recv_data[5] << 8) | recv_data[6]);
         return true;
     } else {
         return false;
