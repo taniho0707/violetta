@@ -157,16 +157,16 @@ Status DebugActivity::run() {
 
     mpl::TimerStatistics timer_statistics;
 
-    mpl::Timer::sleepMs(5000);
-    led->off(hal::LedNumbers::MIDDLE2);
-    led->off(hal::LedNumbers::MIDDLE3);
-    motor->setDuty(0.1, 0.1);
-    // motor->setDutySuction(0.2);
-    mpl::Timer::sleepMs(3000);
-    led->on(hal::LedNumbers::MIDDLE2);
-    led->on(hal::LedNumbers::MIDDLE3);
-    motor->setDutySuction(0.0);
-    motor->setFloat();
+    // mpl::Timer::sleepMs(3000);
+    // led->off(hal::LedNumbers::MIDDLE2);
+    // led->off(hal::LedNumbers::MIDDLE3);
+    // // motor->setDuty(0.1, 0.1);
+    // motor->setDutySuction(0.5);
+    // mpl::Timer::sleepMs(10000);
+    // led->on(hal::LedNumbers::MIDDLE2);
+    // led->on(hal::LedNumbers::MIDDLE3);
+    // motor->setDutySuction(0.0);
+    // motor->setFloat();
 
     while (1) {
         // mpl::Timer::sleepMs(500);

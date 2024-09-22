@@ -26,7 +26,7 @@ namespace hal {
 
 #ifdef MOUSE_LAZULI
 // FIXME: hal_conf に移動させる
-const uint32_t MOTOR_TIMER_MAXCOUNT = 262144;
+constexpr uint32_t MOTOR_TIMER_MAXCOUNT = 262144 / 128;
 #endif  // ifdef MOUSE_LAZULI
 
 HalStatus initMotorPort();

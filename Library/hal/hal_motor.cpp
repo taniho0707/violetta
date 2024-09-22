@@ -41,9 +41,9 @@ hal::HalStatus hal::initMotorPort() {
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC);
 
-    TIM_InitStruct.Prescaler = 4 - 1;
+    TIM_InitStruct.Prescaler = 1 - 1;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    // TIM_InitStruct.Autoreload = 4294967295; -> 4.096kHz 設定のため Prescaler * Autoreload = 1048576
+    // TIM_InitStruct.Autoreload = 4294967295; -> kHz 設定のため Prescaler * Autoreload =
     TIM_InitStruct.Autoreload = MOTOR_TIMER_MAXCOUNT - 1;
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
     TIM_InitStruct.RepetitionCounter = 0;
@@ -283,10 +283,10 @@ hal::HalStatus hal::setMotorDutyR(float duty) {
 #ifdef MOUSE_LAZULI
     if (duty >= 0.f && duty <= 1.f) {
         LL_TIM_OC_SetCompareCH1(TIM2, (uint32_t)((duty) * (MOTOR_TIMER_MAXCOUNT - 1)));
-        LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_1);
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_1);
     } else if (duty < 0.f && duty >= -1.f) {
         LL_TIM_OC_SetCompareCH1(TIM2, (uint32_t)((-1 * duty) * (MOTOR_TIMER_MAXCOUNT - 1)));
-        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_1);
+        LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_1);
     } else {
         return hal::HalStatus::INVALID_PARAMS;
     }
