@@ -25,6 +25,8 @@ class Observer {
 
     bool getEncoder(hal::EncoderData& data);
 
+    bool sendUartDebug(uint8_t* data, const int len);
+
     static Observer* getInstance();
 };
 

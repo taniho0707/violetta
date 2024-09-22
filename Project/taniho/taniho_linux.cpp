@@ -1,5 +1,7 @@
 #include <cstdio>
 
+// act
+#include "act_manager.h"
 #include "mpl_battery.h"
 #include "mpl_encoder.h"
 #include "mpl_imu.h"
@@ -49,8 +51,10 @@ int main(void) {
     battery->scanSync(battery_voltage);
     printf("BATTERY:%f\n", battery_voltage);
 
-    // for (int i = 0; i < 1000; ++i) {
-    // }
+    // auto activity = act::Manager(act::Activities::DEBUG);
+    auto activity = act::Manager(act::Activities::SEARCH);
+    // auto activity = act::Manager(act::Activities::WALLSENSOR_CHECK);
+    activity.run();
 
     return 0;
 }

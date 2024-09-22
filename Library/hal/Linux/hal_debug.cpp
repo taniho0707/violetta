@@ -15,20 +15,20 @@ hal::HalStatus hal::deinitUartDebugPort() {
 }
 
 hal::HalStatus hal::sendUartDebug1Byte(uint8_t data) {
-    // if (plt::Observer::getInstance()->getImuData(data)) {
-    //     return hal::HalStatus::SUCCESS;
-    // } else {
-    //     return hal::HalStatus::ERROR;
-    // }
-    return hal::HalStatus::NOIMPLEMENT;
+    if (plt::Observer::getInstance()->sendUartDebug(&data, 1)) {
+        return hal::HalStatus::SUCCESS;
+    } else {
+        return hal::HalStatus::ERROR;
+    }
+    return hal::HalStatus::SUCCESS;
 }
 
 hal::HalStatus hal::sendUartDebugNByte(const char *data, const int len) {
-    // if (plt::Observer::getInstance()->getImuData(data)) {
-    //     return hal::HalStatus::SUCCESS;
-    // } else {
-    //     return hal::HalStatus::ERROR;
-    // }
+    if (plt::Observer::getInstance()->sendUartDebug(reinterpret_cast<uint8_t *>(const_cast<char *>(data)), len)) {
+        return hal::HalStatus::SUCCESS;
+    } else {
+        return hal::HalStatus::ERROR;
+    }
     return hal::HalStatus::NOIMPLEMENT;
 }
 

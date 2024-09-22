@@ -173,6 +173,29 @@ bool plt::UdpClient::getEncoder(hal::EncoderData& data) {
     }
 }
 
+bool plt::UdpClient::sendUartDebug(uint8_t* data, const int len) {
+    static char send_data[1024] = {0};  // 領域確保
+    send_data[0] = 0x00;
+    send_data[1] = 0x00;
+    send_data[2] = 0x00;
+    send_data[3] = 0x01;
+    send_data[4] = 0xC0;
+    for (int i = 0; i < len; ++i) {
+        send_data[5 + i] = data[i];
+    }
+    ssize_t bytes_sent = send(client_socket, send_data, len + 5, 0);
+    if (bytes_sent == -1) {
+        perror("Error at sending UART debug data\n");
+        close(client_socket);
+        return false;
+    } else if (bytes_sent != len + 5) {
+        perror("Error at sending UART debug data in the middle\n");
+        close(client_socket);
+        return false;
+    }
+    return true;
+}
+
 plt::UdpClient* plt::UdpClient::getInstance() {
     static plt::UdpClient instance;
     return &instance;

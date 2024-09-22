@@ -29,6 +29,10 @@ bool plt::Observer::getEncoder(hal::EncoderData& data) {
     return udp->getEncoder(data);
 }
 
+bool plt::Observer::sendUartDebug(uint8_t* data, const int len) {
+    return udp->sendUartDebug(data, len);
+}
+
 plt::Observer* plt::Observer::getInstance() {
     static plt::Observer instance;
     return &instance;

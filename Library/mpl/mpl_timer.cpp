@@ -64,11 +64,7 @@ mpl::MplStatus mpl::Timer::init() {
 }
 
 uint32_t mpl::Timer::getInternalCounter() {
-#ifdef LINUX
-    return 0;
-#else
     return hal::getTimerCount();
-#endif
 }
 
 uint32_t mpl::Timer::getNanoTimeFromLastInterrupt() {

@@ -42,6 +42,9 @@ class UdpClient {
     // Encoder
     bool getEncoder(hal::EncoderData& data);
 
+    // Uart
+    bool sendUartDebug(uint8_t* data, const int len);
+
     static UdpClient* getInstance();
 };
 
