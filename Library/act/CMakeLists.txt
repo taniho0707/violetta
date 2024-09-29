@@ -8,6 +8,7 @@ if(${MOUSE} STREQUAL LazuliSensor)
   )
 else()
   add_library(act STATIC
+    act_initialize.cpp
     act_debug.cpp
     act_manager.cpp
     act_module_test.cpp
@@ -18,5 +19,6 @@ else()
     act_shortrun.cpp
     act_wallsensor_check.cpp
     act_wallsensor_run.cpp
+    act_enkaigei.cpp
   )
 endif()

@@ -9,7 +9,10 @@
 
 namespace mpl {
 
+constexpr uint8_t SPEAKER_MUSIC_TONE_LENGTH = 24;
+
 enum class MusicTone : uint16_t {
+    NONE = 0,
     C3 = 131,
     D3 = 147,
     E3 = 165,
@@ -36,6 +39,7 @@ enum class MusicTone : uint16_t {
     E6 = 1319,
     F6 = 1397,
     G6 = 1568,
+    G6S = 1661,
     A6 = 1760,
     B6 = 1976,
     C7 = 2093,
@@ -48,16 +52,49 @@ enum class MusicTone : uint16_t {
     C8 = 4186,
 };
 
+enum class MusicTitle : uint16_t {
+    NONE = 0,
+    STARTUP,
+    SELECT1,
+    SELECT2,
+    SELECT3,
+    DESELECT1,
+    DESELECT2,
+    DESELECT3,
+    ENTER1,
+    ENTER2,
+    ENTER3,
+    RUNSTART,
+    SEARCHCOMPLETE,
+    PULSE_LOW,
+    PULSE_HIGH,
+    ERROR,
+    LENGTH
+};
+
+struct MusicToneItem {
+    MusicTone tone;
+    uint16_t duration;  // [ms]
+} __attribute__((packed));
+
 class Speaker {
    private:
     Speaker();
 
+    MusicToneItem music_tone[static_cast<uint16_t>(MusicTitle::LENGTH)][SPEAKER_MUSIC_TONE_LENGTH];
+
     uint16_t freq;
     uint32_t end_time;  // [us], 0 means no-playing
+
+    // playing music
+    MusicTitle music_title;
+    uint8_t music_tone_index;
 
    public:
     mpl::MplStatus initPort();
     void deinitPort();
+
+    void initMusicToneItem();
 
     bool isPlaying();
 
@@ -65,6 +102,9 @@ class Speaker {
     mpl::MplStatus playFrequencyAsync(uint16_t freq, uint16_t millisec);
     mpl::MplStatus playToneSync(MusicTone tone, uint16_t millisec);
     mpl::MplStatus playToneAsync(MusicTone tone, uint16_t millisec);
+
+    mpl::MplStatus playMusicSync(MusicTitle title);
+    mpl::MplStatus playMusicAsync(MusicTitle title);
 
     void stop();
 

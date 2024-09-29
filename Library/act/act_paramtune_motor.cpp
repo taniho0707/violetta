@@ -7,10 +7,10 @@
 
 using namespace act;
 
-void ParamtuneMotorActivity::init() {}
+void ParamtuneMotorActivity::init(ActivityParameters &params) {}
 
 Status ParamtuneMotorActivity::run() {
     return Status::NOIMPLEMENT;
 }
 
-void ParamtuneMotorActivity::finalize() {}
+void ParamtuneMotorActivity::finalize(ActivityParameters &params) {}

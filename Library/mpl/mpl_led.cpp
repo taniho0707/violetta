@@ -30,10 +30,14 @@ void mpl::Led::deinitPort() {
 }
 
 bool mpl::Led::isFlicking(hal::LedNumbers num) {
-    if (flick_params.at(static_cast<uint8_t>(num)).start_time == 0)
-        return false;
-    else
-        return true;
+    for (auto n : flick_params) {
+        if (n.num == num) {
+            if (n.start_time != 0) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void mpl::Led::on(hal::LedNumbers num) {
@@ -50,36 +54,39 @@ void mpl::Led::flickSync(hal::LedNumbers num, float freq, uint16_t time) {
 }
 
 void mpl::Led::flickAsync(hal::LedNumbers num, float freq, uint16_t time) {
-    flick_params.at(static_cast<uint8_t>(num)).start_time =
-        Timer::getMilliTime();
-    flick_params.at(static_cast<uint8_t>(num)).freq = freq;
-    flick_params.at(static_cast<uint8_t>(num)).time = time;
+    for (auto& n : flick_params) {
+        if (n.start_time == 0) {  // 使われていない要素が見つかれば代入
+            n.start_time = Timer::getMilliTime();
+            n.freq = freq;
+            n.time = time;
+            return;
+        }
+    }
 }
 
 void mpl::Led::flickStop(hal::LedNumbers num) {
-    flick_params.at(static_cast<uint8_t>(num)).start_time = 0;
+    for (auto& n : flick_params) {
+        if (n.num == num) {
+            n.start_time = 0;
+        }
+    }
     hal::offLed(num);
 }
 
 void mpl::Led::interruptPeriodic() {
     uint32_t t;
     uint32_t t2;
-    int8_t i = -1;
     for (auto& n : flick_params) {
-        ++i;
         if (n.start_time == 0) continue;
         t2 = static_cast<uint32_t>(1000 / n.freq);
         t = (Timer::getMilliTime() - n.start_time) % t2;
-        if ((n.time != 0) &&
-            ((Timer::getMilliTime() - n.start_time) > n.time)) {
+        if ((n.time != 0) && ((Timer::getMilliTime() - n.start_time) > n.time)) {
             n.start_time = 0;
-            hal::offLed(static_cast<hal::LedNumbers>(i));
+            hal::offLed(n.num);
             continue;
         }
-        if (t > (t2 / 2))
-            hal::onLed(static_cast<hal::LedNumbers>(i));
-        else
-            hal::offLed(static_cast<hal::LedNumbers>(i));
+        if (t > (t2 / 2)) hal::onLed(n.num);
+        else hal::offLed(n.num);
     }
 }
 

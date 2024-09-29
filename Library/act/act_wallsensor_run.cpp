@@ -14,7 +14,7 @@
 
 using namespace act;
 
-void WallsensorRunActivity::init() {}
+void WallsensorRunActivity::init(ActivityParameters &params) {}
 
 #ifdef MOUSE_LAZULI_SENSOR
 Status WallsensorRunActivity::run() {
@@ -55,4 +55,4 @@ Status WallsensorRunActivity::run() {
 }
 #endif  // MOUSE_LAZULI_SENSOR
 
-void WallsensorRunActivity::finalize() {}
+void WallsensorRunActivity::finalize(ActivityParameters &params) {}

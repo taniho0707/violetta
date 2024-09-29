@@ -5,6 +5,7 @@
 //******************************************************************************
 #pragma once
 
+#include "mll_ui_effect.h"
 #include "stdint.h"
 
 namespace cmd {
@@ -50,16 +51,12 @@ struct CommandFormatDebugRx {
 //  UI
 //***************************
 
-// TODO: UIコマンドを実装する
-// 具体的な動作ではなく、ui_define.h 的なファイルで定義したUI動作を指定すべき？
-
 // enum class UiOutType : uint8_t { LED = 0, SPEAKER = 1, LENGTH = 2 };
 
-// struct CommandFormatUiOut {
-//     uint32_t time;  // [us]
-//     UiOutType type;
-//     // 出力内容
-// };
+struct CommandFormatUiOut {
+    uint32_t time;  // [us]
+    mll::UiOutputEffect type;
+};
 
 // enum class UiInType : uint8_t {
 //     BUTTON = 0,
@@ -70,11 +67,10 @@ struct CommandFormatDebugRx {
 //     LENGTH = 5
 // };
 
-// struct CommandFormatUiIn {
-//     uint32_t time;  // [us]
-//     UiInType type;
-//     // 入力内容
-// };
+struct CommandFormatUiIn {
+    uint32_t time;  // [us]
+    mll::UiInputEffect type;
+};
 
 //***************************
 //  Operation

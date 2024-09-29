@@ -495,9 +495,9 @@ hal::HalStatus hal::setLedDma(LedNumbers* nums, uint8_t size) {
             case hal::LedNumbers::FLAG:
                 return hal::HalStatus::NOIMPLEMENT;
                 break;
-            case hal::LedNumbers::ALL:
-                hal::setLedDma(nums, 8);
-                break;
+            // case hal::LedNumbers::ALL:
+            //     hal::setLedDma(nums, 8);
+            //     break;
             default:
                 return hal::HalStatus::INVALID_PARAMS;
                 break;
@@ -543,46 +543,39 @@ hal::HalStatus hal::onLed(hal::LedNumbers num) {
 #ifdef MOUSE_LAZULI
     uint8_t current_en;
     receiveLedI2cCommand(LedDriverCommands::LED_EN_IDVD, &current_en);
+    uint8_t current_config;
+    receiveLedI2cCommand(LedDriverCommands::LED_CONFIG, &current_config);
 
-    switch (num) {
-        case hal::LedNumbers::FRONTL:
-            transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x01);
-            break;
-        case hal::LedNumbers::LEFT:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x80);
-            break;
-        case hal::LedNumbers::FRONT:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x40);
-            break;
-        case hal::LedNumbers::RIGHT:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x20);
-            break;
-        case hal::LedNumbers::FRONTR:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x10);
-            break;
-        case hal::LedNumbers::MIDDLE1:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x08);
-            break;
-        case hal::LedNumbers::MIDDLE2:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x04);
-            break;
-        case hal::LedNumbers::MIDDLE3:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x02);
-            break;
-        case hal::LedNumbers::MIDDLE4:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en | 0x01);
-            break;
-        case hal::LedNumbers::FLAG:
-            return hal::HalStatus::NOIMPLEMENT;
-            break;
-        case hal::LedNumbers::ALL:
-            transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x01);
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, 0xFF);
-            break;
-        default:
-            return hal::HalStatus::INVALID_PARAMS;
-            break;
+    if ((num & hal::LedNumbers::FRONTL) == hal::LedNumbers::FRONTL) {
+        current_config |= 0x01;
+        transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x01);
     }
+    if ((num & hal::LedNumbers::LEFT) == hal::LedNumbers::LEFT) {
+        current_en |= 0x80;
+    }
+    if ((num & hal::LedNumbers::FRONT) == hal::LedNumbers::FRONT) {
+        current_en |= 0x40;
+    }
+    if ((num & hal::LedNumbers::RIGHT) == hal::LedNumbers::RIGHT) {
+        current_en |= 0x20;
+    }
+    if ((num & hal::LedNumbers::FRONTR) == hal::LedNumbers::FRONTR) {
+        current_en |= 0x10;
+    }
+    if ((num & hal::LedNumbers::MIDDLE1) == hal::LedNumbers::MIDDLE1) {
+        current_en |= 0x08;
+    }
+    if ((num & hal::LedNumbers::MIDDLE2) == hal::LedNumbers::MIDDLE2) {
+        current_en |= 0x04;
+    }
+    if ((num & hal::LedNumbers::MIDDLE3) == hal::LedNumbers::MIDDLE3) {
+        current_en |= 0x02;
+    }
+    if ((num & hal::LedNumbers::MIDDLE4) == hal::LedNumbers::MIDDLE4) {
+        current_en |= 0x01;
+    }
+    transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en);
+
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
@@ -644,46 +637,39 @@ hal::HalStatus hal::offLed(hal::LedNumbers num) {
 #ifdef MOUSE_LAZULI
     uint8_t current_en;
     receiveLedI2cCommand(LedDriverCommands::LED_EN_IDVD, &current_en);
+    uint8_t current_config;
+    receiveLedI2cCommand(LedDriverCommands::LED_CONFIG, &current_config);
 
-    switch (num) {
-        case hal::LedNumbers::FRONTL:
-            transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x00);
-            break;
-        case hal::LedNumbers::LEFT:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0x7F);
-            break;
-        case hal::LedNumbers::FRONT:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xBF);
-            break;
-        case hal::LedNumbers::RIGHT:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xDF);
-            break;
-        case hal::LedNumbers::FRONTR:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xEF);
-            break;
-        case hal::LedNumbers::MIDDLE1:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xF7);
-            break;
-        case hal::LedNumbers::MIDDLE2:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xFB);
-            break;
-        case hal::LedNumbers::MIDDLE3:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xFD);
-            break;
-        case hal::LedNumbers::MIDDLE4:
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en & 0xFE);
-            break;
-        case hal::LedNumbers::FLAG:
-            return hal::HalStatus::NOIMPLEMENT;
-            break;
-        case hal::LedNumbers::ALL:
-            transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x00);
-            transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, 0x00);
-            break;
-        default:
-            return hal::HalStatus::INVALID_PARAMS;
-            break;
+    if ((num & hal::LedNumbers::FRONTL) == hal::LedNumbers::FRONTL) {
+        current_config &= 0xFE;
+        transmitLedI2cCommand(LedDriverCommands::LED_CONFIG, 0x00);
     }
+    if ((num & hal::LedNumbers::LEFT) == hal::LedNumbers::LEFT) {
+        current_en &= 0x7F;
+    }
+    if ((num & hal::LedNumbers::FRONT) == hal::LedNumbers::FRONT) {
+        current_en &= 0xBF;
+    }
+    if ((num & hal::LedNumbers::RIGHT) == hal::LedNumbers::RIGHT) {
+        current_en &= 0xDF;
+    }
+    if ((num & hal::LedNumbers::FRONTR) == hal::LedNumbers::FRONTR) {
+        current_en &= 0xEF;
+    }
+    if ((num & hal::LedNumbers::MIDDLE1) == hal::LedNumbers::MIDDLE1) {
+        current_en &= 0xF7;
+    }
+    if ((num & hal::LedNumbers::MIDDLE2) == hal::LedNumbers::MIDDLE2) {
+        current_en &= 0xFB;
+    }
+    if ((num & hal::LedNumbers::MIDDLE3) == hal::LedNumbers::MIDDLE3) {
+        current_en &= 0xFD;
+    }
+    if ((num & hal::LedNumbers::MIDDLE4) == hal::LedNumbers::MIDDLE4) {
+        current_en &= 0xFE;
+    }
+    transmitLedI2cCommand(LedDriverCommands::LED_EN_IDVD, current_en);
+
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 

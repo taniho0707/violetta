@@ -13,7 +13,10 @@
 
 namespace mpl {
 
+constexpr uint8_t LED_FLICK_LENGTH = 4;
+
 struct LedFlickParams {
+    hal::LedNumbers num = static_cast<hal::LedNumbers>(0);
     uint32_t start_time = 0;
     float freq = 0;
     uint32_t time = 0;
@@ -21,7 +24,7 @@ struct LedFlickParams {
 
 class Led {
    private:
-    std::array<LedFlickParams, LED_NUMS> flick_params;
+    std::array<LedFlickParams, LED_FLICK_LENGTH> flick_params;
 
     Led();
 

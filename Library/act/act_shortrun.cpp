@@ -7,8 +7,10 @@
 
 using namespace act;
 
-void ShortrunActivity::init() {}
+void ShortrunActivity::init(ActivityParameters &params) {}
 
-Status ShortrunActivity::run() { return Status::NOIMPLEMENT; }
+Status ShortrunActivity::run() {
+    return Status::NOIMPLEMENT;
+}
 
-void ShortrunActivity::finalize() {}
+void ShortrunActivity::finalize(ActivityParameters &params) {}

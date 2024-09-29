@@ -3,7 +3,7 @@
 // @file       act_debug.cpp
 // @brief      Debug Activity
 //******************************************************************************
-#include "act_debug.h"
+#include "act_enkaigei.h"
 
 #include "cmd_server.h"
 #include "mll_localizer.h"
@@ -27,32 +27,10 @@
 
 using namespace act;
 
-void DebugActivity::init(ActivityParameters &params) {}
-
-// Status DebugActivity::run() {
-//     LL_mDelay(1000);
-
-//     auto debug = mpl::Debug::getInstance();
-//     LL_mDelay(1000);
-//     debug->printf("H");  // なぜかはじめの1文字目が送信できない…
-//     LL_mDelay(1000);
-//     debug->printf("Hello Zirconia2kai!\n");
-
-//     hal::initImuPort();
-//     LL_mDelay(1000);
-//     auto whoami = hal::whoamiImu();
-//     if (whoami == hal::HalStatus::SUCCESS) {
-//         debug->printf("IMU WhoAmI: SUCCESS\n");
-//     } else {
-//         debug->printf("IMU WhoAmI: ERROR\n");
-//     }
-
-//     while (true) {
-//     }
-// }
+void EnkaigeiActivity::init(ActivityParameters &params) {}
 
 #ifdef MOUSE_LAZULI
-Status DebugActivity::run() {
+Status EnkaigeiActivity::run() {
     auto cmd_server = cmd::CommandServer::getInstance();
     cmd::CommandFormatDebugTx cmd_debug_tx = {0};
 
@@ -123,11 +101,6 @@ Status DebugActivity::run() {
 
     [[maybe_unused]]
     auto motor = mpl::Motor::getInstance();
-    // debug->printf("Motor: 25%% ON...");
-    // motor->setDuty(+0.05, -0.05);
-    // LL_mDelay(1000);
-    // debug->printf("OFF\n");
-    // motor->setFloat();
 
     auto motor_controller = mll::MotorController::getInstance();
     motor_controller->init();
@@ -141,6 +114,7 @@ Status DebugActivity::run() {
     [[maybe_unused]]
     static auto params_cache = misc::Params::getInstance()->getCachePointer();
     misc::Params::getInstance()->load(misc::ParameterDestinationType::HARDCODED);
+    misc::Params::getInstance()->loadSlalom(misc::ParameterDestinationType::HARDCODED);
 
     mpl::Timer::init();
 
@@ -154,62 +128,12 @@ Status DebugActivity::run() {
     msg::MsgFormatEncoder msg_encoder = msg::MsgFormatEncoder();
     msg::MsgFormatImu msg_imu = msg::MsgFormatImu();
     msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
+    msg::MsgFormatMotorController msg_motor_controller = msg::MsgFormatMotorController();
 
-    mpl::TimerStatistics timer_statistics;
-
-    // mpl::Timer::sleepMs(3000);
-    // led->off(hal::LedNumbers::MIDDLE2);
-    // led->off(hal::LedNumbers::MIDDLE3);
-    // // motor->setDuty(0.1, 0.1);
-    // motor->setDutySuction(0.5);
-    // mpl::Timer::sleepMs(10000);
-    // led->on(hal::LedNumbers::MIDDLE2);
-    // led->on(hal::LedNumbers::MIDDLE3);
-    // motor->setDutySuction(0.0);
-    // motor->setFloat();
+    motor_controller->setStay();
 
     while (1) {
-        // mpl::Timer::sleepMs(500);
-        mpl::Timer::sleepMs(1);
-        mpl::Timer::getStatistics(timer_statistics);
-        message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
-        message->receiveMessage(msg::ModuleId::ENCODER, &msg_encoder);
-        message->receiveMessage(msg::ModuleId::IMU, &msg_imu);
-        message->receiveMessage(msg::ModuleId::WALLSENSOR, &msg_wallsensor);
-        // cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
-        //                                  "T: %10d B: %1.2f | L: %5d, R: %5d | FL: %4d, L: %4d, R: %4d, FR: "
-        //                                  "%4d, IMU: %8d, %10d, % 6d, % 6d, % 6d, % 6d, % 6d, % 6d, %d\n",
-        //                                  mpl::Timer::getMicroTime(), msg_battery.battery, msg_encoder.left,
-        //                                  msg_encoder.right, msg_wallsensor.frontleft, msg_wallsensor.left,
-        //                                  msg_wallsensor.right, msg_wallsensor.frontright, msg_imu.getCount(),
-        //                                  msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.gyro_roll,
-        //                                  msg_imu.gyro_pitch, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z,
-        //                                  msg_imu.temperature);
-        // cmd_debug_tx.len = debug->format(
-        //     cmd_debug_tx.message,
-        //     "T: %10d B: %1.2f | IMU: %8d, %10d, % 8.2f, % 7.1f, % 7.1f, % 7.1f | WALL: % 4d,% 4d,% 4d,% 4d,% 4d | STAT: "
-        //     "Max.[%2.0f|%2.0f|%2.0f|%2.0f] "
-        //     "Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n",
-        //     mpl::Timer::getMicroTime(), msg_battery.battery, msg_imu.getCount(), msg_imu.getTime(), msg_imu.gyro_yaw, msg_imu.acc_x / 1000,
-        //     msg_imu.acc_y / 1000, msg_imu.acc_z / 1000, msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.center, msg_wallsensor.right,
-        //     msg_wallsensor.frontright, float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX,
-        //     float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX,
-        //     float(timer_statistics.count4_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX,
-        //     float(timer_statistics.count2_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_avg) * 100 / hal::TIMER_COUNT_MAX,
-        //     float(timer_statistics.count4_avg) * 100 / hal::TIMER_COUNT_MAX);
-        cmd_debug_tx.len = debug->format(
-            cmd_debug_tx.message,
-            "T: %10d B: %1.2f | L: % 6.4f R: % 6.4f | IMU: % 8.2f, % 7.1f, % 7.1f, % 7.1f | WALL: % 4d,% 4d,% 4d,% 4d,% 4d | STAT: "
-            "Max.[%2.0f|%2.0f|%2.0f|%2.0f] "
-            "Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n",
-            mpl::Timer::getMicroTime(), msg_battery.battery, msg_encoder.left, msg_encoder.right, msg_imu.gyro_yaw, msg_imu.acc_x / 1000,
-            msg_imu.acc_y / 1000, msg_imu.acc_z / 1000, msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.center, msg_wallsensor.right,
-            msg_wallsensor.frontright, float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX,
-            float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX,
-            float(timer_statistics.count4_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX,
-            float(timer_statistics.count2_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_avg) * 100 / hal::TIMER_COUNT_MAX,
-            float(timer_statistics.count4_avg) * 100 / hal::TIMER_COUNT_MAX);
-        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+        mpl::Timer::sleepMs(500);
     }
 
     return Status::ERROR;
@@ -217,13 +141,13 @@ Status DebugActivity::run() {
 #endif  // MOUSE_LAZULI
 
 #ifdef MOUSE_LAZULI_SENSOR
-Status DebugActivity::run() {
+Status EnkaigeiActivity::run() {
     return Status::ERROR;
 }
 #endif  // MOUSE_LAZULI_SENSOR
 
 #ifdef MOUSE_ZIRCONIA2KAI
-Status DebugActivity::run() {
+Status EnkaigeiActivity::run() {
     auto cmd_server = cmd::CommandServer::getInstance();
     cmd::CommandFormatDebugTx cmd_debug_tx = {0};
 
@@ -542,4 +466,4 @@ Status DebugActivity::run() {
 }
 #endif  // MOUSE_ZIRCONIA2KAI
 
-void DebugActivity::finalize(ActivityParameters &params) {}
+void EnkaigeiActivity::finalize(ActivityParameters &params) {}

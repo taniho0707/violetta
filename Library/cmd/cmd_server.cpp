@@ -10,6 +10,12 @@
 using namespace cmd;
 
 CommandServer::CommandServer() {
+    iteNextUiOut = 0;
+    iteLastUiOut = 0;
+
+    iteNextUiIn = 0;
+    iteLastUiIn = 0;
+
     iteNextDebugTx = 0;
     iteLastDebugTx = 0;
 
@@ -25,6 +31,10 @@ CommandServer::CommandServer() {
 
 uint16_t CommandServer::length(CommandId id) {
     switch (id) {
+        case CommandId::UI_OUT:
+            return iteNextUiOut - iteLastUiOut;
+        case CommandId::UI_IN:
+            return iteNextUiIn - iteLastUiIn;
         case CommandId::DEBUG_TX:
             return iteNextDebugTx - iteLastDebugTx;
         case CommandId::DEBUG_RX:
@@ -44,6 +54,14 @@ CmdResult CommandServer::push(CommandId id, void* format) {
         return CmdResult::BUFFER_FULL;
     }
     switch (id) {
+        case CommandId::UI_OUT:
+            bufferUiOut[iteNextUiOut % COMMAND_BUFFER_SIZE] = *(CommandFormatUiOut*)format;
+            ++iteNextUiOut;
+            return CmdResult::SUCCESS;
+        case CommandId::UI_IN:
+            bufferUiIn[iteNextUiIn % COMMAND_BUFFER_SIZE] = *(CommandFormatUiIn*)format;
+            ++iteNextUiIn;
+            return CmdResult::SUCCESS;
         case CommandId::DEBUG_TX:
             bufferDebugTx[iteNextDebugTx % COMMAND_BUFFER_SIZE] = *(CommandFormatDebugTx*)format;
             ++iteNextDebugTx;
@@ -70,6 +88,14 @@ CmdResult CommandServer::pop(CommandId id, void* format) {
         return CmdResult::BUFFER_EMPTY;
     }
     switch (id) {
+        case CommandId::UI_OUT:
+            *(CommandFormatUiOut*)format = bufferUiOut[iteLastUiOut % COMMAND_BUFFER_SIZE];
+            ++iteLastUiOut;
+            return CmdResult::SUCCESS;
+        case CommandId::UI_IN:
+            *(CommandFormatUiIn*)format = bufferUiIn[iteLastUiIn % COMMAND_BUFFER_SIZE];
+            ++iteLastUiIn;
+            return CmdResult::SUCCESS;
         case CommandId::DEBUG_TX:
             *(CommandFormatDebugTx*)format = bufferDebugTx[iteLastDebugTx % COMMAND_BUFFER_SIZE];
             ++iteLastDebugTx;

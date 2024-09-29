@@ -10,7 +10,7 @@
 #include "mpl_debug.h"
 #include "mpl_encoder.h"
 #include "mpl_imu.h"
-// #include "mpl_led.h"
+#include "mpl_led.h"
 #include "mpl_motor.h"
 #include "mpl_speaker.h"
 #include "mpl_wallsensor.h"
@@ -20,6 +20,7 @@
 #include "mll_logger.h"
 #include "mll_motor_controller.h"
 #include "mll_operation_coordinator.h"
+#include "mll_ui.h"
 #include "mll_wall_analyser.h"
 
 void mpl::Timer::run1() {
@@ -39,11 +40,14 @@ void mpl::Timer::run2() {
 
     static auto battery = mpl::Battery::getInstance();
     battery->interruptPeriodic();
+
+    static auto ui = mll::Ui::getInstance();
+    ui->interruptPeriodic();
 }
 
 void mpl::Timer::run3() {
-    // static auto led = mpl::Led::getInstance();
-    // led->interrupt();
+    static auto led = mpl::Led::getInstance();
+    led->interruptPeriodic();
 
 #ifdef MOUSE_LAZULI
     static auto speaker = mpl::Speaker::getInstance();

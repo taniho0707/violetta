@@ -62,18 +62,17 @@ struct WallSensorData {
 
 #if defined(MOUSE_LAZULI)
 #define LED_NUMS 10
-enum class LedNumbers : uint8_t {
-    FRONTL = 0,
-    LEFT,
-    FRONT,
-    RIGHT,
-    FRONTR,
-    MIDDLE1,
-    MIDDLE2,
-    MIDDLE3,
-    MIDDLE4,
-    FLAG,
-    ALL = 255,
+enum class LedNumbers : uint16_t {
+    FRONTL = 1,
+    LEFT = 2,
+    FRONT = 4,
+    RIGHT = 8,
+    FRONTR = 16,
+    MIDDLE1 = 32,
+    MIDDLE2 = 64,
+    MIDDLE3 = 128,
+    MIDDLE4 = 256,
+    FLAG = 512,
 };
 
 const float BATTERY_RATIO = 5.7f;
@@ -354,5 +353,12 @@ struct EncoderData {
     int16_t LEFT;
     int16_t RIGHT;
 };
+
+inline constexpr LedNumbers operator|(LedNumbers a, LedNumbers b) {
+    return static_cast<LedNumbers>(static_cast<uint16_t>(a) | static_cast<uint16_t>(b));
+}
+inline constexpr LedNumbers operator&(LedNumbers a, LedNumbers b) {
+    return static_cast<LedNumbers>(static_cast<uint16_t>(a) & static_cast<uint16_t>(b));
+}
 
 }  // namespace hal

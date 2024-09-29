@@ -23,5 +23,6 @@ else()
         # mll_coordinate_director.cpp
         # mll_position_corrector.cpp
         # mll_crash_detector.cpp
+        mll_ui.cpp
     )
 endif()

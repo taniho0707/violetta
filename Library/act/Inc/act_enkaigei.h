@@ -1,7 +1,7 @@
 //******************************************************************************
 // @addtogroup ACT
-// @file       act_search.h
-// @brief      Search Activity
+// @file       act_enkaigei.h
+// @brief      Enkaigei Activity
 //******************************************************************************
 #pragma once
 
@@ -9,7 +9,7 @@
 
 namespace act {
 
-class SearchActivity : public IActivity {
+class EnkaigeiActivity : public IActivity {
    private:
    public:
     void init(ActivityParameters &params) override;

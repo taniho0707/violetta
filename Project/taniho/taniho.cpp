@@ -84,9 +84,10 @@ int main(void) {
     auto activity = act::Manager(act::Activities::WALLSENSOR_RUN);
     activity.run();
 #else
-    auto activity = act::Manager(act::Activities::DEBUG);
+    // auto activity = act::Manager(act::Activities::DEBUG);
     // auto activity = act::Manager(act::Activities::SEARCH);
     // auto activity = act::Manager(act::Activities::WALLSENSOR_CHECK);
+    auto activity = act::Manager(act::Activities::INITIALIZE, act::ActivityTransitionMode::MANUAL);
     activity.run();
 #endif  // ifndef MOUSE_LAZULI_SENSOR
 }
