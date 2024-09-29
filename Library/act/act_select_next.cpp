@@ -40,7 +40,6 @@ Status SelectNextActivity::run() {
     mpl::TimerStatistics timer_statistics;
 
     while (true) {
-        mpl::Timer::sleepMs(1);
         mpl::Timer::getStatistics(timer_statistics);
         message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
         message->receiveMessage(msg::ModuleId::ENCODER, &msg_encoder);
@@ -70,7 +69,6 @@ Status SelectNextActivity::run() {
                         current.number = 0;
                         cmd_ui_out.type = mll::UiOutputEffect::MODE_SELECT1;
                     }
-                    mpl::Timer::sleepMs(300);
                     break;
                 case mll::UiInputEffect::GYRO_ROLL_MINUS:
                     if (current.prime != 0) {
@@ -79,7 +77,6 @@ Status SelectNextActivity::run() {
                         current.number = 0;
                         cmd_ui_out.type = mll::UiOutputEffect::MODE_DESELECT1;
                     }
-                    mpl::Timer::sleepMs(300);
                     break;
                 case mll::UiInputEffect::GYRO_PITCH_PLUS:
                     if (current.sub + 1 != static_cast<uint8_t>(MODE_EXPR::LAST)) {
@@ -87,7 +84,6 @@ Status SelectNextActivity::run() {
                         current.number = 0;
                         cmd_ui_out.type = mll::UiOutputEffect::MODE_SELECT2;
                     }
-                    mpl::Timer::sleepMs(300);
                     break;
                 case mll::UiInputEffect::GYRO_PITCH_MINUS:
                     if (current.sub != 0) {
@@ -95,7 +91,6 @@ Status SelectNextActivity::run() {
                         current.number = 0;
                         cmd_ui_out.type = mll::UiOutputEffect::MODE_DESELECT2;
                     }
-                    mpl::Timer::sleepMs(300);
                     break;
                 case mll::UiInputEffect::GYRO_YAW_PLUS:
                     break;
@@ -119,6 +114,7 @@ Status SelectNextActivity::run() {
         if (cmd_ui_out.type != mll::UiOutputEffect::POWERON) {  // 0 でない場合とする
             cmd_server->push(cmd::CommandId::UI_OUT, &cmd_ui_out);
             cmd_ui_out.type = mll::UiOutputEffect::POWERON;
+            mpl::Timer::sleepMs(300);
         }
 
         if (select_end) {
