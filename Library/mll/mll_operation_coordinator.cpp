@@ -71,6 +71,13 @@ void OperationCoordinator::resetPosition(const MousePhysicalPosition& position) 
 
 void OperationCoordinator::interruptPeriodic() {
     switch (current_state) {
+        case OperationCoordinatorResult::IDLE_WITH_MOTOR_CONTROL:
+            position_updater->update();
+            break;
+        case OperationCoordinatorResult::RUNNING_SEARCH:
+            break;
+        case OperationCoordinatorResult::RUNNING_SHORT:
+            break;
         case OperationCoordinatorResult::RUNNING_SPECIFIC:
             // PositionUpdater の動作が完了していれば次の動作を設定する
             if (position_updater->isMoveComplete()) {

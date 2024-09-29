@@ -19,14 +19,14 @@ namespace mll {
 const uint16_t LED_ON_TIME_MAX = 0xFFFF;
 
 const float THRESHOLD_COUNT_GYRO_ROLL = 500.f;   // [dps]
-const float THRESHOLD_COUNT_GYRO_PITCH = 500.f;  // [dps]
-const float THRESHOLD_COUNT_GYRO_YAW = 500.f;    // [dps]
+const float THRESHOLD_COUNT_GYRO_PITCH = 400.f;  // [dps]
+const float THRESHOLD_COUNT_GYRO_YAW = 400.f;    // [dps]
 const float THRESHOLD_STABLE_GYRO = 100.f;       // [dps]
-const uint16_t THRESHOLD_WALLSENSOR = 500;       // [LSB]
+const uint16_t THRESHOLD_WALLSENSOR = 200;       // [LSB]
 
-const uint16_t COUNT_GYRO_ROLL = 50;   // [count]
-const uint16_t COUNT_GYRO_PITCH = 50;  // [count]
-const uint16_t COUNT_GYRO_YAW = 50;    // [count]
+const uint16_t COUNT_GYRO_ROLL = 30;   // [count]
+const uint16_t COUNT_GYRO_PITCH = 30;  // [count]
+const uint16_t COUNT_GYRO_YAW = 30;    // [count]
 const uint16_t COUNT_WALLSENSOR = 10;  // [count]
 
 // 物理的な UI の状態

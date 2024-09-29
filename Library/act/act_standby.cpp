@@ -5,14 +5,9 @@
 //******************************************************************************
 #include "act_standby.h"
 
+#include "cmd_format.h"
 #include "cmd_server.h"
-#include "mll_operation_coordinator.h"
-#include "mpl_speaker.h"
 #include "mpl_timer.h"
-#include "msg_format_imu.h"
-#include "msg_format_localizer.h"
-#include "msg_server.h"
-#include "params.h"
 
 using namespace act;
 
@@ -20,27 +15,20 @@ void StandbyActivity::init(ActivityParameters &params) {}
 
 Status StandbyActivity::run() {
     auto cmd_server = cmd::CommandServer::getInstance();
+    auto cmd_ui_in = cmd::CommandFormatUiIn{0};
+    auto cmd_ui_out = cmd::CommandFormatUiOut{0};
 
-    [[maybe_unused]]
-    auto operation_coordinator = mll::OperationCoordinator::getInstance();
-
-    [[maybe_unused]]
-    auto params_cache = misc::Params::getInstance()->getCachePointer();
-    misc::Params::getInstance()->load(misc::ParameterDestinationType::HARDCODED);
-    misc::Params::getInstance()->loadSlalom(misc::ParameterDestinationType::HARDCODED);
-
-    [[maybe_unused]]
-    auto message = msg::MessageServer::getInstance();
-    msg::MsgFormatImu msg_imu = msg::MsgFormatImu();
-    msg::MsgFormatLocalizer msg_localizer = msg::MsgFormatLocalizer();
-
-    // タイマー割り込みの開始
-    mpl::Timer::init();
-
-    auto speaker = mpl::Speaker::getInstance();
-    speaker->initPort();
-    speaker->playToneSync(mpl::MusicTone::A5, 100);
-    speaker->playToneAsync(mpl::MusicTone::D6, 200);
+    while (true) {
+        if (cmd_server->length(cmd::CommandId::UI_IN) > 0) {
+            cmd_server->pop(cmd::CommandId::UI_IN, &cmd_ui_in);
+            if (cmd_ui_in.type == mll::UiInputEffect::WALLSENSOR_RIGHT) {
+                cmd_ui_out.type = mll::UiOutputEffect::RUNSTART;
+                cmd_server->push(cmd::CommandId::UI_OUT, &cmd_ui_out);
+                break;
+            }
+        }
+        mpl::Timer::sleepMs(100);
+    }
 
     return Status::SUCCESS;
 }

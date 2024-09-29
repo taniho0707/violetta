@@ -132,6 +132,7 @@ void SelectNextActivity::finalize(ActivityParameters &params) {
     switch (current.prime) {
         case static_cast<uint8_t>(MODE_PRIME::EXPR):
             params.next_activity = Activities::SEARCH;
+            params.needStandby = true;
             switch (current.sub) {
                 case static_cast<uint8_t>(MODE_EXPR::GRAPH):
                     params.search_algorithm = SearchAlgorithm::GRAPH;
@@ -155,6 +156,7 @@ void SelectNextActivity::finalize(ActivityParameters &params) {
             break;
         case static_cast<uint8_t>(MODE_PRIME::SHRT):
             params.next_activity = Activities::SHORTRUN;
+            params.needStandby = true;
             switch (current.sub) {
                 case static_cast<uint8_t>(MODE_SHRT::SMALL):
                     params.shortcut_method = ShortcutMethod::NONE;
@@ -184,9 +186,11 @@ void SelectNextActivity::finalize(ActivityParameters &params) {
             break;
         case static_cast<uint8_t>(MODE_PRIME::TUNE):
             params.next_activity = Activities::PARAMTUNE_MOTOR;
+            params.needStandby = true;
             switch (current.sub) {
                 case static_cast<uint8_t>(MODE_TUNE::STAY):
-                    params.motor_tune_type = MotorParameterTuneType::STAY;
+                    params.next_activity = Activities::ENKAIGEI;
+                    params.needStandby = false;
                     break;
                 case static_cast<uint8_t>(MODE_TUNE::STRAIGHT_6):
                     params.motor_tune_type = MotorParameterTuneType::STRAIGHT;
