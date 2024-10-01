@@ -17,6 +17,9 @@ OperationCoordinator::OperationCoordinator() {
 }
 
 OperationCoordinatorResult OperationCoordinator::enableMotorControl() {
+    if (enabled_motor_control) {
+        return OperationCoordinatorResult::ERROR_ALREADY_RUNNING;
+    }
     enabled_motor_control = true;
     current_state = OperationCoordinatorResult::IDLE_WITH_MOTOR_CONTROL;
     return OperationCoordinatorResult::SUCCESS;

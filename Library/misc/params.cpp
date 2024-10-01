@@ -49,11 +49,11 @@ bool Params::load(ParameterDestinationType from) {
             cache.battery_shutdown = 3.2 * 2;
             cache.battery_ratio = 5.7f /*[R/R]*/ * 3.0f /*[V]*/ / 4095.0f /*[12bit]*/;
             cache.motor_control_frequency = 3200;
-            cache.motor_control_translation_kp = 0.14902;
-            cache.motor_control_translation_ki = 0.10967;
+            cache.motor_control_translation_kp = 5.f;
+            cache.motor_control_translation_ki = 0.9f;
             cache.motor_control_translation_kd = 0;
-            cache.motor_control_rotation_kp = 75.f;  // 50.0f;
-            cache.motor_control_rotation_ki = 5.5;   // 0.8;
+            cache.motor_control_rotation_kp = 100.f;  // 75.0f + 25.0f;
+            cache.motor_control_rotation_ki = 0;      // 5.5f + 5.f;
             cache.motor_control_rotation_kd = 0;
             cache.motor_control_kabe_kp = 0.02;
             cache.wallsensor_turnon = 10000;

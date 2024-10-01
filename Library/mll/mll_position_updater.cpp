@@ -17,6 +17,8 @@ PositionUpdater::PositionUpdater() {
     trajectory = Trajectory();
     current_move = OperationMoveType::STOP;
     current_velocity_translation_end = 0.f;
+    localizer = Localizer::getInstance();
+
     // NOTE: スタート位置に初期値を設定
     reset(MousePhysicalPosition{45, 45, 0});
     reset(MouseVelocity{0, 0});
@@ -235,6 +237,9 @@ void PositionUpdater::reset(const MousePhysicalPosition& position) {
     start_time = 0;
     current_move = OperationMoveType::STOP;
     current_move_distance = 0;
+
+    // Localizer の初期化
+    localizer->setPosition(position.x, position.y, position.angle);
 }
 
 void PositionUpdater::reset(const MouseVelocity& velocity) {

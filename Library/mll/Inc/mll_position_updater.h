@@ -5,6 +5,7 @@
 //******************************************************************************
 #pragma once
 
+#include "mll_localizer.h"
 #include "mll_position.h"
 #include "mll_trajectory.h"
 #include "params.h"
@@ -48,6 +49,8 @@ class PositionUpdater {
     misc::SlalomParams* slalom_params_cache;
 
     mll::Trajectory trajectory;
+
+    mll::Localizer* localizer;
 
     // 一動作開始前の初期化
     void initMove();

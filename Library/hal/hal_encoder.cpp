@@ -92,8 +92,8 @@ hal::HalStatus hal::initEncoderPort() {
     LL_TIM_EnableCounter(TIM3);
     LL_TIM_EnableCounter(TIM4);
 
-    LL_TIM_SetCounter(TIM3, 0);
-    LL_TIM_SetCounter(TIM4, 0);
+    LL_TIM_SetCounter(TIM3, 32768);
+    LL_TIM_SetCounter(TIM4, 32768);
 
     return HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
@@ -217,8 +217,10 @@ hal::HalStatus hal::getEncoderSync(EncoderData& data) {
 #endif  // ifdef LINUX
 
 #ifdef MOUSE_LAZULI
-    data.LEFT = -1 * LL_TIM_GetCounter(TIM4);
-    data.RIGHT = -1 * LL_TIM_GetCounter(TIM3);
+    data.LEFT = 32768 - LL_TIM_GetCounter(TIM4);
+    LL_TIM_SetCounter(TIM4, 32768);
+    data.RIGHT = 32768 - LL_TIM_GetCounter(TIM3);
+    LL_TIM_SetCounter(TIM3, 32768);
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
