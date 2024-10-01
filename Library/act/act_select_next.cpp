@@ -5,10 +5,7 @@
 //******************************************************************************
 #include "act_select_next.h"
 
-#include "mpl_debug.h"
 #include "mpl_timer.h"
-#include "msg_format_battery.h"
-#include "msg_format_encoder.h"
 
 using namespace act;
 
@@ -29,36 +26,7 @@ Status SelectNextActivity::run() {
     auto cmd_ui_out = cmd::CommandFormatUiOut{0};
     bool select_end = false;
 
-    // for debug
-    auto message = msg::MessageServer::getInstance();
-    msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
-    msg::MsgFormatEncoder msg_encoder = msg::MsgFormatEncoder();
-    msg::MsgFormatImu msg_imu = msg::MsgFormatImu();
-    msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
-    cmd::CommandFormatDebugTx cmd_debug_tx = {0};
-    auto debug = mpl::Debug::getInstance();
-    mpl::TimerStatistics timer_statistics;
-
     while (true) {
-        mpl::Timer::getStatistics(timer_statistics);
-        message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
-        message->receiveMessage(msg::ModuleId::ENCODER, &msg_encoder);
-        message->receiveMessage(msg::ModuleId::IMU, &msg_imu);
-        message->receiveMessage(msg::ModuleId::WALLSENSOR, &msg_wallsensor);
-        cmd_debug_tx.len = debug->format(
-            cmd_debug_tx.message,
-            "T: %10d B: %1.2f | L: % 6.4f R: % 6.4f | IMU: % 8.2f, % 7.1f, % 7.1f, % 7.1f | WALL: % 4d,% 4d,% 4d,% 4d,% 4d | STAT: "
-            "Max.[%2.0f|%2.0f|%2.0f|%2.0f] "
-            "Avg.[%2.0f|%2.0f|%2.0f|%2.0f]\n",
-            mpl::Timer::getMicroTime(), msg_battery.battery, msg_encoder.left, msg_encoder.right, msg_imu.gyro_yaw, msg_imu.acc_x / 1000,
-            msg_imu.acc_y / 1000, msg_imu.acc_z / 1000, msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.center, msg_wallsensor.right,
-            msg_wallsensor.frontright, float(timer_statistics.count1_max) * 100 / hal::TIMER_COUNT_MAX,
-            float(timer_statistics.count2_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_max) * 100 / hal::TIMER_COUNT_MAX,
-            float(timer_statistics.count4_max) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count1_avg) * 100 / hal::TIMER_COUNT_MAX,
-            float(timer_statistics.count2_avg) * 100 / hal::TIMER_COUNT_MAX, float(timer_statistics.count3_avg) * 100 / hal::TIMER_COUNT_MAX,
-            float(timer_statistics.count4_avg) * 100 / hal::TIMER_COUNT_MAX);
-        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
-
         if (cmd_server->length(cmd::CommandId::UI_IN) > 0) {
             cmd_server->pop(cmd::CommandId::UI_IN, &cmd_ui_in);
             switch (cmd_ui_in.type) {
@@ -114,7 +82,7 @@ Status SelectNextActivity::run() {
         if (cmd_ui_out.type != mll::UiOutputEffect::POWERON) {  // 0 でない場合とする
             cmd_server->push(cmd::CommandId::UI_OUT, &cmd_ui_out);
             cmd_ui_out.type = mll::UiOutputEffect::POWERON;
-            mpl::Timer::sleepMs(300);
+            mpl::Timer::sleepMs(500);
         }
 
         if (select_end) {
