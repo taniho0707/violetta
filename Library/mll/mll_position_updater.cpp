@@ -16,6 +16,8 @@ PositionUpdater::PositionUpdater() {
     slalom_params_cache = misc::Params::getInstance()->getCacheSlalomPointer(300);
     trajectory = Trajectory();
     current_move = OperationMoveType::STOP;
+    current_move_distance = 0.f;
+    current_velocity = MouseVelocity{0, 0};
     current_velocity_translation_end = 0.f;
     localizer = Localizer::getInstance();
 
@@ -120,7 +122,7 @@ void PositionUpdater::initMove() {
                             300.f, 300.f);
             current_velocity.rotation = 0.f;
             break;
-        case mll::OperationMoveType::TRAPACCEL_STOP:
+        case OperationMoveType::TRAPACCEL_STOP:
             trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID, 2000.f, current_move_distance, current_velocity.translation,
                             300.f, 0.f);
             current_velocity.rotation = 0.f;
@@ -131,10 +133,9 @@ void PositionUpdater::initMove() {
             break;
         case OperationMoveType::LENGTH:
         case OperationMoveType::UNDEFINED:
-            break;
         default:
-            break;
-    }
+            return;
+    };
 }
 
 void PositionUpdater::update() {
@@ -178,15 +179,21 @@ void PositionUpdater::update() {
         case OperationMoveType::SLALOM90OBL_LEFT:
             break;
         case OperationMoveType::TRAPACCEL:
-            updateTargetPosition(trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time), 0);
+            // updateTargetPosition(trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time), 0);
+            current_velocity.translation = trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time);
+            current_velocity.rotation = 0.f;
             break;
-        case mll::OperationMoveType::TRAPACCEL_STOP:
-            updateTargetPosition(trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time), 0);
+        case OperationMoveType::TRAPACCEL_STOP:
+            // updateTargetPosition(trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time), 0);
+            current_velocity.translation = trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time);
+            current_velocity.rotation = 0.f;
             break;
         case OperationMoveType::PIVOTTURN:
-            updateTargetPosition(0, trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time));
+            // updateTargetPosition(0, trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time));
+            current_velocity.translation = 0.f;
+            current_velocity.rotation = trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time);
             break;
-        case mll::OperationMoveType::WAIT:
+        case OperationMoveType::WAIT:
             break;
         case OperationMoveType::LENGTH:
         case OperationMoveType::UNDEFINED:

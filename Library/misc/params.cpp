@@ -52,8 +52,8 @@ bool Params::load(ParameterDestinationType from) {
             cache.motor_control_translation_kp = 5.f;
             cache.motor_control_translation_ki = 0.9f;
             cache.motor_control_translation_kd = 0;
-            cache.motor_control_rotation_kp = 100.f;  // 75.0f + 25.0f;
-            cache.motor_control_rotation_ki = 0;      // 5.5f + 5.f;
+            cache.motor_control_rotation_kp = 125.f;  // 75.0f + 25.0f;
+            cache.motor_control_rotation_ki = 10.f;   // 5.5f + 5.f;
             cache.motor_control_rotation_kd = 0;
             cache.motor_control_kabe_kp = 0.02;
             cache.wallsensor_turnon = 10000;

@@ -7,6 +7,7 @@
 
 #include "cmd_format.h"
 #include "cmd_server.h"
+#include "mll_ui.h"
 #include "mpl_timer.h"
 
 using namespace act;
@@ -18,6 +19,10 @@ Status StandbyActivity::run() {
     auto cmd_ui_in = cmd::CommandFormatUiIn{0};
     auto cmd_ui_out = cmd::CommandFormatUiOut{0};
 
+    auto ui = mll::Ui::getInstance();
+
+    ui->start();
+
     while (true) {
         if (cmd_server->length(cmd::CommandId::UI_IN) > 0) {
             cmd_server->pop(cmd::CommandId::UI_IN, &cmd_ui_in);
@@ -28,7 +33,10 @@ Status StandbyActivity::run() {
             }
         }
         mpl::Timer::sleepMs(100);
+        mpl::Timer::sleepMs(50);
     }
+
+    ui->stop();
 
     return Status::SUCCESS;
 }

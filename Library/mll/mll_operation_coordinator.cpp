@@ -42,10 +42,13 @@ OperationCoordinatorResult OperationCoordinator::runShort(ShortOptions opt) {
 
 OperationCoordinatorResult OperationCoordinator::runSpecific(OperationMoveCombination* moves, uint16_t length) {
     // 他の動作中は命令を受け付けない
-    if (current_state != OperationCoordinatorResult::IDLE_WITH_MOTOR_CONTROL &&
-        current_state != OperationCoordinatorResult::IDLE_WITHOUT_MOTOR_CONTROL && current_state != OperationCoordinatorResult::IDLE) {
+    // clang-format off
+    if (   current_state != OperationCoordinatorResult::IDLE_WITH_MOTOR_CONTROL
+        && current_state != OperationCoordinatorResult::IDLE_WITHOUT_MOTOR_CONTROL
+        && current_state != OperationCoordinatorResult::IDLE) {
         return OperationCoordinatorResult::ERROR_ALREADY_RUNNING;
     }
+    // clang-format on
 
     if (length > MAX_MOVE_LENGTH) {
         return OperationCoordinatorResult::ERROR_LENGTH_TOO_LONG;
