@@ -47,7 +47,28 @@ Status SelectNextActivity::run() {
                     }
                     break;
                 case mll::UiInputEffect::GYRO_PITCH_PLUS:
-                    if (current.sub + 1 != static_cast<uint8_t>(MODE_EXPR::LAST)) {
+                    uint8_t sub_max;
+                    switch (current.prime) {
+                        case static_cast<uint8_t>(MODE_PRIME::EXPR):
+                            sub_max = static_cast<uint8_t>(MODE_EXPR::LAST);
+                            break;
+                        case static_cast<uint8_t>(MODE_PRIME::SHRT):
+                            sub_max = static_cast<uint8_t>(MODE_SHRT::LAST);
+                            break;
+                        case static_cast<uint8_t>(MODE_PRIME::DEBUG):
+                            sub_max = static_cast<uint8_t>(MODE_DEBUG::LAST);
+                            break;
+                        case static_cast<uint8_t>(MODE_PRIME::TUNE):
+                            sub_max = static_cast<uint8_t>(MODE_TUNE::LAST);
+                            break;
+                        case static_cast<uint8_t>(MODE_PRIME::SENSOR):
+                            sub_max = static_cast<uint8_t>(MODE_SENSOR::LAST);
+                            break;
+                        default:
+                            sub_max = 0;
+                            break;
+                    }
+                    if (current.sub + 1 != sub_max) {
                         ++current.sub;
                         current.number = 0;
                         cmd_ui_out.type = mll::UiOutputEffect::MODE_SELECT2;

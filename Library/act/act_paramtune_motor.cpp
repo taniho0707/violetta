@@ -54,12 +54,10 @@ Status ParamtuneMotorActivity::run() {
             };
             break;
         case act::MotorParameterTuneType::PIVOTTURN:
-            for (int i = 0; i < 8; ++i) {
-                moves[moves_length++] = mll::OperationMoveCombination{
-                    .type = mll::OperationMoveType::PIVOTTURN,
-                    .distance = 180.f,
-                };
-            }
+            moves[moves_length++] = mll::OperationMoveCombination{
+                .type = mll::OperationMoveType::PIVOTTURN,
+                .distance = 2 * misc::PI * 5,
+            };
             break;
         case act::MotorParameterTuneType::STAY:
             break;
@@ -69,7 +67,7 @@ Status ParamtuneMotorActivity::run() {
                 .distance = 90.f,
             };
             moves[moves_length++] = mll::OperationMoveCombination{
-                .type = (motor_tune_right ? mll::OperationMoveType::SLALOM90_RIGHT : mll::OperationMoveType::SLALOM90_LEFT),
+                .type = (motor_tune_right ? mll::OperationMoveType::SLALOM90SML_RIGHT : mll::OperationMoveType::SLALOM90SML_LEFT),
                 .distance = 0.f,
             };
             moves[moves_length++] = mll::OperationMoveCombination{
@@ -88,7 +86,7 @@ Status ParamtuneMotorActivity::run() {
                     .distance = 90.f,
                 };
                 moves[moves_length++] = mll::OperationMoveCombination{
-                    .type = (motor_tune_right ? mll::OperationMoveType::SLALOM90_RIGHT : mll::OperationMoveType::SLALOM90_LEFT),
+                    .type = (motor_tune_right ? mll::OperationMoveType::SLALOM90SML_RIGHT : mll::OperationMoveType::SLALOM90SML_LEFT),
                     .distance = 0.f,
                 };
             }

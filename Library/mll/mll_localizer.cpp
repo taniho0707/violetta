@@ -84,6 +84,8 @@ void mll::Localizer::interruptPeriodic() {
 
     // 相補フィルタの定数
     // TODO: 相補フィルタの定数をparamsからロードする
+    // FIXME: 相補フィルタを実用可能にする
+    // FIXME: 加速度センサのオフセットを設定できるようにする
     const float ALPHA = 1.0f;
     current_status.velocity_translation = ALPHA * encoder_status.velocity_translation + (1 - ALPHA) * imu_status.velocity_translation;
     current_status.accel_translation = ALPHA * encoder_status.accel_translation + (1 - ALPHA) * imu_status.accel_translation;

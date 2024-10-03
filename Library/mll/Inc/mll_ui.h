@@ -18,7 +18,7 @@ namespace mll {
 
 const uint16_t LED_ON_TIME_MAX = 0xFFFF;
 
-const float THRESHOLD_COUNT_GYRO_ROLL = 650.f;   // [dps]
+const float THRESHOLD_COUNT_GYRO_ROLL = 500.f;   // [dps]
 const float THRESHOLD_COUNT_GYRO_PITCH = 500.f;  // [dps]
 const float THRESHOLD_COUNT_GYRO_YAW = 400.f;    // [dps]
 const float THRESHOLD_STABLE_GYRO = 100.f;       // [dps]

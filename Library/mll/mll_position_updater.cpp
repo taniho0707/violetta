@@ -54,6 +54,7 @@ void PositionUpdater::initSlalom(const float rightleft) {
 
 void PositionUpdater::runSlalom() {
     if (slalom_state == SlalomState::BEFORE) {
+        current_velocity.rotation = 0;
         updateTargetPosition(current_velocity.translation, 0);
         slalom_move_distance += current_velocity.translation * 0.001f;
         if (slalom_move_distance >= slalom_params_cache[static_cast<uint8_t>(current_move)].d_before) {
@@ -62,14 +63,17 @@ void PositionUpdater::runSlalom() {
         }
     }
     if (slalom_state == SlalomState::TURN) {
-        updateTargetPosition(current_velocity.translation, trajectory.getVelocity(mpl::Timer::getMilliTime() - slalom_start_time));
+        current_velocity.rotation = trajectory.getVelocity(mpl::Timer::getMilliTime() - slalom_start_time);
+        updateTargetPosition(current_velocity.translation, current_velocity.rotation);
         if (trajectory.isEnd(mpl::Timer::getMilliTime() - slalom_start_time)) {
             slalom_move_distance = 0.f;
             slalom_state = SlalomState::AFTER;
         }
     }
     if (slalom_state == SlalomState::AFTER) {
+        current_velocity.rotation = 0;
         updateTargetPosition(current_velocity.translation, 0);
+        slalom_move_distance += current_velocity.translation * 0.001f;
         if (slalom_move_distance >= slalom_params_cache[static_cast<uint8_t>(current_move)].d_after) {
             slalom_state = SlalomState::END;
         }
@@ -139,6 +143,8 @@ void PositionUpdater::initMove() {
 }
 
 void PositionUpdater::update() {
+    last_update_time = mpl::Timer::getMilliTime();
+
     switch (current_move) {
         case OperationMoveType::STOP:
             // msg_format_motor_controller.is_controlled = true;
@@ -221,7 +227,10 @@ bool PositionUpdater::isMoveComplete() {
     // TODO: trajectory.isEnd の境界条件を確認しておく
     if (current_move == OperationMoveType::STOP) {
         return true;
-    } else if (trajectory.isEnd(last_update_time - start_time)) {
+    } else if (current_move == OperationMoveType::TRAPACCEL || current_move == OperationMoveType::TRAPACCEL_STOP ||
+               current_move == OperationMoveType::PIVOTTURN || current_move == OperationMoveType::WAIT) {  // スラローム以外で動作中の場合
+        return trajectory.isEnd(last_update_time - start_time);
+    } else if (slalom_state == SlalomState::END) {  // スラロームで動作中の場合
         return true;
     } else {
         return false;
