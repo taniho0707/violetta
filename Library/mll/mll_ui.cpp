@@ -3,8 +3,6 @@
 // @file       mll_ui.cpp
 // @brief      マウスのUIを管理するクラス
 //******************************************************************************
-#pragma once
-
 #include "mll_ui.h"
 
 #include "hal_conf.h"
@@ -230,6 +228,11 @@ uint8_t Ui::input(UiInputEffect* effect) {
     } else if (count_gyro_roll == -COUNT_GYRO_ROLL) {
         effect[count++] = UiInputEffect::GYRO_ROLL_MINUS;
     }
+    if (count_gyro_pitch == COUNT_GYRO_PITCH) {
+        effect[count++] = UiInputEffect::GYRO_PITCH_PLUS;
+    } else if (count_gyro_pitch == -COUNT_GYRO_PITCH) {
+        effect[count++] = UiInputEffect::GYRO_PITCH_MINUS;
+    }
 
     // WALLSENSOR
     if (wallsensor_data.right > THRESHOLD_WALLSENSOR) {
@@ -251,9 +254,9 @@ uint8_t Ui::input(UiInputEffect* effect) {
 
     // STABLE
     // clang-format off
-    if (   misc::abs(imu_data.gyro_roll) < THRESHOLD_STABLE_GYRO
+    if (   misc::abs(imu_data.gyro_roll)  < THRESHOLD_STABLE_GYRO
         && misc::abs(imu_data.gyro_pitch) < THRESHOLD_STABLE_GYRO
-        && misc::abs(imu_data.gyro_yaw) < THRESHOLD_STABLE_GYRO) {
+        && misc::abs(imu_data.gyro_yaw)   < THRESHOLD_STABLE_GYRO) {
         ++count_stable;
     } else {
         count_stable = 0;

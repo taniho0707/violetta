@@ -24,6 +24,7 @@ void mpl::WallSensor::deinitPort() {
 
 mpl::MplStatus mpl::WallSensor::scanAllSync(hal::WallSensorData& data) {
     // 順番にすべてのチャンネルをスキャン
+    [[maybe_unused]]
     hal::WallSensorData buffer_bundle = {0};
     hal::HalStatus result;
 
