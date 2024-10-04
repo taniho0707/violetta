@@ -5,35 +5,34 @@
 //******************************************************************************
 #include "act_search.h"
 
-#include "mll_localizer.h"
-#include "mll_motor_controller.h"
 #include "mll_operation_coordinator.h"
 #include "mpl_timer.h"
 
 using namespace act;
 
-void SearchActivity::init(ActivityParameters &params) {}
+void SearchActivity::init(ActivityParameters &params) {
+    algorithm = params.search_algorithm;
+}
 
 Status SearchActivity::run() {
-    auto motor_controller = mll::MotorController::getInstance();
-    motor_controller->init();
-
-    auto localizer = mll::Localizer::getInstance();
-    localizer->init();
-
     auto operation_coordinator = mll::OperationCoordinator::getInstance();
-
-    // OperationController のテスト
-    mpl::Timer::sleepMs(3000);
-    motor_controller->setStay();
-    mpl::Timer::sleepMs(2000);
-
     operation_coordinator->enableMotorControl();
-    operation_coordinator->runSearch(mll::AlgorithmType::LEFT_HAND);
+    mpl::Timer::sleepMs(1000);
+
+    mll::SearchOptions opt = {
+        .maxSearchTime = 0,
+        .algorithm = mll::AlgorithmType::LEFT_HAND,
+        .oneway = true,
+        .search_completed = false,
+        .search_found_goal = false,
+        .velocity_trans = 300,
+        .velocity_turn = 300,
+    };
+    operation_coordinator->runSearch(opt);  // FIXME: 今は左手法固定にしている
 
     while (true);
 
-    return Status::ERROR;
+    return Status::SUCCESS;
 }
 
 void SearchActivity::finalize(ActivityParameters &params) {}

@@ -124,19 +124,19 @@ void SelectNextActivity::finalize(ActivityParameters &params) {
             params.needStandby = true;
             switch (current.sub) {
                 case static_cast<uint8_t>(MODE_EXPR::GRAPH):
-                    params.search_algorithm = SearchAlgorithm::GRAPH;
+                    params.search_algorithm = mll::AlgorithmType::DIJKSTRA;
                     params.only_oneway = false;
                     break;
                 case static_cast<uint8_t>(MODE_EXPR::ADACHI):
-                    params.search_algorithm = SearchAlgorithm::ADACHI;
+                    params.search_algorithm = mll::AlgorithmType::ADACHI;
                     params.only_oneway = false;
                     break;
                 case static_cast<uint8_t>(MODE_EXPR::GRAPH_ONEWAY):
-                    params.search_algorithm = SearchAlgorithm::GRAPH;
+                    params.search_algorithm = mll::AlgorithmType::DIJKSTRA;
                     params.only_oneway = true;
                     break;
                 case static_cast<uint8_t>(MODE_EXPR::ADACHI_ONEWAY):
-                    params.search_algorithm = SearchAlgorithm::ADACHI;
+                    params.search_algorithm = mll::AlgorithmType::ADACHI;
                     params.only_oneway = true;
                     break;
                 default:

@@ -5,6 +5,7 @@
 //******************************************************************************
 #pragma once
 
+#include "mll_maze_solver.h"
 #include "stdint.h"
 
 namespace act {
@@ -36,11 +37,6 @@ enum class ActivityTransitionMode : uint8_t {
     SEMIAUTO,      // 半自動遷移モード (クラッシュ発生以降はMANUALに遷移)
     MANUAL,        // 手動遷移モード (毎回モードセレクトに入る)
     DEBUG,         // デバッグモード
-};
-
-enum class SearchAlgorithm : uint8_t {
-    GRAPH = 0,  // グラフ探索
-    ADACHI,     // 足立法
 };
 
 enum class ShortcutMethod : uint8_t {
@@ -76,8 +72,8 @@ struct ActivityParameters {
     float velocity_turn;                     // ターン時の直進速度 [mm/s]
 
     // Activities::SEARCH
-    SearchAlgorithm search_algorithm;  // 探索アルゴリズム
-    bool only_oneway;                  // 片道で終了するかどうか
+    mll::AlgorithmType search_algorithm;  // 探索アルゴリズム
+    bool only_oneway;                     // 片道で終了するかどうか
 
     // Activities::SHORTRUN
     ShortcutMethod shortcut_method;  // 最短経路走行の方法

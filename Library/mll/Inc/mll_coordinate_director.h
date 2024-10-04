@@ -23,6 +23,9 @@ class CoordinateDirector {
     // この関数は、Localizer と OperationCoordinator からの情報をもとに判断する
     OperationMoveCombination getNextMove();
 
+    // 探索/最短走行が完了し、かつマウスが停止しているかどうかを返す
+    bool isEnd();
+
     // マウスの現在の区画情報を返す？
 
     // マウスの現在の目標区画情報を返す

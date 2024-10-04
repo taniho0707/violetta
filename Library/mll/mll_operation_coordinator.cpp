@@ -12,6 +12,7 @@ OperationCoordinator::OperationCoordinator() {
     current_state = OperationCoordinatorResult::IDLE_WITHOUT_MOTOR_CONTROL;
 
     position_updater = PositionUpdater::getInstance();
+    coordinate_director = CoordinateDirector::getInstance();
 
     msg_server = msg::MessageServer::getInstance();
 }
@@ -32,8 +33,21 @@ OperationCoordinatorResult OperationCoordinator::disableMotorControl() {
     return OperationCoordinatorResult::SUCCESS;
 }
 
-OperationCoordinatorResult OperationCoordinator::runSearch(AlgorithmType type, SearchOptions opt) {
-    return OperationCoordinatorResult::FATAL_ERROR;
+OperationCoordinatorResult OperationCoordinator::runSearch(SearchOptions opt) {
+    // 他の動作中は命令を受け付けない
+    // clang-format off
+    if (   current_state != OperationCoordinatorResult::IDLE_WITH_MOTOR_CONTROL
+        && current_state != OperationCoordinatorResult::IDLE_WITHOUT_MOTOR_CONTROL
+        && current_state != OperationCoordinatorResult::IDLE) {
+        return OperationCoordinatorResult::ERROR_ALREADY_RUNNING;
+    }
+    // clang-format on
+
+    search_options = opt;
+    enabled_motor_control = true;
+    current_state = OperationCoordinatorResult::RUNNING_SEARCH;
+
+    return OperationCoordinatorResult::SUCCESS;
 }
 
 OperationCoordinatorResult OperationCoordinator::runShort(ShortOptions opt) {
@@ -81,6 +95,16 @@ void OperationCoordinator::interruptPeriodic() {
             position_updater->update();
             break;
         case OperationCoordinatorResult::RUNNING_SEARCH:
+            // 1動作 (通常は1区画) が完了していれば次の動作を設定する
+            if (position_updater->isMoveComplete()) {
+                if (coordinate_director->isEnd()) {
+                    current_state = OperationCoordinatorResult::IDLE_WITH_MOTOR_CONTROL;
+                } else {
+                    auto next_move = coordinate_director->getNextMove();
+                    position_updater->setNextMove(next_move.type, next_move.distance);
+                }
+            }
+            position_updater->update();
             break;
         case OperationCoordinatorResult::RUNNING_SHORT:
             break;
@@ -94,10 +118,7 @@ void OperationCoordinator::interruptPeriodic() {
                 }
                 moves_current_index++;
             }
-
-            // PositionUpdater の更新をする
             position_updater->update();
-
             break;
         default:
             break;

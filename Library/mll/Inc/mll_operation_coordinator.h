@@ -6,6 +6,7 @@
 #pragma once
 
 #include "act_conf.h"
+#include "mll_coordinate_director.h"
 #include "mll_maze_solver.h"
 #include "mll_position_updater.h"
 #include "msg_format_localizer.h"
@@ -34,7 +35,7 @@ enum class OperationCoordinatorResult : uint8_t {
 // TODO: メンバを考える
 struct SearchOptions {
     uint8_t maxSearchTime = 0;  // [ms]
-    act::SearchAlgorithm algorithm = act::SearchAlgorithm::GRAPH;
+    mll::AlgorithmType algorithm = mll::AlgorithmType::DIJKSTRA;
     bool oneway = false;  // 片道のみの探索
 
     bool search_completed = false;   // 探索が完了したかどうか
@@ -64,12 +65,15 @@ class OperationCoordinator {
     // モーター制御の有効無効フラグ
     bool enabled_motor_control;
 
+    SearchOptions search_options;
+
     // 現在の動作状態
     // Result を流用しているが、一部の状態しか取らないようにする
     OperationCoordinatorResult current_state;
 
     // 所有する各クラスへのポインタ
     PositionUpdater* position_updater;
+    CoordinateDirector* coordinate_director;
 
     // message
     msg::MessageServer* msg_server;
@@ -80,9 +84,9 @@ class OperationCoordinator {
     OperationCoordinatorResult enableMotorControl();
     OperationCoordinatorResult disableMotorControl();
 
-    OperationCoordinatorResult runSearch(AlgorithmType type, SearchOptions opt = SearchOptions{});
+    OperationCoordinatorResult runSearch(SearchOptions opt);
 
-    OperationCoordinatorResult runShort(ShortOptions opt = ShortOptions{});
+    OperationCoordinatorResult runShort(ShortOptions opt);
 
     // 指定の走行パターンで走る
     OperationCoordinatorResult runSpecific(OperationMoveCombination* moves, uint16_t length);

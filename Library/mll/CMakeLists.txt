@@ -20,7 +20,7 @@ else()
         mll_maze_solver.cpp
         mll_operation_coordinator.cpp
         mll_position_updater.cpp
-        # mll_coordinate_director.cpp
+        mll_coordinate_director.cpp
         # mll_position_corrector.cpp
         # mll_crash_detector.cpp
         mll_ui.cpp
