@@ -11,6 +11,8 @@ namespace act {
 
 class DebugActivity : public IActivity {
    private:
+    DebugLogType log_type;
+
    public:
     void init(ActivityParameters &params) override;
     Status run() override;

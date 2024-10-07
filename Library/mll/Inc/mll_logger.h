@@ -22,11 +22,44 @@ enum class LoggerResult : uint8_t {
 
 // このクラスで対応するログの種類を示す列挙型
 enum class LogType : uint8_t {
-    MOTOR = 0,
-    ENCODER = 1,
-    WALLSENSOR = 2,
+    ALL = 0,
+    MOTOR = 1,
+    ENCODER = 2,
+    WALLSENSOR = 3,
     LENGTH
 };
+
+struct LogFormatAll {
+    uint32_t time;                   // ログを取得した時間
+    float motor_left;                // 左モータの速度
+    float motor_right;               // 右モータの速度
+    float motor_current_left;        // 左モータの電流
+    float motor_current_right;       // 右モータの電流
+    float motor_suction;             // 吸引モータの速度
+    float encoder_left;              // 左エンコーダの読み値
+    float encoder_right;             // 右エンコーダの読み値
+    uint16_t wallsensor_frontleft;   // 前左壁センサの値
+    uint16_t wallsensor_left;        // 左壁センサの値
+    uint16_t wallsensor_center;      // 前壁センサの値
+    uint16_t wallsensor_right;       // 右壁センサの値
+    uint16_t wallsensor_frontright;  // 前右壁センサの値
+    float distance_from_center;      // 左右壁センサから計算した中心からの横方向の距離 (左が正)
+    float distance_from_front;       // 前壁センサから計算した前壁からの距離
+    bool kabekire_left;              // 左側の壁切れ発生可否
+    bool kabekire_right;             // 右側の壁切れ発生可否
+    float target_v_translation;      // 目標直進速度
+    float target_v_rotation;         // 目標回転速度
+    float current_v_translation;     // 現在の直進速度
+    float current_v_rotation;        // 現在の回転速度
+    float position_x;                // 現在の x 座標
+    float position_y;                // 現在の y 座標
+    float position_theta;            // 現在の角度
+    float gyro_yaw;                  // ジャイロの yaw 角度
+    float acc_x;                     // 加速度センサの x 軸方向の加速度
+    float acc_y;                     // 加速度センサの y 軸方向の加速度
+    float acc_z;                     // 加速度センサの z 軸方向の加速度
+    float battery;                   // バッテリー電圧
+} __attribute__((packed));
 
 // LogType::MOTOR のデータ構造
 struct LogFormatMotor {
@@ -64,6 +97,7 @@ struct LogConfig {
     LogDestinationType dest;  // ログの保存先の種類
     uint32_t length;          // ログの長さ
     uint32_t address;         // ログの保存先の先頭アドレス
+    // uint16_t interval;        // ログの保存間隔 0=無効、1=1ms周期、3=3ms周期
 };
 
 class Logger {
