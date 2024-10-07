@@ -123,6 +123,10 @@ void SelectNextActivity::finalize(ActivityParameters &params) {
             params.next_activity = Activities::SEARCH;
             params.needStandby = true;
             switch (current.sub) {
+                case static_cast<uint8_t>(MODE_EXPR::LEFTHAND):
+                    params.search_algorithm = mll::AlgorithmType::LEFT_HAND;
+                    params.only_oneway = true;
+                    break;
                 case static_cast<uint8_t>(MODE_EXPR::GRAPH):
                     params.search_algorithm = mll::AlgorithmType::DIJKSTRA;
                     params.only_oneway = false;

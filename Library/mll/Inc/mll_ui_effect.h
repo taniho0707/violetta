@@ -35,6 +35,12 @@ enum class UiOutputEffect : uint8_t {
     // 探索状態表示
     SEARCH_COMPLETE,  // 探索完了エフェクト
     LED_OFF,          // LED すべて消灯
+    // WallAnalyzer 表示
+    WALL_EXIST_LEFT,      // 左壁あり
+    WALL_EXIST_RIGHT,     // 右壁あり
+    WALL_EXIST_FRONT,     // 前壁あり
+    WALL_KABEKIRE_LEFT,   // 左壁切れ検知
+    WALL_KABEKIRE_RIGHT,  // 右壁切れ検知
     // END
     LENGTH,
 };

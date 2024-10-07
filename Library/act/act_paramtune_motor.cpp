@@ -7,6 +7,7 @@
 
 #include "cmd_format.h"
 #include "cmd_server.h"
+#include "mll_logger.h"
 #include "mll_operation_coordinator.h"
 #include "mpl_debug.h"
 #include "mpl_timer.h"
@@ -101,6 +102,15 @@ Status ParamtuneMotorActivity::run() {
             break;
     }
 
+    // Logger setting
+    auto logger = mll::Logger::getInstance();
+    // FIXME: 範囲外アクセスしていそうなのでどうにかする
+    const uint32_t LOG_ADDRESS = 0x20030000;
+    constexpr uint16_t ALL_LOG_LENGTH = 0x20000 / sizeof(mll::LogFormatAll);
+    auto logconfig = mll::LogConfig{mll::LogType::ALL, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, (uint32_t)(&LOG_ADDRESS)};
+    logger->init(logconfig);
+    logger->startPeriodic(mll::LogType::ALL, 1);
+
     operation_coordinator->runSpecific(moves, moves_length);
 
     while (true) {
@@ -132,6 +142,8 @@ Status ParamtuneMotorActivity::run() {
 
         mpl::Timer::sleepMs(1);
     }
+
+    logger->stopPeriodic(mll::LogType::ALL);
 
     mpl::Timer::sleepMs(1000);
     operation_coordinator->disableMotorControl();

@@ -144,6 +144,36 @@ void Ui::loadOutputStatusTable() {
         .led_freq = 0,
         .speaker_title = mpl::MusicTitle::NONE,
     };
+    output_status_table[static_cast<uint8_t>(UiOutputEffect::WALL_EXIST_LEFT)] = {
+        .led_numbers = static_cast<uint16_t>(hal::LedNumbers::LEFT),
+        .led_time = 0,
+        .led_freq = 0,
+        .speaker_title = mpl::MusicTitle::NONE,
+    };
+    output_status_table[static_cast<uint8_t>(UiOutputEffect::WALL_EXIST_RIGHT)] = {
+        .led_numbers = static_cast<uint16_t>(hal::LedNumbers::RIGHT),
+        .led_time = 0,
+        .led_freq = 0,
+        .speaker_title = mpl::MusicTitle::NONE,
+    };
+    output_status_table[static_cast<uint8_t>(UiOutputEffect::WALL_EXIST_FRONT)] = {
+        .led_numbers = static_cast<uint16_t>(hal::LedNumbers::FRONT),
+        .led_time = 0,
+        .led_freq = 0,
+        .speaker_title = mpl::MusicTitle::NONE,
+    };
+    output_status_table[static_cast<uint8_t>(UiOutputEffect::WALL_KABEKIRE_LEFT)] = {
+        .led_numbers = static_cast<uint16_t>(hal::LedNumbers::LEFT),
+        .led_time = 200,
+        .led_freq = 1,
+        .speaker_title = mpl::MusicTitle::NONE,
+    };
+    output_status_table[static_cast<uint8_t>(UiOutputEffect::WALL_KABEKIRE_RIGHT)] = {
+        .led_numbers = static_cast<uint16_t>(hal::LedNumbers::RIGHT),
+        .led_time = 200,
+        .led_freq = 1,
+        .speaker_title = mpl::MusicTitle::NONE,
+    };
 #endif  // MOUSE_LAZULI
 }
 
