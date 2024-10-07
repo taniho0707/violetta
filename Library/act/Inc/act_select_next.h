@@ -20,7 +20,8 @@ enum class MODE_PRIME : uint8_t {
 };
 
 enum class MODE_EXPR : uint8_t {
-    GRAPH = 0x0,
+    LEFTHAND = 0x0,
+    GRAPH,
     ADACHI,
     GRAPH_ONEWAY,
     ADACHI_ONEWAY,

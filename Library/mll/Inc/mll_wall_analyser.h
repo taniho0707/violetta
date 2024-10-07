@@ -23,6 +23,7 @@ class WallAnalyser {
     // 過去の壁センサ値を残すバッファ
     uint16_t sensor_buffer_frontleft[WALLANALYSER_BUFFER_LENGTH];
     uint16_t sensor_buffer_left[WALLANALYSER_BUFFER_LENGTH];
+    uint16_t sensor_buffer_center[WALLANALYSER_BUFFER_LENGTH];
     uint16_t sensor_buffer_right[WALLANALYSER_BUFFER_LENGTH];
     uint16_t sensor_buffer_frontright[WALLANALYSER_BUFFER_LENGTH];
     uint8_t sensor_buffer_index;  // 指し示している先が最新、一つ若い数字が一つ前のデータ

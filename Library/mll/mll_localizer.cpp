@@ -5,6 +5,8 @@
 //******************************************************************************
 #include "mll_localizer.h"
 
+#include "cmd_format.h"
+
 #if defined(STM32)
 #ifndef STM32C011xx
 #include "arm_math.h"
@@ -21,6 +23,7 @@ using namespace plt;
 #include "msg_format_encoder.h"
 #include "msg_format_imu.h"
 #include "msg_format_localizer.h"
+#include "msg_format_wall_analyser.h"
 #include "msg_format_wallsensor.h"
 #include "msg_server.h"
 
@@ -108,6 +111,13 @@ void mll::Localizer::interruptPeriodic() {
     current_status.position_y += dif_y;
 
     // TODO: 壁センサの値を使って距離を補正
+    // LED Indicator
+    // cmd::CommandFormatUiOut cmd_ui_out;
+    // msg::MsgFormatWallAnalyser msg_wall_analyzer;
+    // if (msg_wall_analyzer.front_wall.isExistWall(FirstPersonDirection::LEFT)) {
+    //     cmd_ui_out.type = UiOutputEffect::WALL_EXIST_LEFT;
+    //     msg_server->sendMessage(msg::ModuleId::UI, &cmd_ui_out);
+    // }
 
     // 自己位置を更新し、メッセージを作成
     static msg::MsgFormatLocalizer msg_localizer;

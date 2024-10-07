@@ -47,6 +47,13 @@ OperationCoordinatorResult OperationCoordinator::runSearch(SearchOptions opt) {
     enabled_motor_control = true;
     current_state = OperationCoordinatorResult::RUNNING_SEARCH;
 
+    coordinate_director->setTargetSection(search_options.goals);
+    coordinate_director->setAlgorithm(search_options.algorithm);
+
+    moves_current_index = 0;
+    moves_current_length = 1;
+    moves[0] = OperationMoveCombination{OperationMoveType::TRAPACCEL, 45.f};
+
     return OperationCoordinatorResult::SUCCESS;
 }
 
@@ -99,9 +106,15 @@ void OperationCoordinator::interruptPeriodic() {
             if (position_updater->isMoveComplete()) {
                 if (coordinate_director->isEnd()) {
                     current_state = OperationCoordinatorResult::IDLE_WITH_MOTOR_CONTROL;
+                    // TODO: 停止する
+                } else if (moves_current_index >= moves_current_length) {
+                    moves_current_index = 0;
+                    coordinate_director->getNextMove(moves, moves_current_length);
+                    position_updater->setNextMove(moves[moves_current_index].type, moves[moves_current_index].distance);
+                    moves_current_index++;
                 } else {
-                    auto next_move = coordinate_director->getNextMove();
-                    position_updater->setNextMove(next_move.type, next_move.distance);
+                    position_updater->setNextMove(moves[moves_current_index].type, moves[moves_current_index].distance);
+                    moves_current_index++;
                 }
             }
             position_updater->update();

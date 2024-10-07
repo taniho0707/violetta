@@ -14,6 +14,8 @@ class PositionCorrector {
    public:
     // TODO: Implement
 
+    void update();
+
     static PositionCorrector* getInstance();
 };
 

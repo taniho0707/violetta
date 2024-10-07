@@ -38,6 +38,8 @@ struct SearchOptions {
     mll::AlgorithmType algorithm = mll::AlgorithmType::DIJKSTRA;
     bool oneway = false;  // 片道のみの探索
 
+    MultiplePosition goals;  // 現在到達したいゴール座標一覧、全て向かうと完了する
+
     bool search_completed = false;   // 探索が完了したかどうか
     bool search_found_goal = false;  // ゴールまでの経路を見つけたかどうか
 
