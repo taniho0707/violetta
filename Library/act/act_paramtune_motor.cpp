@@ -107,7 +107,7 @@ Status ParamtuneMotorActivity::run() {
     // FIXME: 範囲外アクセスしていそうなのでどうにかする
     const uint32_t LOG_ADDRESS = 0x20030000;
     constexpr uint16_t ALL_LOG_LENGTH = 0x20000 / sizeof(mll::LogFormatAll);
-    auto logconfig = mll::LogConfig{mll::LogType::ALL, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, (uint32_t)(&LOG_ADDRESS)};
+    auto logconfig = mll::LogConfig{mll::LogType::ALL, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, LOG_ADDRESS};
     logger->init(logconfig);
     logger->startPeriodic(mll::LogType::ALL, 1);
 

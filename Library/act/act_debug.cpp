@@ -31,7 +31,7 @@ Status DebugActivity::run() {
     // clang-format off
         cmd_debug_tx.len = debug->format(cmd_debug_tx.message, 
             "time, motorL, motorR, motorCurrentL, motorCurrentR, motorS, wallFL, wallL, wallC, wallR, wallFR,"
-            "distC, distF, kabekireL, kabekireR, targetVT, targetVR, currentVT, currentVR,"
+            "encL, encR, distC, distF, kabekireL, kabekireR, targetVT, targetVR, currentVT, currentVR,"
             "posX, posY, posT, gyroY, accX, accY, accZ, battery\n"
         );
     // clang-format on

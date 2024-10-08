@@ -192,7 +192,15 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
-  
+  /* RAM3 IS USED FOR mll::Logger InternalRam */
+  .ram_log :
+  {
+    . = ALIGN(8);
+    _sram_log = .;
+    *(.ram_log)
+    . = ALIGN(8);
+    _eram_log = .;
+  } >RAM3
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
