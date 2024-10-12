@@ -33,7 +33,7 @@ mpl::MplStatus mpl::Motor::setFloat() {
 }
 
 mpl::MplStatus mpl::Motor::setDutyL(float duty) {
-    // NOTE: LIMITTER
+#pragma message "!!! MOTOR DUTY LIMITTER ENABLED !!!"
     if (duty > 0.3) duty = 0.3;
     if (duty < -0.3) duty = -0.3;
 
@@ -44,7 +44,7 @@ mpl::MplStatus mpl::Motor::setDutyL(float duty) {
     }
 }
 mpl::MplStatus mpl::Motor::setDutyR(float duty) {
-    // NOTE: LIMITTER
+#pragma message "!!! MOTOR DUTY LIMITTER ENABLED !!!"
     if (duty > 0.3) duty = 0.3;
     if (duty < -0.3) duty = -0.3;
 

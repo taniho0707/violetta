@@ -29,10 +29,36 @@ using namespace plt;
 
 mll::Localizer::Localizer() {}
 
+void mll::Localizer::updateAveragedEncoder(float left, float right) {
+    encoder_left[encoder_index] = left;
+    encoder_right[encoder_index] = right;
+    encoder_index++;
+    if (encoder_index >= ENCODER_BUFFER_LENGTH) {
+        encoder_index = 0;
+    }
+}
+
+void mll::Localizer::getAveragedEncoder(float& left, float& right) {
+    left = 0;
+    right = 0;
+    for (uint16_t i = 0; i < ENCODER_BUFFER_LENGTH; i++) {
+        left += encoder_left[i];
+        right += encoder_right[i];
+    }
+    left /= ENCODER_BUFFER_LENGTH;
+    right /= ENCODER_BUFFER_LENGTH;
+}
+
 void mll::Localizer::init() {
     params = misc::Params::getInstance()->getCachePointer();
     setPosition(45.f, 45.f, 0);
     // setSectionPosition(0, 1, CardinalDirection::NORTH);
+
+    for (uint16_t i = 0; i < ENCODER_BUFFER_LENGTH; i++) {
+        encoder_left[i] = 0;
+        encoder_right[i] = 0;
+    }
+    encoder_index = 0;
 }
 
 void mll::Localizer::setPosition(float x, float y, float theta) {
@@ -89,7 +115,11 @@ void mll::Localizer::interruptPeriodic() {
     current_status.position_theta += gyro_yaw_pos_delta;
 
     // エンコーダのみを使った推定
-    float encoder_pos_delta = (msg_encoder.left + msg_encoder.right) / 2.f;            // [mm]
+    float encoder_left, encoder_right;
+    updateAveragedEncoder(msg_encoder.left, msg_encoder.right);
+    getAveragedEncoder(encoder_left, encoder_right);
+    // float encoder_pos_delta = (msg_encoder.left + msg_encoder.right) / 2.f;            // [mm]  // 移動平均を取らないケース
+    float encoder_pos_delta = (encoder_left + encoder_right) / 2.f;                    // [mm]  // 移動平均を取るケース
     float encoder_vel = encoder_pos_delta * 1000;                                      // [mm/s]
     float encoder_accel = (encoder_vel - encoder_status.velocity_translation) * 1000;  // [mm/s^2]
     encoder_status.accel_translation = encoder_accel;
