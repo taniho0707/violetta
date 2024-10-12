@@ -84,6 +84,7 @@ OperationCoordinatorResult OperationCoordinator::runSpecific(OperationMoveCombin
     current_state = OperationCoordinatorResult::RUNNING_SPECIFIC;
 
     // TODO: PositionUpdater の初期化をして、離散値が出ないようにする
+    resetPosition(MousePhysicalPosition{45.f, 45.f, 0.f});
 
     return OperationCoordinatorResult::SUCCESS;
 }

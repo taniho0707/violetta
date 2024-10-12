@@ -567,4 +567,6 @@ Status DebugActivity::run() {
 // }
 // #endif  // MOUSE_ZIRCONIA2KAI
 
-void DebugActivity::finalize(ActivityParameters &params) {}
+void DebugActivity::finalize(ActivityParameters &params) {
+    params.next_activity = Activities::SELECT_NEXT;
+}

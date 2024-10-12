@@ -6,6 +6,7 @@
 #pragma once
 
 #include "mll_position.h"
+#include "params.h"
 
 namespace mll {
 
@@ -31,6 +32,8 @@ class Localizer {
     Localizer();
 
     MouseSectionPosition current_section;
+
+    misc::MouseParams* params;
 
    public:
     // 現在の推測内容

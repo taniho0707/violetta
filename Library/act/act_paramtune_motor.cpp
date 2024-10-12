@@ -31,6 +31,7 @@ Status ParamtuneMotorActivity::run() {
 
     // TODO: モーター制御が止まっていることを確認する
 
+    operation_coordinator->resetPosition(mll::MousePhysicalPosition{45.f, 45.f, 0.f});
     operation_coordinator->enableMotorControl();
 
     // for debug

@@ -30,7 +30,7 @@ using namespace plt;
 mll::Localizer::Localizer() {}
 
 void mll::Localizer::init() {
-    // params = misc::Params::getInstance()->getCachePointer();
+    params = misc::Params::getInstance()->getCachePointer();
     setPosition(45.f, 45.f, 0);
     // setSectionPosition(0, 1, CardinalDirection::NORTH);
 }
@@ -39,10 +39,29 @@ void mll::Localizer::setPosition(float x, float y, float theta) {
     current_status.position_x = x;
     current_status.position_y = y;
     current_status.position_theta = theta;
+    current_status.position_translation = 0;
+    current_status.velocity_translation = 0;
+    current_status.velocity_rotation = 0;
+    current_status.accel_translation = 0;
+    current_status.accel_rotation = 0;
 
     encoder_status.position_x = x;
     encoder_status.position_y = y;
     encoder_status.position_theta = theta;
+    encoder_status.position_translation = 0;
+    encoder_status.velocity_translation = 0;
+    encoder_status.velocity_rotation = 0;
+    encoder_status.accel_translation = 0;
+    encoder_status.accel_rotation = 0;
+
+    imu_status.position_x = x;
+    imu_status.position_y = y;
+    imu_status.position_theta = theta;
+    imu_status.position_translation = 0;
+    imu_status.velocity_translation = 0;
+    imu_status.velocity_rotation = 0;
+    imu_status.accel_translation = 0;
+    imu_status.accel_rotation = 0;
 }
 
 // void mll::Localizer::setSectionPosition(int16_t x, int16_t y, CardinalDirection d) {
@@ -86,10 +105,9 @@ void mll::Localizer::interruptPeriodic() {
     imu_status.position_translation = accel_y_pos_delta;
 
     // 相補フィルタの定数
-    // TODO: 相補フィルタの定数をparamsからロードする
     // FIXME: 相補フィルタを実用可能にする
-    // FIXME: 加速度センサのオフセットを設定できるようにする
-    const float ALPHA = 1.0f;
+    // TODO: 位置速度加速度をすべて相補フィルタを通すべきかどうかがわからない
+    float ALPHA = params->complementary_filter_constant;
     current_status.velocity_translation = ALPHA * encoder_status.velocity_translation + (1 - ALPHA) * imu_status.velocity_translation;
     current_status.accel_translation = ALPHA * encoder_status.accel_translation + (1 - ALPHA) * imu_status.accel_translation;
     current_status.position_translation = ALPHA * encoder_status.position_translation + (1 - ALPHA) * imu_status.position_translation;

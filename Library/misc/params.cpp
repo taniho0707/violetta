@@ -56,6 +56,7 @@ bool Params::load(ParameterDestinationType from) {
             cache.motor_control_rotation_ki = 10.f;   // 5.5f + 5.f;
             cache.motor_control_rotation_kd = 0;
             cache.motor_control_kabe_kp = 0.02;
+            cache.complementary_filter_constant = 0.5f;
             cache.wallsensor_turnon = 10000;
             cache.wallsensor_exist_threshold[0] = 0;   // TODO: ここの番号とセンサ番号をいい感じに一致させたい
             cache.wallsensor_exist_threshold[1] = 30;  // LEFT
@@ -71,10 +72,18 @@ bool Params::load(ParameterDestinationType from) {
             cache.wallsensor_center[5] = 0;
             cache.wallsensor_kabekire_dif_threshold = 10;
             cache.encoder_resolution = 160;
-            cache.imu_sensitivity_acceleration = 244.f;  // 0.244 mg/LSB
-            cache.imu_offset_acceleration = 0;
-            cache.imu_sensitivity_gyro = 0.140;  // 140 mdps/LSB
-            cache.imu_offset_gyro = 0;
+            cache.imu_sensitivity_acceleration_x = 2.39f;  // 0.244 mg/LSB
+            cache.imu_sensitivity_acceleration_y = 2.39f;  // 0.244 mg/LSB = 2.39 mm/s^2/LSB
+            cache.imu_sensitivity_acceleration_z = 2.39f;  // 0.244 mg/LSB
+            cache.imu_offset_acceleration_x = 17.f;        // 横方向
+            cache.imu_offset_acceleration_y = 55.f;        // 前方向
+            cache.imu_offset_acceleration_z = -160.f;      // 下方向
+            cache.imu_sensitivity_gyro_yaw = 0.140;        // 140 mdps/LSB
+            cache.imu_sensitivity_gyro_pitch = 0.140;      // 140 mdps/LSB
+            cache.imu_sensitivity_gyro_roll = 0.140;       // 140 mdps/LSB
+            cache.imu_offset_gyro_yaw = 0;
+            cache.imu_offset_gyro_pitch = 0;
+            cache.imu_offset_gyro_roll = 0;
             cache.logging_size_internalflash = 0;
             cache.logging_size_internalram = 49152;
             cache.logging_size_fram = 0;
