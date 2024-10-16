@@ -21,5 +21,6 @@ else()
     act_wallsensor_run.cpp
     act_enkaigei.cpp
     act_standby.cpp
+    act_system_identification.cpp
   )
 endif()

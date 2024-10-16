@@ -15,6 +15,7 @@
 #include "act_select_next.h"
 #include "act_shortrun.h"
 #include "act_standby.h"
+#include "act_system_identification.h"
 #include "act_wallsensor_check.h"
 #endif  // ifndef MOUSE_LAZULI_SENSOR
 
@@ -49,6 +50,7 @@ Manager::Manager(Activities first_activity, ActivityTransitionMode transition_mo
     activity[static_cast<uint8_t>(Activities::ENKAIGEI)] = new EnkaigeiActivity();
     activity[static_cast<uint8_t>(Activities::WALLSENSOR_RUN)] = new WallsensorRunActivity();
     activity[static_cast<uint8_t>(Activities::STANDBY)] = new StandbyActivity();
+    activity[static_cast<uint8_t>(Activities::SYSTEM_IDENTIFICATION)] = new SystemIdentificationActivity();
 }
 
 IActivity* Manager::nextActivity(Activities next_activity) {
@@ -74,6 +76,8 @@ IActivity* Manager::nextActivity(Activities next_activity) {
             return activity[static_cast<uint8_t>(Activities::ENKAIGEI)];
         case Activities::STANDBY:
             return activity[static_cast<uint8_t>(Activities::STANDBY)];
+        case Activities::SYSTEM_IDENTIFICATION:
+            return activity[static_cast<uint8_t>(Activities::SYSTEM_IDENTIFICATION)];
 #endif  // ifndef MOUSE_LAZULI_SENSOR
         case Activities::WALLSENSOR_RUN:
             return activity[static_cast<uint8_t>(Activities::WALLSENSOR_RUN)];

@@ -56,7 +56,7 @@ bool Params::load(ParameterDestinationType from) {
             cache.motor_control_rotation_ki = 10.f;   // 5.5f + 5.f;
             cache.motor_control_rotation_kd = 0;
             cache.motor_control_kabe_kp = 0.02;
-            cache.complementary_filter_constant = 0.5f;
+            cache.complementary_filter_constant = 1.0f;
             cache.wallsensor_turnon = 10000;
             cache.wallsensor_exist_threshold[0] = 0;   // TODO: ここの番号とセンサ番号をいい感じに一致させたい
             cache.wallsensor_exist_threshold[1] = 30;  // LEFT

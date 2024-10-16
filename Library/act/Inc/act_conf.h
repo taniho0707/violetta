@@ -17,18 +17,19 @@ enum class Status : uint8_t {
 };
 
 enum class Activities : uint8_t {
-    NONE = 0x00,       // 何もしない 使わない想定
-    INITIALIZE,        // 初期化
-    SEARCH,            // 探索モード
-    SHORTRUN,          // 最短経路モード
-    WALLSENSOR_RUN,    // 壁センサ単体モード for LazuliSensor Only
-    SELECT_NEXT,       // 次のアクティビティを選択
-    WALLSENSOR_CHECK,  // 壁センサチェック
-    PARAMTUNE_MOTOR,   // モーターパラメータ調整
-    MODULE_TEST,       // モジュールテスト
-    ENKAIGEI,          // 演会芸
-    DEBUG,             // デバッグモード
-    STANDBY,           // 走行前の待機モード
+    NONE = 0x00,            // 何もしない 使わない想定
+    INITIALIZE,             // 初期化
+    SEARCH,                 // 探索モード
+    SHORTRUN,               // 最短経路モード
+    WALLSENSOR_RUN,         // 壁センサ単体モード for LazuliSensor Only
+    SELECT_NEXT,            // 次のアクティビティを選択
+    WALLSENSOR_CHECK,       // 壁センサチェック
+    PARAMTUNE_MOTOR,        // モーターパラメータ調整
+    MODULE_TEST,            // モジュールテスト
+    ENKAIGEI,               // 演会芸
+    DEBUG,                  // デバッグモード
+    STANDBY,                // 走行前の待機モード
+    SYSTEM_IDENTIFICATION,  // システム同定
     LENGTH
 };
 
@@ -59,6 +60,13 @@ enum class MotorParameterTuneType : uint8_t {
     OVERALLTURN,           // 連続した検証
 };
 
+enum class SystemIdentificationType : uint8_t {
+    STEP_TRANSLATION = 0,    // 直進方向のステップ応答
+    STEP_ROTATION,           // 回転方向のステップ応答
+    M_SEQUENCE_TRANSLATION,  // 直進方向のM系列応答
+    M_SEQUENCE_ROTATION,     // 回転方向のM系列応答
+};
+
 struct ActivityParameters {
     Activities current_activity;             // 現在のアクティビティ
     Activities next_activity;                // 次のアクティビティ
@@ -84,6 +92,9 @@ struct ActivityParameters {
     // Activities::PARAMTUNE_MOTOR
     MotorParameterTuneType motor_tune_type;  // モーターパラメータ調整の種類
     bool motor_tune_right;                   // 右モーターを調整するかどうか、falseなら左モーター
+
+    // Activities::SYSTEM_IDENTIFICATION
+    SystemIdentificationType system_identification_type;  // 動作の種類
 };
 
 class IActivity {

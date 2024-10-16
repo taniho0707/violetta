@@ -23,9 +23,6 @@ enum class LoggerResult : uint8_t {
 // このクラスで対応するログの種類を示す列挙型
 enum class LogType : uint8_t {
     ALL = 0,
-    MOTOR = 1,
-    ENCODER = 2,
-    WALLSENSOR = 3,
     LENGTH
 };
 
@@ -61,29 +58,6 @@ struct LogFormatAll {
     float battery;                   // バッテリー電圧
 } __attribute__((packed));
 
-// LogType::MOTOR のデータ構造
-struct LogFormatMotor {
-    uint32_t time;  // ログを取得した時間
-    float left;     // 左モータの速度
-    float right;    // 右モータの速度
-};
-
-// LogType::ENCODER のデータ構造
-struct LogFormatEncoder {
-    uint32_t time;  // ログを取得した時間
-    float left;     // 左モータの速度
-    float right;    // 右モータの速度
-};
-
-// LogType::WALLSENSOR のデータ構造
-struct LogFormatWallsensor {
-    uint32_t time;        // ログを取得した時間
-    uint16_t frontleft;   // 前左壁センサの値
-    uint16_t left;        // 左壁センサの値
-    uint16_t right;       // 右壁センサの値
-    uint16_t frontright;  // 前右壁センサの値
-};
-
 // ログの保存先の種類を示す列挙型
 enum class LogDestinationType : uint8_t {
     INTERNAL_FLASH = 0,
@@ -111,6 +85,8 @@ class Logger {
     // ただし、今は 1ms おき以外に対応していない
     // 0: 自動ロギング無効、1以上の整数: [ms] おきに自動ロギング
     static uint16_t duration[static_cast<uint8_t>(LogType::LENGTH)];
+
+    static uint16_t counter;  // 自動ロギングのカウンタ、== duration のときにロギング
 
    public:
     // ログ保存のための初期設定

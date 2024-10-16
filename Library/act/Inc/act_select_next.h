@@ -52,6 +52,7 @@ enum class MODE_TUNE : uint8_t {
     SLALOM90SML_RIGHT2,
     OVERALL_LEFT,
     OVERALL_RIGHT,
+    SYSTEM_IDENTIFICATION,
     LAST  // コレより下に定義しない
 };
 

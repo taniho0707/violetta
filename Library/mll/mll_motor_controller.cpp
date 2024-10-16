@@ -26,6 +26,7 @@ using namespace plt;
 
 mll::MotorController::MotorController() {
     enabled = false;
+    enabled_override_control = false;  // for act_system_identification
 }
 
 void mll::MotorController::init() {
@@ -69,7 +70,9 @@ void mll::MotorController::stopControl() {
     msg_motor.duty_l = 0;
     msg_motor.duty_r = 0;
     msg_motor.duty_suction = 0;
-    msg_server->sendMessage(msg::ModuleId::MOTOR, &msg_motor);
+    if (!enabled_override_control) {
+        msg_server->sendMessage(msg::ModuleId::MOTOR, &msg_motor);
+    }
 }
 
 void mll::MotorController::setTargetPosition(float target_x, float target_y, float target_angle) {
@@ -94,6 +97,13 @@ void mll::MotorController::resetIntegralRotation() {
 void mll::MotorController::resetIntegral() {
     resetIntegralTransition();
     resetIntegralRotation();
+}
+
+void mll::MotorController::startOverrideControl() {
+    enabled_override_control = true;
+}
+void mll::MotorController::stopOverrideControl() {
+    enabled_override_control = false;
 }
 
 void mll::MotorController::setStay() {

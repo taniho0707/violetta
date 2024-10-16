@@ -50,6 +50,8 @@ class MotorController {
     float last_differential_translation;
     float last_differential_rotation;
 
+    bool enabled_override_control;  // 外部モジュールにモーター制御を委譲する
+
     // 【目標位置と現在位置の差分を計算】
     // 目標距離に対して遅れている場合が正
     float calcDistanceToTarget(float current_x, float current_y, float target_x, float target_y);
@@ -75,6 +77,9 @@ class MotorController {
     void resetIntegralTransition();
     void resetIntegralRotation();
     void resetIntegral();
+
+    void startOverrideControl();
+    void stopOverrideControl();  // モーター制御を外部モジュールに委譲する
 
     // 速度・角速度 0 でモーター制御を開始する
     void setStay();

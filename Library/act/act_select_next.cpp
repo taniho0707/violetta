@@ -216,6 +216,10 @@ void SelectNextActivity::finalize(ActivityParameters &params) {
                     params.motor_tune_type = MotorParameterTuneType::OVERALLTURN;
                     params.motor_tune_right = true;
                     break;
+                case static_cast<uint8_t>(MODE_TUNE::SYSTEM_IDENTIFICATION):
+                    params.next_activity = Activities::SYSTEM_IDENTIFICATION;
+                    params.system_identification_type = SystemIdentificationType::STEP_ROTATION;
+                    break;
                 default:
                     break;
             }

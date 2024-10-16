@@ -22,6 +22,7 @@ using namespace mll;
 LogConfig Logger::config[static_cast<uint8_t>(LogType::LENGTH)];
 uint32_t Logger::address_next[static_cast<uint8_t>(LogType::LENGTH)];
 uint16_t Logger::duration[static_cast<uint8_t>(LogType::LENGTH)];
+uint16_t Logger::counter = 1;
 
 Logger::Logger() {}
 
@@ -32,8 +33,6 @@ LoggerResult Logger::init(LogConfig& config) {
         case LogDestinationType::INTERNAL_RAM:
             switch (config.type) {
                 case LogType::ALL:
-                case LogType::ENCODER:
-                case LogType::WALLSENSOR:
                     break;
                 default:
                     return LoggerResult::NO_IMPLEMENT;
@@ -63,28 +62,6 @@ LoggerResult Logger::save(LogType type, void* data) {
                     Logger::address_next[static_cast<uint8_t>(type)] += sizeof(LogFormatAll);
                     return LoggerResult::SUCCESS;
                 }
-            case LogType::ENCODER:
-                if (Logger::address_next[static_cast<uint8_t>(type)] + sizeof(LogFormatEncoder) >
-                    Logger::config[static_cast<uint8_t>(type)].address +
-                        sizeof(LogFormatEncoder) * Logger::config[static_cast<uint8_t>(type)].length) {
-                    return LoggerResult::DESTINATION_FULL;
-                } else {
-                    auto log = static_cast<LogFormatEncoder*>(data);
-                    *reinterpret_cast<LogFormatEncoder*>(Logger::address_next[static_cast<uint8_t>(type)]) = *log;
-                    Logger::address_next[static_cast<uint8_t>(type)] += sizeof(LogFormatEncoder);
-                    return LoggerResult::SUCCESS;
-                }
-            case LogType::WALLSENSOR:
-                if (Logger::address_next[static_cast<uint8_t>(type)] + sizeof(LogFormatWallsensor) >
-                    Logger::config[static_cast<uint8_t>(type)].address +
-                        sizeof(LogFormatWallsensor) * Logger::config[static_cast<uint8_t>(type)].length) {
-                    return LoggerResult::DESTINATION_FULL;
-                } else {
-                    auto log = static_cast<LogFormatWallsensor*>(data);
-                    *reinterpret_cast<LogFormatWallsensor*>(Logger::address_next[static_cast<uint8_t>(type)]) = *log;
-                    Logger::address_next[static_cast<uint8_t>(type)] += sizeof(LogFormatWallsensor);
-                    return LoggerResult::SUCCESS;
-                }
             default:
                 return LoggerResult::NO_IMPLEMENT;
         }
@@ -107,25 +84,6 @@ LoggerResult Logger::read(LogConfig& config, uint32_t ite, void* data) {
                         *reinterpret_cast<LogFormatAll*>(Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatAll) * ite);
                     return LoggerResult::SUCCESS;
                 }
-            case LogType::ENCODER:
-                if (Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatEncoder) * ite >
-                    Logger::address_next[static_cast<uint8_t>(config.type)]) {
-                    return LoggerResult::NO_DATA;
-                } else {
-                    *reinterpret_cast<LogFormatEncoder*>(data) = *reinterpret_cast<LogFormatEncoder*>(
-                        Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatEncoder) * ite);
-                    return LoggerResult::SUCCESS;
-                }
-            case LogType::WALLSENSOR:
-                if (Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatWallsensor) * ite >
-                    Logger::address_next[static_cast<uint8_t>(config.type)]) {
-                    return LoggerResult::NO_DATA;
-                } else {
-                    *reinterpret_cast<LogFormatWallsensor*>(data) = *reinterpret_cast<LogFormatWallsensor*>(
-                        Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatWallsensor) * ite);
-                    return LoggerResult::SUCCESS;
-                }
-                break;
             default:
                 return LoggerResult::NO_IMPLEMENT;
         }
@@ -138,6 +96,7 @@ LoggerResult Logger::read(LogConfig& config, uint32_t ite, void* data) {
 
 LoggerResult Logger::startPeriodic(LogType type, uint16_t duration) {
     Logger::duration[static_cast<uint8_t>(type)] = duration;
+    Logger::counter = 1;
     return LoggerResult::SUCCESS;
 }
 
@@ -166,6 +125,12 @@ void Logger::interruptPeriodic() {
     // duration 配列を確認し、0以外の要素に対して save を呼び出す
     for (uint8_t i = 0, len = static_cast<uint8_t>(LogType::LENGTH); i < len; i++) {
         if (Logger::duration[i] != 0) {
+            if (Logger::counter < Logger::duration[i]) {
+                Logger::counter++;
+                continue;
+            }
+            Logger::counter = 1;
+
             LogType type = static_cast<LogType>(i);
             switch (type) {
                 case LogType::ALL: {
@@ -207,27 +172,6 @@ void Logger::interruptPeriodic() {
                     log.acc_y = msg_imu.acc_y;
                     log.acc_z = msg_imu.acc_z;
                     log.battery = msg_battery.battery;
-                    auto result = Logger::save(static_cast<LogType>(i), &log);
-                    if (result != LoggerResult::SUCCESS) {
-                        // ログ追加の失敗時には自動ログ追加を無効化する
-                        Logger::duration[i] = 0;
-                    }
-                } break;
-                case LogType::ENCODER: {
-                    msg::MsgFormatEncoder msg_encoder = msg::MsgFormatEncoder();
-                    msg_server->receiveMessage(msg::ModuleId::ENCODER, &msg_encoder);
-                    mll::LogFormatEncoder log = {mpl::Timer::getMicroTime(), msg_encoder.left, msg_encoder.right};
-                    auto result = Logger::save(static_cast<LogType>(i), &log);
-                    if (result != LoggerResult::SUCCESS) {
-                        // ログ追加の失敗時には自動ログ追加を無効化する
-                        Logger::duration[i] = 0;
-                    }
-                } break;
-                case LogType::WALLSENSOR: {
-                    msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
-                    msg_server->receiveMessage(msg::ModuleId::WALLSENSOR, &msg_wallsensor);
-                    mll::LogFormatWallsensor log = {mpl::Timer::getMicroTime(), msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.right,
-                                                    msg_wallsensor.frontright};
                     auto result = Logger::save(static_cast<LogType>(i), &log);
                     if (result != LoggerResult::SUCCESS) {
                         // ログ追加の失敗時には自動ログ追加を無効化する
