@@ -12,6 +12,7 @@
 #include "msg_format_localizer.h"
 #include "msg_format_motor.h"
 #include "msg_format_motor_controller.h"
+#include "msg_format_motor_controller_internal.h"
 #include "msg_format_motor_current.h"
 #endif  // ifndef MOUSE_LAZULI_SENSOR
 
@@ -30,6 +31,7 @@ MessageServer::MessageServer() {
     messages[static_cast<uint8_t>(ModuleId::MOTORCURRENT)] = new MsgFormatMotorCurrent();
     messages[static_cast<uint8_t>(ModuleId::LOCALIZER)] = new MsgFormatLocalizer();
     messages[static_cast<uint8_t>(ModuleId::MOTORCONTROLLER)] = new MsgFormatMotorController();
+    messages[static_cast<uint8_t>(ModuleId::MOTORCONTROLLER_INTERNAL)] = new MsgFormatMotorControllerInternal();
 #endif  // MOUSE_LAZULI_SENSOR
 
     messages[static_cast<uint8_t>(ModuleId::WALLSENSOR)] = new MsgFormatWallsensor();

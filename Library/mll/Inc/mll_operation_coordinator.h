@@ -11,6 +11,7 @@
 #include "mll_position_updater.h"
 #include "msg_format_localizer.h"
 #include "msg_format_motor_controller.h"
+#include "msg_format_motor_controller_internal.h"
 #include "msg_server.h"
 #include "stdint.h"
 
@@ -27,6 +28,7 @@ enum class OperationCoordinatorResult : uint8_t {
     RUNNING_SEARCH = 64,
     RUNNING_SHORT = 80,
     RUNNING_SPECIFIC = 96,
+    ERROR_MOTOR_FAILSAFE = 200,
     ERROR_LENGTH_TOO_LONG = 253,
     ERROR_ALREADY_RUNNING = 254,
     FATAL_ERROR = 255,
@@ -81,6 +83,7 @@ class OperationCoordinator {
     msg::MessageServer* msg_server;
     msg::MsgFormatMotorController msg_format_motor_controller;
     msg::MsgFormatLocalizer msg_format_localizer;
+    msg::MsgFormatMotorControllerInternal msg_format_motor_controller_internal;
 
    public:
     OperationCoordinatorResult enableMotorControl();
@@ -95,6 +98,9 @@ class OperationCoordinator {
 
     // 現在の状況を返す
     OperationCoordinatorResult state();
+
+    // CoordinateDirector が持っている現在区画情報を返す
+    const MouseSectionPosition getCurrentSection() const;
 
     // 位置をリセットする
     // enableMotorControl の直前に呼び出すことを推奨

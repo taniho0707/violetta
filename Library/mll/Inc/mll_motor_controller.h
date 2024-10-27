@@ -9,6 +9,7 @@
 #include "mll_position.h"
 #include "msg_format_localizer.h"
 #include "msg_format_motor_controller.h"
+#include "msg_format_motor_controller_internal.h"
 #include "msg_server.h"
 #include "params.h"
 
@@ -25,6 +26,7 @@ class MotorController {
     // msg::MsgFormatImu msg_imu;
     msg::MsgFormatLocalizer msg_localizer;
     msg::MsgFormatMotorController msg_motor_controller;
+    msg::MsgFormatMotorControllerInternal msg_motor_controller_internal;
 
     misc::MouseParams* params;
 

@@ -15,8 +15,6 @@ class CoordinateDirector {
    private:
     CoordinateDirector();
 
-    mll::MazeSolver* maze_solver;
-
     // mll::MouseSectionPosition current_section;
 
     msg::MessageServer* msg_server;
@@ -43,6 +41,7 @@ class CoordinateDirector {
     bool isEnd();
 
     // マウスの現在の区画情報を返す？
+    const MouseSectionPosition getCurrentSection() const;
 
     // マウスの目標区画情報を設定する
     void setTargetSection(MultiplePosition& pos);

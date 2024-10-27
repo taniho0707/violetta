@@ -88,8 +88,8 @@ void Ui::loadOutputStatusTable() {
         .speaker_title = mpl::MusicTitle::RUNSTART,
     };
     output_status_table[static_cast<uint8_t>(UiOutputEffect::DETECT_CRASH)] = {
-        .led_numbers = 0,
-        .led_time = 1000,
+        .led_numbers = static_cast<uint16_t>(hal::LedNumbers::MIDDLE4),
+        .led_time = LED_ON_TIME_MAX,
         .led_freq = 0,
         .speaker_title = mpl::MusicTitle::ERROR,
     };
@@ -173,6 +173,12 @@ void Ui::loadOutputStatusTable() {
         .led_time = 200,
         .led_freq = 1,
         .speaker_title = mpl::MusicTitle::NONE,
+    };
+    output_status_table[static_cast<uint8_t>(UiOutputEffect::DEBUG1)] = {
+        .led_numbers = 0,
+        .led_time = 1000,
+        .led_freq = 0,
+        .speaker_title = mpl::MusicTitle::SIN_A4_SHORT,
     };
 #endif  // MOUSE_LAZULI
 }

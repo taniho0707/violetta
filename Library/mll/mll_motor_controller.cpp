@@ -174,8 +174,13 @@ void mll::MotorController::interruptPeriodic() {
     // cmd::CommandFormatDebugTx cmd_debug_tx = {};
     // cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "%10d, % 5.2f, % 5.2f, % 5.2f, % 5.2f, % 5.2f, % 5.2f, % 5.2f\n",
     //                                  mpl::Timer::getMicroTime(), msg_localizer.position_x, msg_localizer.position_y, msg_localizer.position_theta,
-    //                                  error_vector.x, error_vector.y, error_translation, control_translation);
+    //                                  error_translation, control_translation, integral_translation, integral_rotation);
     // cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+
+    // NOTE: 仮実装、フェイルセーフのため内部値を送信する
+    msg_motor_controller_internal.integral_translation = integral_translation;
+    msg_motor_controller_internal.integral_rotation = integral_rotation;
+    msg_server->sendMessage(msg::ModuleId::MOTORCONTROLLER_INTERNAL, &msg_motor_controller_internal);
 }
 
 mll::MotorController* mll::MotorController::getInstance() {

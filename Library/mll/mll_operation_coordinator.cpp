@@ -93,6 +93,10 @@ OperationCoordinatorResult OperationCoordinator::state() {
     return current_state;
 }
 
+const MouseSectionPosition OperationCoordinator::getCurrentSection() const {
+    return coordinate_director->getCurrentSection();
+}
+
 void OperationCoordinator::resetPosition(const MousePhysicalPosition& position) {
     position_updater->reset(position);
 }
@@ -103,6 +107,16 @@ void OperationCoordinator::interruptPeriodic() {
             position_updater->update();
             break;
         case OperationCoordinatorResult::RUNNING_SEARCH:
+            // モーターのフェイルセーフを検知
+            msg_server->receiveMessage(msg::ModuleId::MOTORCONTROLLER_INTERNAL, &msg_format_motor_controller_internal);
+            if (misc::abs(msg_format_motor_controller_internal.integral_translation) > 100 ||
+                misc::abs(msg_format_motor_controller_internal.integral_rotation) > 30) {
+                current_state = OperationCoordinatorResult::ERROR_MOTOR_FAILSAFE;
+                enabled_motor_control = false;
+                position_updater->reset(MousePhysicalPosition{45, 45, 0});
+                position_updater->reset(MouseVelocity{0, 0});
+                break;
+            }
             // 1動作 (通常は1区画) が完了していれば次の動作を設定する
             if (position_updater->isMoveComplete()) {
                 if (coordinate_director->isEnd()) {

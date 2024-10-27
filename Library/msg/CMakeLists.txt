@@ -20,5 +20,6 @@ else()
         msg_format_localizer.cpp
         msg_format_motor_controller.cpp
         msg_format_wall_analyser.cpp
+        msg_format_motor_controller_internal.cpp
     )
 endif()
