@@ -41,6 +41,8 @@ enum class UiOutputEffect : uint8_t {
     WALL_EXIST_FRONT,     // 前壁あり
     WALL_KABEKIRE_LEFT,   // 左壁切れ検知
     WALL_KABEKIRE_RIGHT,  // 右壁切れ検知
+    // DEBUG
+    DEBUG1,
     // END
     LENGTH,
 };

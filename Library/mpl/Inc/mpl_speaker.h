@@ -68,6 +68,7 @@ enum class MusicTitle : uint16_t {
     SEARCHCOMPLETE,
     PULSE_LOW,
     PULSE_HIGH,
+    SIN_A4_SHORT,
     ERROR,
     LENGTH
 };

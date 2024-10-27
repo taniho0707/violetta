@@ -5,9 +5,12 @@
 //******************************************************************************
 #pragma once
 
+#include "cmd_server.h"
 #include "mll_localizer.h"
 #include "mll_position.h"
 #include "mll_trajectory.h"
+#include "msg_format_wall_analyser.h"
+#include "msg_server.h"
 #include "params.h"
 // #include "msg_server.h"
 
@@ -43,7 +46,12 @@ class PositionUpdater {
     uint32_t start_time;
 
     // msg
-    // msg::MessageServer* msg_server;
+    msg::MessageServer* msg_server;
+    msg::MsgFormatWallAnalyser msg_wall_analyser;
+
+    // cmd
+    cmd::CommandServer* cmd_server;
+    cmd::CommandFormatUiOut cmd_ui_out;
 
     misc::MouseParams* params_cache;
     misc::SlalomParams* slalom_params_cache;

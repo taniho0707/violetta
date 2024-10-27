@@ -94,6 +94,9 @@ void Speaker::initMusicToneItem() {
 
     music_tone[static_cast<uint8_t>(MusicTitle::ERROR)][0] = MusicToneItem({MusicTone::D7, 500});
     music_tone[static_cast<uint8_t>(MusicTitle::ERROR)][1] = MusicToneItem({MusicTone::NONE, 0});
+
+    music_tone[static_cast<uint8_t>(MusicTitle::SIN_A4_SHORT)][0] = MusicToneItem({MusicTone::A4, 50});
+    music_tone[static_cast<uint8_t>(MusicTitle::SIN_A4_SHORT)][1] = MusicToneItem({MusicTone::NONE, 0});
 #endif  // MOUSE_LAZULI
     // clang-format on
 }

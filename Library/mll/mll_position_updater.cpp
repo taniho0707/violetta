@@ -20,8 +20,11 @@ PositionUpdater::PositionUpdater() {
     current_velocity = MouseVelocity{0, 0};
     current_velocity_translation_end = 0.f;
     localizer = Localizer::getInstance();
+    msg_server = msg::MessageServer::getInstance();
+    cmd_server = cmd::CommandServer::getInstance();
 
     // NOTE: スタート位置に初期値を設定
+    // TODO: フェイルセーフ時に速度とcurrent_moveはリセットするが、位置はリセットしないようにしたい
     reset(MousePhysicalPosition{45, 45, 0});
     reset(MouseVelocity{0, 0});
 }
@@ -131,9 +134,23 @@ void PositionUpdater::initMove() {
                             300.f, 0.f);
             current_velocity.rotation = 0.f;
             break;
-        case OperationMoveType::PIVOTTURN:
-            trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID, 100.f, current_move_distance, 0.0f, 15.f, 0);
+        case OperationMoveType::PIVOTTURN_LEFT:
+            trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID, 100.f, current_move_distance, 0.0f, 10.f, 0);
             current_velocity.translation = 0.f;
+            break;
+        case OperationMoveType::PIVOTTURN_RIGHT:
+            trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID, -100.f, current_move_distance, 0.0f, -10.f, 0);
+            current_velocity.translation = 0.f;
+            break;
+        case OperationMoveType::WAIT:
+            start_time = mpl::Timer::getMilliTime();
+            current_velocity.translation = 0.f;
+            current_velocity.rotation = 0.f;
+            break;
+        case OperationMoveType::CORRECTION_FRONT:
+            start_time = mpl::Timer::getMilliTime();
+            current_velocity.translation = 0.f;
+            current_velocity.rotation = 0.f;
             break;
         case OperationMoveType::LENGTH:
         case OperationMoveType::UNDEFINED:
@@ -194,12 +211,33 @@ void PositionUpdater::update() {
             current_velocity.translation = trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time);
             current_velocity.rotation = 0.f;
             break;
-        case OperationMoveType::PIVOTTURN:
+        case OperationMoveType::PIVOTTURN_LEFT:
+            // updateTargetPosition(0, trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time));
+            current_velocity.translation = 0.f;
+            current_velocity.rotation = trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time);
+            break;
+        case OperationMoveType::PIVOTTURN_RIGHT:
             // updateTargetPosition(0, trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time));
             current_velocity.translation = 0.f;
             current_velocity.rotation = trajectory.getVelocity(mpl::Timer::getMilliTime() - start_time);
             break;
         case OperationMoveType::WAIT:
+            // Do nothing
+            break;
+        case OperationMoveType::CORRECTION_FRONT:
+            msg_server->receiveMessage(msg::ModuleId::WALLANALYSER, &msg_wall_analyser);
+            current_velocity.translation = params_cache->wall_position_front_translation_kp * msg_wall_analyser.distance_from_center * (-1.f);
+            current_velocity.rotation = params_cache->wall_position_front_rotation_kp * msg_wall_analyser.angle_from_front;
+            if (current_velocity.translation > 0.f) {
+                current_velocity.translation = misc::min(current_velocity.translation, params_cache->wall_position_front_translation_max);
+            } else {
+                current_velocity.translation = misc::max(current_velocity.translation, -params_cache->wall_position_front_translation_max);
+            }
+            if (current_velocity.rotation > 0.f) {
+                current_velocity.rotation = misc::min(current_velocity.rotation, params_cache->wall_position_front_rotation_max);
+            } else {
+                current_velocity.rotation = misc::max(current_velocity.rotation, -params_cache->wall_position_front_rotation_max);
+            }
             break;
         case OperationMoveType::LENGTH:
         case OperationMoveType::UNDEFINED:
@@ -227,8 +265,23 @@ bool PositionUpdater::isMoveComplete() {
     // TODO: trajectory.isEnd の境界条件を確認しておく
     if (current_move == OperationMoveType::STOP) {
         return true;
+    } else if (current_move == OperationMoveType::WAIT) {
+        if (last_update_time - start_time >= current_move_distance) {
+            return true;
+        } else {
+            return false;
+        }
+    } else if (current_move == OperationMoveType::CORRECTION_FRONT) {
+        if (misc::abs(current_velocity.translation) <= 0.1f && misc::abs(current_velocity.rotation) <= 0.1f) {
+            cmd_ui_out.type = mll::UiOutputEffect::DEBUG1;
+            cmd_server->push(cmd::CommandId::UI_OUT, &cmd_ui_out);
+            return true;
+        } else {
+            return false;
+        }
     } else if (current_move == OperationMoveType::TRAPACCEL || current_move == OperationMoveType::TRAPACCEL_STOP ||
-               current_move == OperationMoveType::PIVOTTURN || current_move == OperationMoveType::WAIT) {  // スラローム以外で動作中の場合
+               current_move == OperationMoveType::PIVOTTURN_LEFT || current_move == OperationMoveType::PIVOTTURN_RIGHT ||
+               current_move == OperationMoveType::WAIT) {  // スラローム以外で動作中の場合
         return trajectory.isEnd(last_update_time - start_time);
     } else if (slalom_state == SlalomState::END) {  // スラロームで動作中の場合
         return true;

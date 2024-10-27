@@ -57,7 +57,7 @@ Status ParamtuneMotorActivity::run() {
             break;
         case act::MotorParameterTuneType::PIVOTTURN:
             moves[moves_length++] = mll::OperationMoveCombination{
-                .type = mll::OperationMoveType::PIVOTTURN,
+                .type = mll::OperationMoveType::PIVOTTURN_LEFT,
                 .distance = 2 * misc::PI * 5,
             };
             break;
@@ -120,21 +120,21 @@ Status ParamtuneMotorActivity::run() {
         message->receiveMessage(msg::ModuleId::MOTORCONTROLLER, &msg_motor_controller);
         message->receiveMessage(msg::ModuleId::MOTOR, &msg_motor);
 
-        // clang-format off
-        // Time, EncLeft, EncRight, Gyro, AccX, AccY, AccZ, DutyL, DutyR, MotorControl, VelTrans, VelRot
-        cmd_debug_tx.len = debug->format(
-            cmd_debug_tx.message,
-            "%10d,% 7.2f,% 7.2f,% 8.2f, % 6.1f, % 6.1f, % 6.1f,"
-            "% 8.2f,% 8.2f,%s,% 6.2f,% 6.2f\n",
-            mpl::Timer::getMicroTime(), msg_encoder.left, msg_encoder.right,
-            msg_imu.gyro_yaw,
-            msg_imu.acc_x / 1000, msg_imu.acc_y / 1000, msg_imu.acc_z / 1000,
-            msg_motor.duty_l, msg_motor.duty_r,
-            (msg_motor_controller.is_controlled ? "ON " : "OFF"),
-            msg_motor_controller.velocity_translation, msg_motor_controller.velocity_rotation
-            );
-        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
-        // clang-format on
+        // // clang-format off
+        // // Time, EncLeft, EncRight, Gyro, AccX, AccY, AccZ, DutyL, DutyR, MotorControl, VelTrans, VelRot
+        // cmd_debug_tx.len = debug->format(
+        //     cmd_debug_tx.message,
+        //     "%10d,% 7.2f,% 7.2f,% 8.2f, % 6.1f, % 6.1f, % 6.1f,"
+        //     "% 8.2f,% 8.2f,%s,% 6.2f,% 6.2f\n",
+        //     mpl::Timer::getMicroTime(), msg_encoder.left, msg_encoder.right,
+        //     msg_imu.gyro_yaw,
+        //     msg_imu.acc_x / 1000, msg_imu.acc_y / 1000, msg_imu.acc_z / 1000,
+        //     msg_motor.duty_l, msg_motor.duty_r,
+        //     (msg_motor_controller.is_controlled ? "ON " : "OFF"),
+        //     msg_motor_controller.velocity_translation, msg_motor_controller.velocity_rotation
+        //     );
+        // cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+        // // clang-format on
 
         auto state = operation_coordinator->state();
         if (state != mll::OperationCoordinatorResult::RUNNING_SPECIFIC) {

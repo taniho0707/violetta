@@ -12,7 +12,6 @@
 using namespace mll;
 
 CoordinateDirector::CoordinateDirector() {
-    maze_solver = MazeSolver::getInstance();
     current_section = MouseSectionPosition{0, 1, CardinalDirection::NORTH};
     msg_server = msg::MessageServer::getInstance();
     solver = mll::MazeSolver::getInstance();
@@ -61,11 +60,25 @@ void CoordinateDirector::getNextMove(OperationMoveCombination* moves, uint16_t& 
             current_section.move(OperationMoveType::SLALOM90SML_RIGHT);
             break;
         case FirstPersonDirection::BACK:
-            moves[0] = OperationMoveCombination{OperationMoveType::TRAPACCEL_STOP, 45.f};
-            moves[1] = OperationMoveCombination{OperationMoveType::PIVOTTURN, misc::PI};
-            moves[2] = OperationMoveCombination{OperationMoveType::TRAPACCEL, 45.f};
-            length = 3;
-            current_section.move(OperationMoveType::PIVOTTURN);
+            uint8_t i = 0;
+            moves[i++] = OperationMoveCombination{OperationMoveType::TRAPACCEL_STOP, 45.f};
+            if (msg_wall_analyzer.front_wall.isExistWall(FirstPersonDirection::FRONT)) {
+                moves[i++] = OperationMoveCombination{OperationMoveType::CORRECTION_FRONT, 0.f};
+            }
+            if (msg_wall_analyzer.front_wall.isExistWall(FirstPersonDirection::LEFT)) {
+                moves[i++] = OperationMoveCombination{OperationMoveType::PIVOTTURN_LEFT, misc::PI / 2};
+                moves[i++] = OperationMoveCombination{OperationMoveType::CORRECTION_FRONT, 0.f};
+                moves[i++] = OperationMoveCombination{OperationMoveType::PIVOTTURN_LEFT, misc::PI / 2};
+            } else if (msg_wall_analyzer.front_wall.isExistWall(FirstPersonDirection::RIGHT)) {
+                moves[i++] = OperationMoveCombination{OperationMoveType::PIVOTTURN_RIGHT, misc::PI / 2};
+                moves[i++] = OperationMoveCombination{OperationMoveType::CORRECTION_FRONT, 0.f};
+                moves[i++] = OperationMoveCombination{OperationMoveType::PIVOTTURN_RIGHT, misc::PI / 2};
+            } else {
+                moves[i++] = OperationMoveCombination{OperationMoveType::PIVOTTURN_LEFT, misc::PI};
+            }
+            moves[i++] = OperationMoveCombination{OperationMoveType::TRAPACCEL, 45.f};
+            length = i;
+            current_section.move(OperationMoveType::PIVOTTURN_LEFT);
             break;
     }
     return;
@@ -84,6 +97,10 @@ bool CoordinateDirector::isEnd() {
     } else {
         return false;
     }
+}
+
+const MouseSectionPosition CoordinateDirector::getCurrentSection() const {
+    return current_section;
 }
 
 void CoordinateDirector::setTargetSection(MultiplePosition& pos) {

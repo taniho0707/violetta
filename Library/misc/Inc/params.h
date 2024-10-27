@@ -105,6 +105,12 @@ struct MouseParams {
 
     float complementary_filter_constant;  // 相補フィルタの定数 1.0の場合100%エンコーダ [1] (0.0 ～ 1.0)
 
+    // 壁位置補正
+    float wall_position_front_translation_kp;   // 前壁距離補正の P ゲイン [1]
+    float wall_position_front_rotation_kp;      // 前壁角度補正の P ゲイン [1]
+    float wall_position_front_translation_max;  // 前壁距離補正の最大速度 [mm/s]
+    float wall_position_front_rotation_max;     // 前壁角度補正の最大角速度 [rad/s]
+
     // Wall Sensor
     uint16_t wallsensor_turnon;                  // 壁センサLEDの立ち上がり待ち時間 [ns]
     uint16_t wallsensor_exist_threshold[6];      // 壁センサの壁有無判定閾値 [1]
