@@ -109,8 +109,8 @@ void OperationCoordinator::interruptPeriodic() {
         case OperationCoordinatorResult::RUNNING_SEARCH:
             // モーターのフェイルセーフを検知
             msg_server->receiveMessage(msg::ModuleId::MOTORCONTROLLER_INTERNAL, &msg_format_motor_controller_internal);
-            if (misc::abs(msg_format_motor_controller_internal.integral_translation) > 100 ||
-                misc::abs(msg_format_motor_controller_internal.integral_rotation) > 30) {
+            if (misc::abs(msg_format_motor_controller_internal.integral_translation) > 10000 ||
+                misc::abs(msg_format_motor_controller_internal.integral_rotation) > 300) {
                 current_state = OperationCoordinatorResult::ERROR_MOTOR_FAILSAFE;
                 enabled_motor_control = false;
                 position_updater->reset(MousePhysicalPosition{45, 45, 0});

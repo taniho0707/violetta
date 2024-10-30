@@ -281,11 +281,19 @@ hal::HalStatus hal::setMotorDutyR(float duty) {
 #endif  // ifdef MOUSE_VIOLETTA
 
 #ifdef MOUSE_LAZULI
-    if (duty >= 0.f && duty <= 1.f) {
-        LL_TIM_OC_SetCompareCH1(TIM2, (uint32_t)((duty) * (MOTOR_TIMER_MAXCOUNT - 1)));
+    // NOTE: モーターがギリギリ回転しないDuty (バッテリー満タン) を指定
+    // constexpr float MOTOR_DUTY_MIN = 0.117f;
+    constexpr float MOTOR_DUTY_MIN = 0.117f;
+    constexpr float MOTOR_DUTY_WIDTH = 1.0f - MOTOR_DUTY_MIN;
+    float adjusted_duty = MOTOR_DUTY_WIDTH * duty;
+    if (duty == 0.f) {
+        LL_TIM_OC_SetCompareCH1(TIM2, 0);
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_1);
+    } else if (duty >= 0.f && duty <= 1.f) {
+        LL_TIM_OC_SetCompareCH1(TIM2, (uint32_t)((adjusted_duty + MOTOR_DUTY_MIN) * (MOTOR_TIMER_MAXCOUNT - 1)));
         LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_1);
     } else if (duty < 0.f && duty >= -1.f) {
-        LL_TIM_OC_SetCompareCH1(TIM2, (uint32_t)((-1 * duty) * (MOTOR_TIMER_MAXCOUNT - 1)));
+        LL_TIM_OC_SetCompareCH1(TIM2, (uint32_t)((-1 * adjusted_duty + MOTOR_DUTY_MIN) * (MOTOR_TIMER_MAXCOUNT - 1)));
         LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_1);
     } else {
         return hal::HalStatus::INVALID_PARAMS;
@@ -318,11 +326,19 @@ hal::HalStatus hal::setMotorDutyL(float duty) {
 #endif  // ifdef MOUSE_VIOLETTA
 
 #ifdef MOUSE_LAZULI
-    if (duty >= 0.f && duty <= 1.f) {
-        LL_TIM_OC_SetCompareCH2(TIM2, (uint32_t)((duty) * (MOTOR_TIMER_MAXCOUNT - 1)));
+    // NOTE: モーターがギリギリ回転しないDuty (バッテリー満タン) を指定
+    // constexpr float MOTOR_DUTY_MIN = 0.105f;
+    constexpr float MOTOR_DUTY_MIN = 0.105f;
+    constexpr float MOTOR_DUTY_WIDTH = 1.0f - MOTOR_DUTY_MIN;
+    float adjusted_duty = MOTOR_DUTY_WIDTH * duty;
+    if (duty == 0.f) {
+        LL_TIM_OC_SetCompareCH2(TIM2, 0);
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_2);
+    } else if (duty >= 0.f && duty <= 1.f) {
+        LL_TIM_OC_SetCompareCH2(TIM2, (uint32_t)((adjusted_duty + MOTOR_DUTY_MIN) * (MOTOR_TIMER_MAXCOUNT - 1)));
         LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_2);
     } else if (duty < 0.f && duty >= -1.f) {
-        LL_TIM_OC_SetCompareCH2(TIM2, (uint32_t)((-1 * duty) * (MOTOR_TIMER_MAXCOUNT - 1)));
+        LL_TIM_OC_SetCompareCH2(TIM2, (uint32_t)((-1 * adjusted_duty + MOTOR_DUTY_MIN) * (MOTOR_TIMER_MAXCOUNT - 1)));
         LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_2);
     } else {
         return hal::HalStatus::INVALID_PARAMS;
