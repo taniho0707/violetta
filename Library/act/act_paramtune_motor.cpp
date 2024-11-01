@@ -60,6 +60,38 @@ Status ParamtuneMotorActivity::run() {
                 .type = mll::OperationMoveType::PIVOTTURN_LEFT,
                 .distance = 2 * misc::PI * 5,
             };
+            moves[moves_length++] = mll::OperationMoveCombination{
+                .type = mll::OperationMoveType::WAIT,
+                .distance = 2000,
+            };
+            moves[moves_length++] = mll::OperationMoveCombination{
+                .type = mll::OperationMoveType::PIVOTTURN_LEFT,
+                .distance = 2 * misc::PI * 1,
+            };
+            moves[moves_length++] = mll::OperationMoveCombination{
+                .type = mll::OperationMoveType::WAIT,
+                .distance = 2000,
+            };
+            moves[moves_length++] = mll::OperationMoveCombination{
+                .type = mll::OperationMoveType::PIVOTTURN_LEFT,
+                .distance = 2 * misc::PI * 1,
+            };
+            moves[moves_length++] = mll::OperationMoveCombination{
+                .type = mll::OperationMoveType::WAIT,
+                .distance = 2000,
+            };
+            moves[moves_length++] = mll::OperationMoveCombination{
+                .type = mll::OperationMoveType::PIVOTTURN_LEFT,
+                .distance = 2 * misc::PI * 1,
+            };
+            moves[moves_length++] = mll::OperationMoveCombination{
+                .type = mll::OperationMoveType::WAIT,
+                .distance = 2000,
+            };
+            moves[moves_length++] = mll::OperationMoveCombination{
+                .type = mll::OperationMoveType::PIVOTTURN_RIGHT,
+                .distance = 2 * misc::PI * 5,
+            };
             break;
         case act::MotorParameterTuneType::STAY:
             break;

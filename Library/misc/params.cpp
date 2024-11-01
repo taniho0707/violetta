@@ -82,7 +82,7 @@ bool Params::load(ParameterDestinationType from) {
             cache.imu_offset_acceleration_x = 17.f;        // 横方向
             cache.imu_offset_acceleration_y = 55.f;        // 前方向
             cache.imu_offset_acceleration_z = -160.f;      // 下方向
-            cache.imu_sensitivity_gyro_yaw = 0.14123;      // 0.140;        // 140 mdps/LSB
+            cache.imu_sensitivity_gyro_yaw = 0.1408;       // 0.140;        // 140 mdps/LSB
             cache.imu_sensitivity_gyro_pitch = 0.140;      // 140 mdps/LSB
             cache.imu_sensitivity_gyro_roll = 0.140;       // 140 mdps/LSB
             cache.imu_offset_gyro_yaw = 0;
@@ -188,17 +188,17 @@ bool Params::loadSlalom(ParameterDestinationType from) {
             // 300mm/s
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_before = 20;
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_after = 40;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].acc_rad = 1000;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].acc_rad = 300;
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].max_v_rad = 15;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].deg = misc::PI / 2 + 0.15;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].const_deg = misc::PI / 6;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].deg = misc::PI / 2 + 0.05;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].const_deg = misc::PI / 5;
 
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].d_before = 20;
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].d_after = 40;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].acc_rad = 1000;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].acc_rad = 300;
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].max_v_rad = 15;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].deg = misc::PI / 2 + 0.15;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].const_deg = misc::PI / 6;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].deg = misc::PI / 2;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].const_deg = misc::PI / 5;
 #endif  // MOUSE_LAZULI
             return false;
         case ParameterDestinationType::INTERNAL_FLASH:
