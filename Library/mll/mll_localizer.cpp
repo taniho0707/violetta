@@ -155,7 +155,7 @@ void mll::Localizer::interruptPeriodic() {
     float dif_x = encoder_status.position_translation * sin(current_status.position_theta);
     float dif_y = encoder_status.position_translation * cos(current_status.position_theta);
 #endif
-    current_status.position_x += dif_x;
+    current_status.position_x -= dif_x;
     current_status.position_y += dif_y;
 
     // TODO: 壁センサの値を使って距離を補正
