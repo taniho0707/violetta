@@ -13,7 +13,6 @@
 
 #ifdef STM32C011xx
 #include "stm32c0xx_ll_bus.h"
-#include "stm32c0xx_ll_pwr.h"
 #include "stm32c0xx_ll_rcc.h"
 #include "stm32c0xx_ll_system.h"
 #include "stm32c0xx_ll_utils.h"
@@ -81,7 +80,7 @@ int main(void) {
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
 
 #ifdef MOUSE_LAZULI_SENSOR
-    auto activity = act::Manager(act::Activities::WALLSENSOR_RUN);
+    auto activity = act::Manager(act::Activities::WALLSENSOR_RUN, act::ActivityTransitionMode::MANUAL);
     activity.run();
 #else
     // auto activity = act::Manager(act::Activities::DEBUG);

@@ -289,7 +289,7 @@ hal::HalStatus hal::initWallSensorPort() {
     SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
     SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
     SPI_InitStruct.CRCPoly = 7;
-    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV8;
+    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV4;
     LL_SPI_Init(SPI1, &SPI_InitStruct);
     LL_SPI_SetStandard(SPI1, LL_SPI_PROTOCOL_MOTOROLA);
     LL_SPI_DisableNSSPulseMgt(SPI1);

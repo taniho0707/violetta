@@ -39,6 +39,8 @@ Manager::Manager(Activities first_activity, ActivityTransitionMode transition_mo
     params.velocity_turn = 300;   // 探索速度初期値
 
     activity[static_cast<uint8_t>(Activities::NONE)] = new NoneActivity();
+
+#ifndef MOUSE_LAZULI_SENSOR
     activity[static_cast<uint8_t>(Activities::INITIALIZE)] = new InitializeActivity();
     activity[static_cast<uint8_t>(Activities::SEARCH)] = new SearchActivity();
     activity[static_cast<uint8_t>(Activities::SHORTRUN)] = new ShortrunActivity();
@@ -48,9 +50,13 @@ Manager::Manager(Activities first_activity, ActivityTransitionMode transition_mo
     activity[static_cast<uint8_t>(Activities::DEBUG)] = new DebugActivity();
     activity[static_cast<uint8_t>(Activities::WALLSENSOR_CHECK)] = new WallsensorCheckActivity();
     activity[static_cast<uint8_t>(Activities::ENKAIGEI)] = new EnkaigeiActivity();
-    activity[static_cast<uint8_t>(Activities::WALLSENSOR_RUN)] = new WallsensorRunActivity();
     activity[static_cast<uint8_t>(Activities::STANDBY)] = new StandbyActivity();
     activity[static_cast<uint8_t>(Activities::SYSTEM_IDENTIFICATION)] = new SystemIdentificationActivity();
+#endif  // ifndef MOUSE_LAZULI_SENSOR
+
+#ifdef MOUSE_LAZULI_SENSOR
+    activity[static_cast<uint8_t>(Activities::WALLSENSOR_RUN)] = new WallsensorRunActivity();
+#endif  // ifdef MOUSE_LAZULI_SENSOR
 }
 
 IActivity* Manager::nextActivity(Activities next_activity) {

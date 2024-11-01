@@ -29,15 +29,22 @@ class WallAnalyser {
     uint16_t sensor_buffer_frontright[WALLANALYSER_BUFFER_LENGTH];
     uint8_t sensor_buffer_index;  // 指し示している先が最新、一つ若い数字が一つ前のデータ
 
+    uint16_t sensor_buffer_average[5];
+
     void incrementSensorBufferIndex();
     uint8_t previousSensorBufferIndex();
+
+    uint16_t calcSensorBufferAverageSingle(hal::WallSensorNumbers sensor_number);
 
    public:
     void init();
 
     void interruptPeriodic();
 
+    void updateSensorBufferAverage();
+
     uint16_t getNextSensorBufferSingle(hal::WallSensorNumbers sensor_number);
+    uint16_t getNextSensorBufferAverage(hal::WallSensorNumbers sensor_number);
 
     static WallAnalyser* getInstance();
 };

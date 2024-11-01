@@ -68,10 +68,12 @@ void SPI1_IRQHandler() {
 
     if (LL_SPI_IsActiveFlag_RXNE(SPI1)) {
         // TODO: hal 層に移管する
-        auto hoge = LL_SPI_ReceiveData16(SPI1);  // dummy read
+        LL_SPI_ReceiveData16(SPI1);  // dummy read
 
         // バッファ内を送信し、次の Tx バッファに古いデータをセットする
-        uint16_t data = wallanalyser->getNextSensorBufferSingle(sensor_number);
+        // uint16_t data = wallanalyser->getNextSensorBufferSingle(sensor_number);
+        uint16_t data = wallanalyser->getNextSensorBufferAverage(sensor_number);
+
         uint16_t combined_data = (static_cast<uint16_t>(sensor_number) << 12) | data;
         hal::sendWallSensorDataSpiSync(combined_data);
         sensor_number = static_cast<hal::WallSensorNumbers>((static_cast<uint16_t>(sensor_number) + 1) % WALLSENSOR_NUMS);

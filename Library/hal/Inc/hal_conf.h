@@ -183,6 +183,11 @@ enum class InternalFlashSector : uint8_t {
 #endif  // ifdef MOUSE_LAZULI
 
 #ifdef MOUSE_LAZULI_SENSOR
+#define LED_NUMS 0
+enum class LedNumbers : uint8_t {
+    ALL = 255,
+};
+
 const uint32_t TIMER_COUNT_INTERVAL = 250;  // [us]
 const uint32_t TIMER_COUNT_MAX = 12500;     // 1 カウントあたり ? [us] = ? [ns]
 

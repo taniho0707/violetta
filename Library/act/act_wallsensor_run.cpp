@@ -5,8 +5,7 @@
 //******************************************************************************
 #include "act_wallsensor_run.h"
 
-#include "hal_wallsensor.h"
-#include "mll_wall_analyser.h"
+#include "mll_wall_analyser_lazulisensor.h"
 #include "mpl_wallsensor.h"
 #include "msg_format_wall_analyser.h"
 #include "msg_server.h"
@@ -19,8 +18,6 @@ void WallsensorRunActivity::init(ActivityParameters &params) {}
 #ifdef MOUSE_LAZULI_SENSOR
 Status WallsensorRunActivity::run() {
     auto message = msg::MessageServer::getInstance();
-    msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
-    msg::MsgFormatWallAnalyser msg_wallanalyser = msg::MsgFormatWallAnalyser();
 
     auto wallsensor = mpl::WallSensor::getInstance();
     wallsensor->initPort();

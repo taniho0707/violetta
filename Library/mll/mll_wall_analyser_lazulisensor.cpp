@@ -50,6 +50,8 @@ void WallAnalyser::interruptPeriodic() {
     sensor_buffer_frontright[next_sensor_buffer_index] = msg_wallsensor.frontright;
     incrementSensorBufferIndex();
 
+    updateSensorBufferAverage();
+
     // TODO: 1ms 未満の間隔のデータに対して入れるフィルタを実装
 
     // // FIXME: うまいこといかない
@@ -65,6 +67,40 @@ void WallAnalyser::interruptPeriodic() {
     // }
 }
 
+uint16_t WallAnalyser::calcSensorBufferAverageSingle(hal::WallSensorNumbers sensor_number) {
+    uint32_t sum = 0;
+    for (uint8_t i = 0; i < WALLANALYSER_BUFFER_LENGTH; i++) {
+        switch (sensor_number) {
+            case hal::WallSensorNumbers::FRONTLEFT:
+                sum += sensor_buffer_frontleft[i];
+                break;
+            case hal::WallSensorNumbers::LEFT:
+                sum += sensor_buffer_left[i];
+                break;
+            case hal::WallSensorNumbers::CENTER:
+                sum += sensor_buffer_center[i];
+                break;
+            case hal::WallSensorNumbers::RIGHT:
+                sum += sensor_buffer_right[i];
+                break;
+            case hal::WallSensorNumbers::FRONTRIGHT:
+                sum += sensor_buffer_frontright[i];
+                break;
+            default:
+                break;
+        }
+    }
+    return uint16_t(sum / WALLANALYSER_BUFFER_LENGTH);
+}
+
+void WallAnalyser::updateSensorBufferAverage() {
+    sensor_buffer_average[0] = calcSensorBufferAverageSingle(hal::WallSensorNumbers::FRONTLEFT);
+    sensor_buffer_average[1] = calcSensorBufferAverageSingle(hal::WallSensorNumbers::LEFT);
+    sensor_buffer_average[2] = calcSensorBufferAverageSingle(hal::WallSensorNumbers::CENTER);
+    sensor_buffer_average[3] = calcSensorBufferAverageSingle(hal::WallSensorNumbers::RIGHT);
+    sensor_buffer_average[4] = calcSensorBufferAverageSingle(hal::WallSensorNumbers::FRONTRIGHT);
+}
+
 uint16_t WallAnalyser::getNextSensorBufferSingle(hal::WallSensorNumbers sensor_number) {
     switch (sensor_number) {
         case hal::WallSensorNumbers::FRONTLEFT:
@@ -77,6 +113,23 @@ uint16_t WallAnalyser::getNextSensorBufferSingle(hal::WallSensorNumbers sensor_n
             return sensor_buffer_right[sensor_buffer_index];
         case hal::WallSensorNumbers::FRONTRIGHT:
             return sensor_buffer_frontright[sensor_buffer_index];
+        default:
+            return 0;
+    }
+}
+
+uint16_t WallAnalyser::getNextSensorBufferAverage(hal::WallSensorNumbers sensor_number) {
+    switch (sensor_number) {
+        case hal::WallSensorNumbers::FRONTLEFT:
+            return sensor_buffer_average[0];
+        case hal::WallSensorNumbers::LEFT:
+            return sensor_buffer_average[1];
+        case hal::WallSensorNumbers::CENTER:
+            return sensor_buffer_average[2];
+        case hal::WallSensorNumbers::RIGHT:
+            return sensor_buffer_average[3];
+        case hal::WallSensorNumbers::FRONTRIGHT:
+            return sensor_buffer_average[4];
         default:
             return 0;
     }
