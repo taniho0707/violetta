@@ -77,7 +77,7 @@ T average(T* array, uint16_t len) {
 
 template <typename T>
 T abs(T a) {
-    return a < 0 ? -a : a;
+    return a < 0 ? -1 * a : a;
 }
 
 template <typename T>

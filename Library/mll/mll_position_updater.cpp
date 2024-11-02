@@ -7,13 +7,14 @@
 
 #include "mll_operation_move_type.h"
 #include "mpl_timer.h"
+#include "msg_format_wallsensor.h"
 
 using namespace mll;
 
 PositionUpdater::PositionUpdater() {
     params_cache = misc::Params::getInstance()->getCachePointer();
     // FIXME: 複数の速度に対応、パラメータからの読み出し
-    slalom_params_cache = misc::Params::getInstance()->getCacheSlalomPointer(300);
+    slalom_params_cache = misc::Params::getInstance()->getCacheSlalomPointer(250);
     trajectory = Trajectory();
     current_move = OperationMoveType::STOP;
     current_move_distance = 0.f;
@@ -53,6 +54,13 @@ void PositionUpdater::initSlalom(const float rightleft) {
     slalom_state = SlalomState::BEFORE;
     slalom_rightleft = rightleft;
     slalom_move_distance = 0.f;
+
+    if (slalom_front_control) {
+        msg_server->receiveMessage(msg::ModuleId::WALLANALYSER, &msg_wall_analyser);
+        if (!msg_wall_analyser.front_wall.isExistWall(FirstPersonDirection::FRONT)) {
+            slalom_front_control = false;
+        }
+    }
 }
 
 void PositionUpdater::runSlalom() {
@@ -60,9 +68,22 @@ void PositionUpdater::runSlalom() {
         current_velocity.rotation = 0;
         updateTargetPosition(current_velocity.translation, 0);
         slalom_move_distance += current_velocity.translation * 0.001f;
-        if (slalom_move_distance >= slalom_params_cache[static_cast<uint8_t>(current_move)].d_before) {
-            slalom_start_time = mpl::Timer::getMilliTime();
-            slalom_state = SlalomState::TURN;
+        if (slalom_front_control) {
+            msg::MsgFormatWallsensor msg_wallsensor;
+            msg_server->receiveMessage(msg::ModuleId::WALLSENSOR, &msg_wallsensor);
+#ifdef MOUSE_LAZULI
+            if (msg_wallsensor.center > params_cache->wallsensor_slalom_front_control) {
+#else
+            static_assert(false, "Not implemented");
+#endif
+                slalom_start_time = mpl::Timer::getMilliTime();
+                slalom_state = SlalomState::TURN;
+            }
+        } else {
+            if (slalom_move_distance >= slalom_params_cache[static_cast<uint8_t>(current_move)].d_before) {
+                slalom_start_time = mpl::Timer::getMilliTime();
+                slalom_state = SlalomState::TURN;
+            }
         }
     }
     if (slalom_state == SlalomState::TURN) {
@@ -126,12 +147,12 @@ void PositionUpdater::initMove() {
         case OperationMoveType::TRAPACCEL:
             // FIXME: 最高速、終端速を適切にする
             trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID, 2000.f, current_move_distance, current_velocity.translation,
-                            300.f, 300.f);
+                            250.f, 250.f);
             current_velocity.rotation = 0.f;
             break;
         case OperationMoveType::TRAPACCEL_STOP:
             trajectory.init(TrajectoryCalcType::TIME, TrajectoryFormType::TRAPEZOID, 2000.f, current_move_distance, current_velocity.translation,
-                            300.f, 0.f);
+                            250.f, 0.f);
             current_velocity.rotation = 0.f;
             break;
         case OperationMoveType::PIVOTTURN_LEFT:
@@ -226,17 +247,23 @@ void PositionUpdater::update() {
             break;
         case OperationMoveType::CORRECTION_FRONT:
             msg_server->receiveMessage(msg::ModuleId::WALLANALYSER, &msg_wall_analyser);
-            current_velocity.translation = params_cache->wall_position_front_translation_kp * msg_wall_analyser.distance_from_center * (-1.f);
-            current_velocity.rotation = params_cache->wall_position_front_rotation_kp * msg_wall_analyser.angle_from_front;
+            current_velocity.translation = params_cache->wall_position_front_translation_kp * msg_wall_analyser.distance_from_front * (-1.f);
+            // 前後方向の補正が完了してから角度補正を行う
+            if (misc::abs(current_velocity.translation) <= 0.1f) {
+                current_velocity.rotation = params_cache->wall_position_front_rotation_kp * msg_wall_analyser.angle_from_front;
+            } else {
+                current_velocity.rotation = 0.f;
+            }
+
             if (current_velocity.translation > 0.f) {
                 current_velocity.translation = misc::min(current_velocity.translation, params_cache->wall_position_front_translation_max);
             } else {
-                current_velocity.translation = misc::max(current_velocity.translation, -params_cache->wall_position_front_translation_max);
+                current_velocity.translation = misc::max(current_velocity.translation, -1 * params_cache->wall_position_front_translation_max);
             }
             if (current_velocity.rotation > 0.f) {
                 current_velocity.rotation = misc::min(current_velocity.rotation, params_cache->wall_position_front_rotation_max);
             } else {
-                current_velocity.rotation = misc::max(current_velocity.rotation, -params_cache->wall_position_front_rotation_max);
+                current_velocity.rotation = misc::max(current_velocity.rotation, -1 * params_cache->wall_position_front_rotation_max);
             }
             break;
         case OperationMoveType::LENGTH:
@@ -290,10 +317,13 @@ bool PositionUpdater::isMoveComplete() {
     }
 }
 
-void PositionUpdater::setNextMove(const OperationMoveType move, const float distance) {
+void PositionUpdater::setNextMove(const OperationMoveType move, const float distance, const bool slalom_front_control_flag) {
     current_move = move;
     current_move_distance = distance;
     start_physical_position = target_physical_position;
+    if (slalom_front_control_flag) {
+        slalom_front_control = true;
+    }
     start_time = mpl::Timer::getMilliTime();
     initMove();
 }

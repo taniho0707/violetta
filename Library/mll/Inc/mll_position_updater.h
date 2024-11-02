@@ -34,6 +34,7 @@ class PositionUpdater {
     // スラローム用の内部パラメータ
     float slalom_start_time;     // ターンを開始した時刻 [ms]
     float slalom_move_distance;  // 直線距離のカウント用 [mm]
+    bool slalom_front_control;   // スラロームの前壁制御を有効にするかどうか
 
     // マウスの目標物理座標
     MousePhysicalPosition target_physical_position;
@@ -88,7 +89,8 @@ class PositionUpdater {
 
     // マウスの次の一動作を設定する
     // 動作が完了していない場合は、現在の動作を上書きする？
-    void setNextMove(const OperationMoveType move, const float distance);
+    // NOTE: 引数 slalom_front_control が有効の時、前壁がありそうなら前壁制御をする
+    void setNextMove(const OperationMoveType move, const float distance, const bool slalom_front_control_flag = false);
 
     // パラメータをリセットし、目標物理座標を強制的に上書きする
     void reset(const MousePhysicalPosition& position);

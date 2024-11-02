@@ -125,10 +125,10 @@ void OperationCoordinator::interruptPeriodic() {
                 } else if (moves_current_index >= moves_current_length) {
                     moves_current_index = 0;
                     coordinate_director->getNextMove(moves, moves_current_length);
-                    position_updater->setNextMove(moves[moves_current_index].type, moves[moves_current_index].distance);
+                    position_updater->setNextMove(moves[moves_current_index].type, moves[moves_current_index].distance, true);
                     moves_current_index++;
                 } else {
-                    position_updater->setNextMove(moves[moves_current_index].type, moves[moves_current_index].distance);
+                    position_updater->setNextMove(moves[moves_current_index].type, moves[moves_current_index].distance, true);
                     moves_current_index++;
                 }
             }
@@ -142,7 +142,7 @@ void OperationCoordinator::interruptPeriodic() {
                 if (moves_current_index >= moves_current_length) {
                     current_state = OperationCoordinatorResult::IDLE_WITH_MOTOR_CONTROL;
                 } else {
-                    position_updater->setNextMove(moves[moves_current_index].type, moves[moves_current_index].distance);
+                    position_updater->setNextMove(moves[moves_current_index].type, moves[moves_current_index].distance, false);
                 }
                 moves_current_index++;
             }

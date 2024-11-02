@@ -29,7 +29,7 @@ Status DebugActivity::run() {
 
     auto debug = mpl::Debug::getInstance();
     // clang-format off
-        cmd_debug_tx.len = debug->format(cmd_debug_tx.message, 
+        cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
             "time, motorL, motorR, motorCurrentL, motorCurrentR, motorS, wallFL, wallL, wallC, wallR, wallFR,"
             "encL, encR, distC, distF, kabekireL, kabekireR, targetVT, targetVR, currentVT, currentVR,"
             "posX, posY, posT, gyroY, accX, accY, accZ, battery\n"
@@ -41,12 +41,12 @@ Status DebugActivity::run() {
     for (int i = 0; i < ALL_LOG_LENGTH; ++i) {
         logger->read(logconfig, i, &log_data);
         // clang-format off
-        cmd_debug_tx.len = debug->format(cmd_debug_tx.message, 
+        cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
             "%12d,%6.3f,%6.3f,"
             "%7.5f,%7.5f,%6.3f,"
             "%5.2f,%5.2f,"
             "%d,%d,%d,%d,%d,"
-            "%4.1f,%4.1f,"
+            "%4.1f,%4.1f,%4.1f,"
             "%d,%d,"
             "%6.3f,%6.2f,%6.3f,%6.2f,"
             "%7.4f,%7.4f,%6.2f,"
@@ -54,8 +54,8 @@ Status DebugActivity::run() {
             log_data.time, log_data.motor_left, log_data.motor_right,
             log_data.motor_current_left, log_data.motor_current_right, log_data.motor_suction,
             log_data.encoder_left, log_data.encoder_right,
-            log_data.wallsensor_frontleft, log_data.wallsensor_left, log_data.wallsensor_center, log_data.wallsensor_right, log_data.wallsensor_frontright,
-            log_data.distance_from_center, log_data.distance_from_front,
+            log_data.wallsensor_frontleft, log_data.wallsensor_left, log_data.wallsensor_center, log_data.wallsensor_right,
+            log_data.wallsensor_frontright, log_data.distance_from_center, log_data.distance_from_front, log_data.angle_from_front,
             log_data.kabekire_left, log_data.kabekire_right,
             log_data.target_v_translation, log_data.target_v_rotation, log_data.current_v_translation, log_data.current_v_rotation,
             log_data.position_x, log_data.position_y, log_data.position_theta,
@@ -65,8 +65,42 @@ Status DebugActivity::run() {
         cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
         mpl::Timer::sleepMs(1);  // TODO: 様子見で削除する
     }
-    // cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "Hello Lazuli!\n");
+
+    // auto logger = mll::Logger::getInstance();
+    // const uint32_t LOG_ADDRESS = 0x20030000;
+    // constexpr uint16_t ALL_LOG_LENGTH = 0x20000 / sizeof(mll::LogFormatSearch);
+    // auto logconfig = mll::LogConfig{mll::LogType::SEARCH, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, (uint32_t)(&LOG_ADDRESS)};
+    // mll::LogFormatSearch log_data = {0};
+
+    // auto debug = mpl::Debug::getInstance();
+    // // clang-format off
+    //     cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
+    //         "time, secX, secY, secD, phyX, phyY, phyA, walL, walF, walR, walB\n"
+    //     );
+    // // clang-format on
     // cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    // mpl::Timer::sleepMs(1);  // TODO: 様子見で削除する
+
+    // for (int i = 0; i < ALL_LOG_LENGTH; ++i) {
+    //     logger->read(logconfig, i, &log_data);
+    //     // clang-format off
+    //     cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
+    //         "%12d,"
+    //         "%3d,%3d,%3d,"
+    //         "%6.2f,%6.2f,%6.2f,"
+    //         "%d,%d,%d,%d\n",
+    //         log_data.time,
+    //         log_data.current_section.x, log_data.current_section.y, log_data.current_section.d,
+    //         log_data.current_position.x, log_data.current_position.y, log_data.current_position.angle,
+    //         log_data.current_walldata.isExistWall(mll::FirstPersonDirection::LEFT),
+    //         log_data.current_walldata.isExistWall(mll::FirstPersonDirection::FRONT),
+    //         log_data.current_walldata.isExistWall(mll::FirstPersonDirection::RIGHT),
+    //         log_data.current_walldata.isExistWall(mll::FirstPersonDirection::BACK)
+    //     );
+    //     // clang-format on
+    //     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    //     mpl::Timer::sleepMs(1);  // TODO: 様子見で削除する
+    // }
 
     return Status::SUCCESS;
 }

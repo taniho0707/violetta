@@ -7,6 +7,7 @@
 
 #include "cmd_format.h"
 #include "cmd_server.h"
+#include "mll_logger.h"
 #include "mll_operation_coordinator.h"
 #include "mpl_timer.h"
 
@@ -30,10 +31,21 @@ Status SearchActivity::run() {
     mpl::Timer::sleepMs(1000);
 
     mll::MultiplePosition goals;
-    goals.add(2, 12);
-    goals.add(3, 12);
-    goals.add(2, 13);
-    goals.add(3, 13);
+    goals.add(7, 7);
+    goals.add(7, 8);
+    goals.add(8, 7);
+    goals.add(8, 8);
+
+    // Logger setting
+    auto logger = mll::Logger::getInstance();
+    const uint32_t LOG_ADDRESS = 0x20030000;
+    constexpr uint16_t ALL_LOG_LENGTH = 0x20000 / sizeof(mll::LogFormatAll);
+    auto logconfig = mll::LogConfig{mll::LogType::ALL, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, LOG_ADDRESS};
+    logger->init(logconfig);
+    logger->startPeriodic(mll::LogType::ALL, 2);
+    // constexpr uint16_t ALL_LOG_LENGTH = 0x20000 / sizeof(mll::LogFormatSearch);
+    // auto logconfig = mll::LogConfig{mll::LogType::SEARCH, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, LOG_ADDRESS};
+    // logger->init(logconfig);
 
     mll::SearchOptions opt = {
         .maxSearchTime = 0,
@@ -42,8 +54,9 @@ Status SearchActivity::run() {
         .goals = goals,
         .search_completed = false,
         .search_found_goal = false,
-        .velocity_trans = 300,
-        .velocity_turn = 300,
+        .velocity_trans = 250,
+        .velocity_turn = 250,
+        // FIXME: 速度パラメータを使用できていない
     };
     operation_coordinator->runSearch(opt);
 
@@ -60,6 +73,8 @@ Status SearchActivity::run() {
 
         mpl::Timer::sleepMs(1);  // FIXME: 将来的に削除したい
     }
+
+    logger->stopPeriodic(mll::LogType::ALL);
 
     if (state == mll::OperationCoordinatorResult::ERROR_MOTOR_FAILSAFE) {
         cmd_ui_out.type = mll::UiOutputEffect::DETECT_CRASH;

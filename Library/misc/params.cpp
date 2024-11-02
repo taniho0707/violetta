@@ -17,12 +17,14 @@ MouseParams* Params::getCachePointer() {
 
 SlalomParams* Params::getCacheSlalomPointer(float velocity) {
     uint8_t index = 0;
-    if (velocity == 300) {
+    if (velocity == 250) {
         index = 0;
-    } else if (velocity == 500) {
+    } else if (velocity == 300) {
         index = 1;
-    } else if (velocity == 700) {
+    } else if (velocity == 500) {
         index = 2;
+    } else if (velocity == 700) {
+        index = 3;
     }
     return cache_slalom[index];
 }
@@ -41,7 +43,7 @@ bool Params::load(ParameterDestinationType from) {
             cache.length_front = 0;
             cache.length_back = 0;
             cache.tread = 40;
-            cache.tire_diameter = 13;
+            cache.tire_diameter = 14.7f;  // 13;
             cache.tire_width = 4;
             cache.weight = 0;
             cache.battery_capacity = 70;
@@ -50,29 +52,30 @@ bool Params::load(ParameterDestinationType from) {
             cache.battery_ratio = 5.7f /*[R/R]*/ * 3.0f /*[V]*/ / 4095.0f /*[12bit]*/;
             cache.motor_control_frequency = 3200;
             cache.motor_control_translation_kp = 2.f;    // 5.f;
-            cache.motor_control_translation_ki = 0.02f;  // 0.9f;
+            cache.motor_control_translation_ki = 0.04f;  // 0.9f;
             cache.motor_control_translation_kd = 0.f;    // 100.f;
             cache.motor_control_rotation_kp = 100.f;     // 125.f;
             cache.motor_control_rotation_ki = 10.f;      // 10.f;
             cache.motor_control_rotation_kd = 0;
             cache.motor_control_kabe_kp = 0.2;  // 0.02;
             cache.complementary_filter_constant = 1.0f;
-            cache.wall_position_front_translation_kp = 0.01f;   // 前壁距離補正の P ゲイン [1]
-            cache.wall_position_front_rotation_kp = 0.01f;      // 前壁角度補正の P ゲイン [1]
-            cache.wall_position_front_translation_max = 100.f;  // 前壁距離補正の最大速度 [mm/s]
-            cache.wall_position_front_rotation_max = 100.f;     // 前壁角度補正の最大角速度 [rad/s]
+            cache.wall_position_front_translation_kp = 0.2f;   // 前壁距離補正の P ゲイン [1]
+            cache.wall_position_front_rotation_kp = 0.01f;     // 前壁角度補正の P ゲイン [1]
+            cache.wall_position_front_translation_max = 50.f;  // 前壁距離補正の最大速度 [mm/s]
+            cache.wall_position_front_rotation_max = 100.f;    // 前壁角度補正の最大角速度 [rad/s]
+            cache.wallsensor_slalom_front_control = 145;       // スラローム時の前壁制御で使う前壁センサ閾値 [1]
             cache.wallsensor_turnon = 10000;
             cache.wallsensor_exist_threshold[0] = 0;   // TODO: ここの番号とセンサ番号をいい感じに一致させたい
-            cache.wallsensor_exist_threshold[1] = 30;  // LEFT
+            cache.wallsensor_exist_threshold[1] = 80;  // LEFT
             cache.wallsensor_exist_threshold[2] = 60;  // CENTER
-            cache.wallsensor_exist_threshold[3] = 30;  // RIGHT
+            cache.wallsensor_exist_threshold[3] = 50;  // RIGHT
             cache.wallsensor_exist_threshold[4] = 0;   // FRONTR
             cache.wallsensor_exist_threshold[5] = 0;
-            cache.wallsensor_center[0] = 0;    // FRONTL
-            cache.wallsensor_center[1] = 115;  // LEFT
-            cache.wallsensor_center[2] = 750;  // CENTER
-            cache.wallsensor_center[3] = 115;  // RIGHT
-            cache.wallsensor_center[4] = 0;    // FRONTR
+            cache.wallsensor_center[0] = 490;  // FRONTL
+            cache.wallsensor_center[1] = 123;  // LEFT
+            cache.wallsensor_center[2] = 650;  // CENTER
+            cache.wallsensor_center[3] = 70;   // RIGHT
+            cache.wallsensor_center[4] = 330;  // FRONTR
             cache.wallsensor_center[5] = 0;
             cache.wallsensor_kabekire_dif_threshold = 10;
             cache.encoder_resolution = 160;
@@ -124,6 +127,7 @@ bool Params::load(ParameterDestinationType from) {
             cache.wall_position_front_rotation_kp = 0.01f;      // 前壁角度補正の P ゲイン [1]
             cache.wall_position_front_translation_max = 100.f;  // 前壁距離補正の最大速度 [mm/s]
             cache.wall_position_front_rotation_max = 100.f;     // 前壁角度補正の最大角速度 [rad/s]
+            cache.wallsensor_slalom_front_control = 145;        // スラローム時の前壁制御で使う前壁センサ閾値 [1]
             cache.wallsensor_turnon = 10000;
             cache.wallsensor_exist_threshold[0] = 20;  // TODO: ここの番号とセンサ番号をいい感じに一致させたい
             cache.wallsensor_exist_threshold[1] = 30;
@@ -169,7 +173,7 @@ bool Params::loadSlalom(ParameterDestinationType from) {
     switch (from) {
         case ParameterDestinationType::HARDCODED:
 #ifdef MOUSE_ZIRCONIA2KAI
-            // 300mm/s
+            // 250mm/s
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_before = 20;
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_after = 40;
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].acc_rad = 1000;
@@ -183,22 +187,52 @@ bool Params::loadSlalom(ParameterDestinationType from) {
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].max_v_rad = 15;
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].deg = misc::PI / 2 + 0.15;
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].const_deg = misc::PI / 6;
+
+            // 300mm/s
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_before = 20;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_after = 40;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].acc_rad = 1000;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].max_v_rad = 15;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].deg = misc::PI / 2 + 0.15;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].const_deg = misc::PI / 6;
+
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].d_before = 20;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].d_after = 40;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].acc_rad = 1000;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].max_v_rad = 15;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].deg = misc::PI / 2 + 0.15;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].const_deg = misc::PI / 6;
 #endif  // MOUSE_ZIRCONIA2KAI
 #ifdef MOUSE_LAZULI
-            // 300mm/s
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_before = 20;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_after = 40;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].acc_rad = 300;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].max_v_rad = 15;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].deg = misc::PI / 2 + 0.05;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].const_deg = misc::PI / 5;
+            // 250mm/s
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_before = 11;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_after = 10;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].acc_rad = 200;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].max_v_rad = 10;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].deg = misc::PI / 2;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].const_deg = misc::PI / 8;
 
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].d_before = 20;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].d_after = 40;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].acc_rad = 300;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].max_v_rad = 15;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].d_before = 16;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].d_after = 12;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].acc_rad = 200;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].max_v_rad = 10;
             cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].deg = misc::PI / 2;
-            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].const_deg = misc::PI / 5;
+            cache_slalom[0][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].const_deg = misc::PI / 8;
+
+            // 300mm/s
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_before = 22;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].d_after = 15;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].acc_rad = 300;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].max_v_rad = 15;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].deg = misc::PI / 2;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_RIGHT)].const_deg = misc::PI / 5;
+
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].d_before = 20;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].d_after = 15;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].acc_rad = 300;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].max_v_rad = 15;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].deg = misc::PI / 2;
+            cache_slalom[1][static_cast<uint8_t>(SlalomType::SLALOM90SML_LEFT)].const_deg = misc::PI / 5;
 #endif  // MOUSE_LAZULI
             return false;
         case ParameterDestinationType::INTERNAL_FLASH:

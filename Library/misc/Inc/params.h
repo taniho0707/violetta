@@ -21,7 +21,7 @@
 
 namespace misc {
 
-constexpr uint8_t SLALOM_PARAMS_VELOCITY_LENGTH = 3;  // 0.3, 0.5, 0.7
+constexpr uint8_t SLALOM_PARAMS_VELOCITY_LENGTH = 4;  // 0.25, 0.3, 0.5, 0.7
 
 // 保存先の種類を示す列挙型
 enum class ParameterDestinationType : uint8_t {
@@ -110,6 +110,7 @@ struct MouseParams {
     float wall_position_front_rotation_kp;      // 前壁角度補正の P ゲイン [1]
     float wall_position_front_translation_max;  // 前壁距離補正の最大速度 [mm/s]
     float wall_position_front_rotation_max;     // 前壁角度補正の最大角速度 [rad/s]
+    uint16_t wallsensor_slalom_front_control;   // スラローム時の前壁制御で使う前壁センサ閾値 [1]
 
     // Wall Sensor
     uint16_t wallsensor_turnon;                  // 壁センサLEDの立ち上がり待ち時間 [ns]

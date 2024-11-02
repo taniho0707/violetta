@@ -42,6 +42,13 @@ cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=STM32 -DMOUSE=Lazuli -DTARG
 ninja
 ```
 
+- taniho を LazuliSensor STM32C0 向けにビルド
+
+```
+cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=STM32 -DMOUSE=LazuliSensor -DTARGET_GROUP=taniho -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=on
+ninja
+```
+
 - UnitTest を Zirconia2kai Linux 向けにビルド
 
 ```

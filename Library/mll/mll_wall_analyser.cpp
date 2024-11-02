@@ -57,11 +57,13 @@ void WallAnalyser::interruptPeriodic() {
                                (sensor_buffer_right[sensor_buffer_index] - params->wallsensor_center[4]);
 #if defined(MOUSE_ZIRCONIA2KAI)
     int32_t distance_from_front = ((sensor_buffer_frontleft[sensor_buffer_index] - params->wallsensor_center[1]) +
-                                   (sensor_buffer_frontright[sensor_buffer_index] - params->wallsensor_center[3])) /
+                                   (sensor_buffer_frontright[sensor_buffer_index] - params->wallsensor_center[4])) /
                                   2;
 #endif
 #if defined(MOUSE_LAZULI)
-    int32_t distance_from_front = sensor_buffer_center[sensor_buffer_index] - params->wallsensor_exist_threshold[2];
+    // int32_t distance_from_front = sensor_buffer_center[sensor_buffer_index] - params->wallsensor_center[2];
+    int32_t distance_from_front = (sensor_buffer_left[sensor_buffer_index] - params->wallsensor_center[0]) +
+                                  (sensor_buffer_right[sensor_buffer_index] - params->wallsensor_center[4]);
 #endif
 
     // 壁切れの判定用変数
@@ -84,11 +86,11 @@ void WallAnalyser::interruptPeriodic() {
         dif_from_center_left = 0;
         // dif_from_center_right *= 2;
     }
-    if (sensor_buffer_right[sensor_buffer_index] > params->wallsensor_exist_threshold[2]) {
+    if (sensor_buffer_right[sensor_buffer_index] > params->wallsensor_exist_threshold[3]) {
         // 右壁あり
         wall.addWall(FirstPersonDirection::RIGHT);
     } else {
-        if (sensor_buffer_right[previous_index] > params->wallsensor_exist_threshold[2] &&
+        if (sensor_buffer_right[previous_index] > params->wallsensor_exist_threshold[3] &&
             sensor_buffer_right[previous_index] - sensor_buffer_right[sensor_buffer_index] > params->wallsensor_kabekire_dif_threshold) {
             kabekire_right = true;
         }
