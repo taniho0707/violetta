@@ -5,6 +5,8 @@
 //******************************************************************************
 #pragma once
 
+#include "mll_position.h"
+#include "mll_wall.h"
 #include "stdint.h"
 
 namespace mll {
@@ -23,6 +25,7 @@ enum class LoggerResult : uint8_t {
 // このクラスで対応するログの種類を示す列挙型
 enum class LogType : uint8_t {
     ALL = 0,
+    SEARCH = 1,
     LENGTH
 };
 
@@ -42,6 +45,7 @@ struct LogFormatAll {
     uint16_t wallsensor_frontright;  // 前右壁センサの値
     float distance_from_center;      // 左右壁センサから計算した中心からの横方向の距離 (左が正)
     float distance_from_front;       // 前壁センサから計算した前壁からの距離
+    float angle_from_front;          // 前壁センサから計算した前壁からの角度
     bool kabekire_left;              // 左側の壁切れ発生可否
     bool kabekire_right;             // 右側の壁切れ発生可否
     float target_v_translation;      // 目標直進速度
@@ -56,6 +60,13 @@ struct LogFormatAll {
     float acc_y;                     // 加速度センサの y 軸方向の加速度
     float acc_z;                     // 加速度センサの z 軸方向の加速度
     float battery;                   // バッテリー電圧
+} __attribute__((packed));
+
+struct LogFormatSearch {
+    uint32_t time;                           // ログを取得した時間
+    MouseSectionPosition current_section;    // 現在の区画
+    MousePhysicalPosition current_position;  // 現在の物理位置
+    Walldata current_walldata;               // 現在の壁情報
 } __attribute__((packed));
 
 // ログの保存先の種類を示す列挙型
@@ -82,7 +93,6 @@ class Logger {
     static uint32_t address_next[static_cast<uint8_t>(LogType::LENGTH)];
 
     // 定期的にロギングするかどうか、するなら何秒おきかを指定する配列
-    // ただし、今は 1ms おき以外に対応していない
     // 0: 自動ロギング無効、1以上の整数: [ms] おきに自動ロギング
     static uint16_t duration[static_cast<uint8_t>(LogType::LENGTH)];
 

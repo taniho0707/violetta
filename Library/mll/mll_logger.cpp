@@ -33,6 +33,7 @@ LoggerResult Logger::init(LogConfig& config) {
         case LogDestinationType::INTERNAL_RAM:
             switch (config.type) {
                 case LogType::ALL:
+                case LogType::SEARCH:
                     break;
                 default:
                     return LoggerResult::NO_IMPLEMENT;
@@ -62,6 +63,17 @@ LoggerResult Logger::save(LogType type, void* data) {
                     Logger::address_next[static_cast<uint8_t>(type)] += sizeof(LogFormatAll);
                     return LoggerResult::SUCCESS;
                 }
+            case LogType::SEARCH:
+                if (Logger::address_next[static_cast<uint8_t>(LogType::SEARCH)] + sizeof(LogFormatSearch) >
+                    Logger::config[static_cast<uint8_t>(type)].address +
+                        sizeof(LogFormatSearch) * Logger::config[static_cast<uint8_t>(type)].length) {
+                    return LoggerResult::DESTINATION_FULL;
+                } else {
+                    auto log = static_cast<LogFormatSearch*>(data);
+                    *reinterpret_cast<LogFormatSearch*>(Logger::address_next[static_cast<uint8_t>(type)]) = *log;
+                    Logger::address_next[static_cast<uint8_t>(type)] += sizeof(LogFormatSearch);
+                    return LoggerResult::SUCCESS;
+                }
             default:
                 return LoggerResult::NO_IMPLEMENT;
         }
@@ -82,6 +94,15 @@ LoggerResult Logger::read(LogConfig& config, uint32_t ite, void* data) {
                 } else {
                     *reinterpret_cast<LogFormatAll*>(data) =
                         *reinterpret_cast<LogFormatAll*>(Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatAll) * ite);
+                    return LoggerResult::SUCCESS;
+                }
+            case LogType::SEARCH:
+                if (Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatSearch) * ite >
+                    Logger::address_next[static_cast<uint8_t>(config.type)]) {
+                    return LoggerResult::NO_DATA;
+                } else {
+                    *reinterpret_cast<LogFormatSearch*>(data) = *reinterpret_cast<LogFormatSearch*>(
+                        Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatSearch) * ite);
                     return LoggerResult::SUCCESS;
                 }
             default:
@@ -158,6 +179,7 @@ void Logger::interruptPeriodic() {
                     log.wallsensor_frontright = msg_wallsensor.frontright;
                     log.distance_from_center = msg_wallanalyser.distance_from_center;
                     log.distance_from_front = msg_wallanalyser.distance_from_front;
+                    log.angle_from_front = msg_wallanalyser.angle_from_front;
                     log.kabekire_left = msg_wallanalyser.kabekire_left;
                     log.kabekire_right = msg_wallanalyser.kabekire_right;
                     log.target_v_translation = msg_motor_controller.velocity_translation;
@@ -172,6 +194,18 @@ void Logger::interruptPeriodic() {
                     log.acc_y = msg_imu.acc_y;
                     log.acc_z = msg_imu.acc_z;
                     log.battery = msg_battery.battery;
+                    auto result = Logger::save(static_cast<LogType>(i), &log);
+                    if (result != LoggerResult::SUCCESS) {
+                        // ログ追加の失敗時には自動ログ追加を無効化する
+                        Logger::duration[i] = 0;
+                    }
+                } break;
+                case LogType::SEARCH: {
+                    mll::LogFormatSearch log = {mpl::Timer::getMicroTime()};
+                    msg_server->receiveMessage(msg::ModuleId::LOCALIZER, &msg_localizer);
+                    msg_server->receiveMessage(msg::ModuleId::WALLANALYSER, &msg_wallanalyser);
+                    log.current_position = MousePhysicalPosition{msg_localizer.position_x, msg_localizer.position_y, msg_localizer.position_theta};
+                    log.current_walldata = msg_wallanalyser.front_wall;
                     auto result = Logger::save(static_cast<LogType>(i), &log);
                     if (result != LoggerResult::SUCCESS) {
                         // ログ追加の失敗時には自動ログ追加を無効化する
