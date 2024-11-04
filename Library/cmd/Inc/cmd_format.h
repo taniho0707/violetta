@@ -10,7 +10,8 @@
 
 namespace cmd {
 
-const uint16_t COMMAND_DEBUG_TX_MESSAGE_LENGTH = 256;
+// const uint16_t COMMAND_DEBUG_TX_MESSAGE_LENGTH = 256;
+const uint16_t COMMAND_DEBUG_TX_MESSAGE_LENGTH = 8704;
 const uint16_t COMMAND_DEBUG_RX_MESSAGE_LENGTH = 64;
 
 enum class CmdResult : uint8_t {

@@ -197,15 +197,125 @@ FirstPersonDirection MazeSolver::getNextDirectionInSearchAdachi(int8_t current_x
     return FirstPersonDirection::BACK;
 }
 
+// FIXME: Implement
+FirstPersonDirection MazeSolver::getNextDirectionInSearchDijkstra(int8_t current_x, int8_t current_y, CardinalDirection current_angle) {
+    Footmap* fm = getFootmap();
+    Walldata walldata = map.getKnownWalldata(current_x, current_y);
+    uint16_t min = fm->getMinNextTo(current_x, current_y, walldata);
+    if (current_angle == CardinalDirection::NORTH) {
+        if (fm->get(current_x, current_y + 1, 1024) == min && walldata.isExistWall(FirstPersonDirection::FRONT) == false)
+            return FirstPersonDirection::FRONT;
+        else if (fm->get(current_x + 1, current_y, 1024) == min && walldata.isExistWall(FirstPersonDirection::RIGHT) == false)
+            return FirstPersonDirection::RIGHT;
+        else if (fm->get(current_x - 1, current_y, 1024) == min && walldata.isExistWall(FirstPersonDirection::LEFT) == false)
+            return FirstPersonDirection::LEFT;
+        else return FirstPersonDirection::BACK;
+    } else if (current_angle == CardinalDirection::EAST) {
+        if (fm->get(current_x + 1, current_y, 1024) == min && walldata.isExistWall(FirstPersonDirection::RIGHT) == false)
+            return FirstPersonDirection::FRONT;
+        else if (fm->get(current_x, current_y - 1, 1024) == min && walldata.isExistWall(FirstPersonDirection::BACK) == false)
+            return FirstPersonDirection::RIGHT;
+        else if (fm->get(current_x, current_y + 1, 1024) == min && walldata.isExistWall(FirstPersonDirection::FRONT) == false)
+            return FirstPersonDirection::LEFT;
+        else return FirstPersonDirection::BACK;
+    } else if (current_angle == CardinalDirection::SOUTH) {
+        if (fm->get(current_x, current_y - 1, 1024) == min && walldata.isExistWall(FirstPersonDirection::BACK) == false)
+            return FirstPersonDirection::FRONT;
+        else if (fm->get(current_x - 1, current_y, 1024) == min && walldata.isExistWall(FirstPersonDirection::LEFT) == false)
+            return FirstPersonDirection::RIGHT;
+        else if (fm->get(current_x + 1, current_y, 1024) == min && walldata.isExistWall(FirstPersonDirection::RIGHT) == false)
+            return FirstPersonDirection::LEFT;
+        else return FirstPersonDirection::BACK;
+    } else if (current_angle == CardinalDirection::WEST) {
+        if (fm->get(current_x - 1, current_y, 1024) == min && walldata.isExistWall(FirstPersonDirection::LEFT) == false)
+            return FirstPersonDirection::FRONT;
+        else if (fm->get(current_x, current_y + 1, 1024) == min && walldata.isExistWall(FirstPersonDirection::FRONT) == false)
+            return FirstPersonDirection::RIGHT;
+        else if (fm->get(current_x, current_y - 1, 1024) == min && walldata.isExistWall(FirstPersonDirection::BACK) == false)
+            return FirstPersonDirection::LEFT;
+        else return FirstPersonDirection::BACK;
+    }
+    return FirstPersonDirection::BACK;
+}
+
 FirstPersonDirection MazeSolver::getNextDirectionInSearch(int8_t current_x, int8_t current_y, CardinalDirection current_angle) {
     switch (algorithm) {
         case AlgorithmType::LEFT_HAND:
             return getNextDirectionInSearchLeftHand(current_x, current_y, current_angle);
         case AlgorithmType::ADACHI:
             return getNextDirectionInSearchAdachi(current_x, current_y, current_angle);
+        case AlgorithmType::DIJKSTRA:
+            return getNextDirectionInSearchDijkstra(current_x, current_y, current_angle);
         default:
             return FirstPersonDirection::FRONT;
     }
+}
+
+uint16_t MazeSolver::string(char* buf) {
+    uint16_t index = 0;
+    auto fm = getFootmap();
+
+    for (uint16_t i = 0; i < 32; ++i) {
+        buf[index++] = '+';
+        buf[index++] = '-';
+        buf[index++] = '-';
+        buf[index++] = '-';
+    }
+    buf[index++] = '+';
+    buf[index++] = '\n';
+
+    for (int16_t y = 31; y >= 0; --y) {
+        for (int16_t x = 0; x < 32; ++x) {
+            // 縦壁+歩数
+            if (map.isExistWall(x, y, CardinalDirection::WEST)) {
+                buf[index++] = '|';
+            } else {
+                buf[index++] = ' ';
+            }
+            if (footmap1.get(x, y, 1024) == 1024) {
+                buf[index++] = ' ';
+                buf[index++] = ' ';
+                buf[index++] = ' ';
+            } else {
+                char tmp1 = '0' + (fm->get(x, y, 0) / 100) % 10;
+                char tmp2 = '0' + (fm->get(x, y, 0) / 10) % 10;
+                char tmp3 = '0' + fm->get(x, y, 0) % 10;
+                if (tmp1 == '0') {
+                    buf[index++] = ' ';
+                    if (tmp2 == '0') {
+                        buf[index++] = ' ';
+                    } else {
+                        buf[index++] = tmp2;
+                    }
+                    buf[index++] = tmp3;
+                } else {
+                    buf[index++] = tmp1;
+                    buf[index++] = tmp2;
+                    buf[index++] = tmp3;
+                }
+            }
+        }
+        buf[index++] = '|';
+        buf[index++] = '\n';
+        // 横壁
+        for (uint16_t x = 0; x < 32; ++x) {
+            if (map.isExistWall(x, y, CardinalDirection::SOUTH)) {
+                buf[index++] = '+';
+                buf[index++] = '-';
+                buf[index++] = '-';
+                buf[index++] = '-';
+            } else {
+                buf[index++] = '+';
+                buf[index++] = ' ';
+                buf[index++] = ' ';
+                buf[index++] = ' ';
+            }
+        }
+        buf[index++] = '+';
+        buf[index++] = '\n';
+    }
+    buf[index++] = '\n';
+    return index;
 }
 
 MazeSolver* MazeSolver::getInstance() {

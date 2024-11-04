@@ -7,7 +7,12 @@
 
 #include "cmd_format.h"
 #include "hal_conf.h"
+#include "mll_logger.h"
 #include "msg_format_wall_analyser.h"
+
+// for Debug
+#include "mpl_timer.h"
+#include "msg_format_localizer.h"
 
 using namespace mll;
 
@@ -25,6 +30,7 @@ void CoordinateDirector::getNextMove(OperationMoveCombination* moves, uint16_t& 
     msg::MsgFormatWallAnalyser msg_wall_analyzer;
     msg_server->receiveMessage(msg::ModuleId::WALLANALYSER, &msg_wall_analyzer);
     solver->map.setWall(current_section.x, current_section.y, current_section.d, msg_wall_analyzer.front_wall);
+    solver->map.setReached(current_section.x, current_section.y);
 
     // TODO: LED Indicator with DMA
     // // LED Indicator
@@ -42,6 +48,14 @@ void CoordinateDirector::getNextMove(OperationMoveCombination* moves, uint16_t& 
     //     msg_server->sendMessage(msg::ModuleId::UI, &cmd_ui_out);
     // }
 
+    // mll::LogFormatSearch log = {mpl::Timer::getMicroTime()};
+    // msg::MsgFormatLocalizer msg_localizer;
+    // msg_server->receiveMessage(msg::ModuleId::LOCALIZER, &msg_localizer);
+    // log.current_position = MousePhysicalPosition{msg_localizer.position_x, msg_localizer.position_y, msg_localizer.position_theta};
+    // log.current_section = current_section;
+    // log.current_walldata = msg_wall_analyzer.front_wall;
+    // Logger::getInstance()->save(mll::LogType::SEARCH, &log);
+
     auto next_direction = solver->getNextDirectionInSearch(current_section.x, current_section.y, current_section.d);
     switch (next_direction) {
         case FirstPersonDirection::FRONT:
@@ -54,7 +68,7 @@ void CoordinateDirector::getNextMove(OperationMoveCombination* moves, uint16_t& 
             length = 1;
             current_section.move(OperationMoveType::SLALOM90SML_LEFT);
             break;
-        case mll::FirstPersonDirection::RIGHT:
+        case FirstPersonDirection::RIGHT:
             moves[0] = OperationMoveCombination{OperationMoveType::SLALOM90SML_RIGHT, 0.f};
             length = 1;
             current_section.move(OperationMoveType::SLALOM90SML_RIGHT);
@@ -122,6 +136,10 @@ void CoordinateDirector::setTargetSection(MultiplePosition& pos) {
 // マウスの現在の目標区画情報を返す
 const misc::Point<uint16_t> CoordinateDirector::getTargetSection() const {
     return target_pos;
+}
+
+const uint16_t CoordinateDirector::debugOutput(char* buf) const {
+    return solver->string(buf);
 }
 
 CoordinateDirector* CoordinateDirector::getInstance() {
