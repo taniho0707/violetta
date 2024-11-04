@@ -7,6 +7,7 @@
 
 #include "cmd_format.h"
 #include "cmd_server.h"
+#include "mll_coordinate_director.h"
 #include "mll_logger.h"
 #include "mpl_debug.h"
 #include "mpl_timer.h"
@@ -26,6 +27,13 @@ Status DebugActivity::run() {
     constexpr uint16_t ALL_LOG_LENGTH = 0x20000 / sizeof(mll::LogFormatAll);
     auto logconfig = mll::LogConfig{mll::LogType::ALL, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, (uint32_t)(&LOG_ADDRESS)};
     mll::LogFormatAll log_data = {0};
+
+    auto coordinate_director = mll::CoordinateDirector::getInstance();
+    for (uint8_t i = 0; i < 65; i++) {
+        cmd_debug_tx.len = coordinate_director->debugOutput(cmd_debug_tx.message, i);
+        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+        mpl::Timer::sleepMs(2);
+    }
 
     auto debug = mpl::Debug::getInstance();
     // clang-format off

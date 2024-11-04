@@ -49,8 +49,8 @@ class CoordinateDirector {
     // 到達済みの目標区画は削除されていくため、isEnd 時には空になるはず？
     const misc::Point<uint16_t> getTargetSection() const;
 
-    // 引数 buf は 8450 Byte 以上のサイズを確保すること
-    const uint16_t debugOutput(char* buf) const;
+    // 引数 buf は 130 Byte 以上のサイズを確保すること
+    const uint16_t debugOutput(char* buf, uint8_t n) const;
 
     static CoordinateDirector* getInstance();
 };

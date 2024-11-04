@@ -64,8 +64,9 @@ class MazeSolver {
     // 現在の動作の目的地座標
     MultiplePosition destination;
 
-    // 引数 buf は 8450 Byte 以上のサイズを確保すること
-    uint16_t string(char* buf);
+    // 引数 buf は 130 Byte 以上のサイズを確保すること
+    // 引数 n は表示する行番号、0 から 65 まで
+    uint16_t string(char* buf, const uint8_t n);
 
     static MazeSolver* getInstance();
 };

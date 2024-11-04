@@ -138,8 +138,8 @@ const misc::Point<uint16_t> CoordinateDirector::getTargetSection() const {
     return target_pos;
 }
 
-const uint16_t CoordinateDirector::debugOutput(char* buf) const {
-    return solver->string(buf);
+const uint16_t CoordinateDirector::debugOutput(char* buf, uint8_t n) const {
+    return solver->string(buf, n);
 }
 
 CoordinateDirector* CoordinateDirector::getInstance() {

@@ -251,35 +251,35 @@ FirstPersonDirection MazeSolver::getNextDirectionInSearch(int8_t current_x, int8
     }
 }
 
-uint16_t MazeSolver::string(char* buf) {
+uint16_t MazeSolver::string(char* buf, const uint8_t n) {
     uint16_t index = 0;
     auto fm = getFootmap();
 
-    for (uint16_t i = 0; i < 32; ++i) {
+    if (n == 0) {
         buf[index++] = '+';
-        buf[index++] = '-';
-        buf[index++] = '-';
-        buf[index++] = '-';
-    }
-    buf[index++] = '+';
-    buf[index++] = '\n';
-
-    for (int16_t y = 31; y >= 0; --y) {
+        for (uint16_t i = 0; i < 32; ++i) {
+            buf[index++] = '-';
+            buf[index++] = '-';
+            buf[index++] = '-';
+            buf[index++] = '+';
+        }
+        buf[index++] = '\n';
+    } else if (n % 2 == 1) {
         for (int16_t x = 0; x < 32; ++x) {
             // 縦壁+歩数
-            if (map.isExistWall(x, y, CardinalDirection::WEST)) {
+            if (map.isExistWall(x, 31 - (n - 1) / 2, CardinalDirection::WEST)) {
                 buf[index++] = '|';
             } else {
                 buf[index++] = ' ';
             }
-            if (footmap1.get(x, y, 1024) == 1024) {
+            if (footmap1.get(x, 31 - (n - 1) / 2, 1024) == 1024) {
                 buf[index++] = ' ';
                 buf[index++] = ' ';
                 buf[index++] = ' ';
             } else {
-                char tmp1 = '0' + (fm->get(x, y, 0) / 100) % 10;
-                char tmp2 = '0' + (fm->get(x, y, 0) / 10) % 10;
-                char tmp3 = '0' + fm->get(x, y, 0) % 10;
+                char tmp1 = '0' + (fm->get(x, 31 - (n - 1) / 2, 0) / 100) % 10;
+                char tmp2 = '0' + (fm->get(x, 31 - (n - 1) / 2, 0) / 10) % 10;
+                char tmp3 = '0' + fm->get(x, 31 - (n - 1) / 2, 0) % 10;
                 if (tmp1 == '0') {
                     buf[index++] = ' ';
                     if (tmp2 == '0') {
@@ -297,9 +297,10 @@ uint16_t MazeSolver::string(char* buf) {
         }
         buf[index++] = '|';
         buf[index++] = '\n';
+    } else {
         // 横壁
         for (uint16_t x = 0; x < 32; ++x) {
-            if (map.isExistWall(x, y, CardinalDirection::SOUTH)) {
+            if (map.isExistWall(x, 31 - (n - 2) / 2, CardinalDirection::SOUTH)) {
                 buf[index++] = '+';
                 buf[index++] = '-';
                 buf[index++] = '-';
@@ -314,7 +315,7 @@ uint16_t MazeSolver::string(char* buf) {
         buf[index++] = '+';
         buf[index++] = '\n';
     }
-    buf[index++] = '\n';
+
     return index;
 }
 
