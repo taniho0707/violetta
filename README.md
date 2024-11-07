@@ -55,3 +55,9 @@ ninja
 cmake . -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM=Linux -DMOUSE=Zirconia2kai -DTARGET_GROUP=Test -GNinja -DCMAKE_EXPORT_COMPILE_COMMANDS=on
 ninja
 ```
+
+- PlantUML の生成
+
+```
+hpp2plantuml -i "./Library/act/Inc/*" -i "./Library/cmd/Inc/*" -i "./Library/misc/Inc/*" -i "./Library/mll/Inc/*" -i "./Library/mpl/Inc/*" -i "./Library/msg/Inc/msg_server.h" -o out.puml
+```

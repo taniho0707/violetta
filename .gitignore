@@ -67,3 +67,6 @@ Makefile
 # Google test
 _deps/
 CTestTestfile.cmake
+
+# PlantUML
+*.puml
