@@ -21,6 +21,7 @@ void MsgFormatWallAnalyser::copy(void* target) {
     t->front_wall = front_wall;
     t->distance_from_center = distance_from_center;
     t->distance_from_front = distance_from_front;
+    t->angle_from_front = angle_from_front;
     t->kabekire_left = kabekire_left;
     t->kabekire_right = kabekire_right;
 }
@@ -35,6 +36,7 @@ void MsgFormatWallAnalyser::update(void* from) {
     front_wall = f->front_wall;
     distance_from_center = f->distance_from_center;
     distance_from_front = f->distance_from_front;
+    angle_from_front = f->angle_from_front;
     kabekire_left = f->kabekire_left;
     kabekire_right = f->kabekire_right;
 }

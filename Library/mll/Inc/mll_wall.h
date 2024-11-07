@@ -52,7 +52,7 @@ struct Walldata {
         Walldata newwall;
         newwall.data = 0;
         for (int i = 0; i < 4; i++) {
-            if (wall.isExistWall((FirstPersonDirection)((i + (int)angle) % 4))) {
+            if (wall.isExistWall((FirstPersonDirection)((i - (int)angle + 4) % 4))) {
                 newwall.addWall((FirstPersonDirection)i);
             }
         }
@@ -63,7 +63,7 @@ struct Walldata {
         Walldata newwall;
         newwall.data = 0;
         for (int i = 0; i < 4; i++) {
-            if (wall.isExistWall((FirstPersonDirection)((i - (int)angle + 4) % 4))) {
+            if (wall.isExistWall((FirstPersonDirection)((i + (int)angle) % 4))) {
                 newwall.addWall((FirstPersonDirection)i);
             }
         }

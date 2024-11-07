@@ -11,8 +11,7 @@
 
 using namespace msg;
 
-msg::MsgFormatMotorController::MsgFormatMotorController()
-    : MsgFormat(ModuleId::MOTORCONTROLLER) {}
+msg::MsgFormatMotorController::MsgFormatMotorController() : MsgFormat(ModuleId::MOTORCONTROLLER) {}
 
 void msg::MsgFormatMotorController::copy(void* target) {
     auto* t = static_cast<MsgFormatMotorController*>(target);

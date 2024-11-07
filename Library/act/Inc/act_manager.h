@@ -11,15 +11,19 @@ namespace act {
 
 class Manager {
    private:
-    // Activity のインスタンスを生成する
-    IActivity* createActivity(Activities);
+    // 次の Activity のポインタを返す
+    IActivity* nextActivity(Activities);
 
     IActivity* current;
 
-    Activities next_activity;
+    ActivityParameters params;
+
+    IActivity* activity[static_cast<uint8_t>(Activities::LENGTH)];
+
+    act::Status selectNextActivity();  // 次の Activity を判断し、params にセットする
 
    public:
-    Manager(Activities first_activity);
+    Manager(Activities first_activity, ActivityTransitionMode transition_mode);
 
     void run();
 };

@@ -1,0 +1,37 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${default}",
+                ".includes",
+                "Project/taniho/Inc",
+                "${workspaceFolder}/**"
+            ],
+            "forcedInclude": [
+                ".includes/arm-none-eabi/include/stdint.h"
+            ],
+            "defines": [
+                "LINUX",
+                "MOUSE_LAZULI"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc",
+            "configurationProvider": "ms-vscode.makefile-tools",
+            "browse": {
+                "path": [
+                    "${default}",
+                    ".includes",
+                    "Project/taniho/Inc",
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 4
+}

@@ -6,27 +6,62 @@
 #include "act_wallsensor_check.h"
 
 #include "cmd_server.h"
-#include "mll_localizer.h"
-#include "mll_motor_controller.h"
-#include "mll_wall_analyser.h"
-#include "mpl_battery.h"
 #include "mpl_debug.h"
-#include "mpl_encoder.h"
-#include "mpl_imu.h"
-#include "mpl_led.h"
-#include "mpl_motor.h"
 #include "mpl_timer.h"
-#include "mpl_wallsensor.h"
+#include "msg_format_battery.h"
+#include "msg_format_imu.h"
 #include "msg_format_wall_analyser.h"
+#include "msg_format_wallsensor.h"
 #include "msg_server.h"
-#include "params.h"
 
 using namespace act;
 
-void WallsensorCheckActivity::init() {}
+void WallsensorCheckActivity::init(ActivityParameters &params) {}
 
 #ifdef MOUSE_LAZULI
-Status DebugActivity::run() {}
+Status WallsensorCheckActivity::run() {
+    auto message = msg::MessageServer::getInstance();
+    msg::MsgFormatBattery msg_battery = msg::MsgFormatBattery();
+    msg::MsgFormatWallsensor msg_wallsensor = msg::MsgFormatWallsensor();
+    msg::MsgFormatWallAnalyser msg_wallanalyser = msg::MsgFormatWallAnalyser();
+    msg::MsgFormatImu msg_imu = msg::MsgFormatImu();
+
+    auto debug = mpl::Debug::getInstance();
+    auto cmd_server = cmd::CommandServer::getInstance();
+    cmd::CommandFormatDebugTx cmd_debug_tx = {0};
+
+    // 【壁センサの値を取るための無限ループ】
+    while (1) {
+        auto start_time = mpl::Timer::getMilliTime();
+        bool kabekire_left = false;
+        bool kabekire_right = false;
+        while (mpl::Timer::getMilliTime() <= start_time + 100) {
+            message->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
+            message->receiveMessage(msg::ModuleId::WALLSENSOR, &msg_wallsensor);
+            message->receiveMessage(msg::ModuleId::WALLANALYSER, &msg_wallanalyser);
+            message->receiveMessage(msg::ModuleId::IMU, &msg_imu);
+
+            if (msg_wallanalyser.kabekire_left) {
+                kabekire_left = true;
+            }
+            if (msg_wallanalyser.kabekire_right) {
+                kabekire_right = true;
+            }
+        }
+
+        // clang-format off
+        // "T: %10d B: %1.2f | FL: %4d, L: %4d, C: %4d, R: %4d, FR: %4d | kire(%d|%d) | F: % 4.1f, LR: % 4.1f | GyroYaw GyroPitch GyroRoll AccX AccY AccZ\n",
+        cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
+            "%10d,%4.2f,%4d,%4d,%4d,%4d,%4d,%1d,%1d,% 4.1f,% 4.1f,% 6.2f,% 6.2f,% 6.2f,% 7.2f,% 7.2f,% 7.2f\n",
+            mpl::Timer::getMilliTime(), msg_battery.battery,
+            msg_wallsensor.frontleft, msg_wallsensor.left, msg_wallsensor.center, msg_wallsensor.right, msg_wallsensor.frontright,
+            kabekire_left ? 1 : 0, kabekire_right ? 1 : 0,
+            msg_wallanalyser.distance_from_front, msg_wallanalyser.distance_from_center,
+            msg_imu.gyro_yaw, msg_imu.gyro_pitch, msg_imu.gyro_roll, msg_imu.acc_x, msg_imu.acc_y, msg_imu.acc_z);
+        cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+        // clang-format on
+    }
+}
 #endif  // MOUSE_LAZULI
 
 #ifdef MOUSE_ZIRCONIA2KAI
@@ -146,4 +181,4 @@ Status WallsensorCheckActivity::run() {
 }
 #endif  // MOUSE_ZIRCONIA2KAI
 
-void WallsensorCheckActivity::finalize() {}
+void WallsensorCheckActivity::finalize(ActivityParameters &params) {}

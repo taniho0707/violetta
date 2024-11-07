@@ -8,8 +8,10 @@
 #include "mpl_conf.h"
 #include "util.h"
 
+#ifndef MOUSE_LAZULI_SENSOR
 #define ENABLE_TIMER_STATISTICS       // タイマーの統計情報を取得する
 #define LENGTH_TIMER_STATISTICS 1000  // タイマーの Average 取得期間
+#endif                                // ifndef MOUSE_LAZULI_SENSOR
 
 // #ifdef STM32L4P5xx
 // // STM32HAL/LL
@@ -17,10 +19,10 @@
 // #include "stm32l4xx_ll_tim.h"
 // #endif  // ifdef STM32L4P5xx
 
-// #ifdef LINUX
-// #include <chrono>
-// #include <cstdint>
-// #endif
+#ifdef LINUX
+#include <chrono>
+#include <cstdint>
+#endif
 
 namespace mpl {
 

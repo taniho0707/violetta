@@ -29,10 +29,14 @@ enum class OperationMoveType : uint8_t {
     SLALOM90OBL_LEFT,
     TRAPACCEL,
     TRAPACCEL_STOP,
-    PIVOTTURN,
-    TRAPDIAGO,
-    EXTRALENGTH,
+    PIVOTTURN_LEFT,
+    PIVOTTURN_RIGHT,
+    // TRAPDIAGO,
+    // EXTRALENGTH,
     WAIT,
+    // 補正に関係する動作
+    CORRECTION_FRONT,
+    // 以下は実装上の都合で定義
     LENGTH,
     UNDEFINED
 };  // TODO: 考える
@@ -40,6 +44,13 @@ enum class OperationMoveType : uint8_t {
 struct OperationMoveCombination {
     OperationMoveType type;
     float distance;  // 距離、角度、秒数など
+};
+
+enum class SlalomState : uint8_t {
+    BEFORE = 0,
+    TURN,
+    AFTER,
+    END,
 };
 
 }  // namespace mll

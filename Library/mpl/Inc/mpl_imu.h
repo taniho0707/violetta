@@ -5,7 +5,7 @@
 //******************************************************************************
 #pragma once
 
-#include "hal_imu.h"
+#include "hal_conf.h"
 #include "mpl_conf.h"
 #include "msg_format_imu.h"
 

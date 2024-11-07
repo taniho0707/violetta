@@ -5,13 +5,13 @@
 //******************************************************************************
 #pragma once
 
-#include "tcp_client.h"
+#include "udp_client.h"
 
 namespace plt {
 
 class Observer {
    private:
-    plt::TcpClient* tcp;
+    plt::UdpClient* udp;
 
    public:
     Observer();
@@ -24,6 +24,8 @@ class Observer {
     bool getWallSensorData(uint16_t* data);
 
     bool getEncoder(hal::EncoderData& data);
+
+    bool sendUartDebug(uint8_t* data, const int len);
 
     static Observer* getInstance();
 };

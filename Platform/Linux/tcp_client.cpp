@@ -21,10 +21,9 @@ bool plt::TcpClient::connectServer() {
 
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(3000);
-    server_address.sin_addr.s_addr = inet_addr("172.27.224.1");
+    server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-    if (connect(client_socket, (struct sockaddr*)&server_address,
-                sizeof(server_address)) < 0) {
+    if (connect(client_socket, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
         perror("Error at connecting to server\n");
         return false;
     }
@@ -63,20 +62,13 @@ bool plt::TcpClient::getImuData(hal::ImuData& data) {
     printf("%ld bytes received from IMU\n", bytes_recv);
 
     if (bytes_recv == 14) {
-        data.OUT_TEMP = static_cast<int16_t>(
-            (static_cast<uint16_t>(recv_data[1]) << 8) | recv_data[2]);
-        data.OUT_X_G = static_cast<int16_t>(
-            (static_cast<uint16_t>(recv_data[3]) << 8) | recv_data[4]);
-        data.OUT_Y_G = static_cast<int16_t>(
-            (static_cast<uint16_t>(recv_data[5]) << 8) | recv_data[6]);
-        data.OUT_Z_G = static_cast<int16_t>(
-            (static_cast<uint16_t>(recv_data[7]) << 8) | recv_data[8]);
-        data.OUT_X_A = static_cast<int16_t>(
-            (static_cast<uint16_t>(recv_data[9]) << 8) | recv_data[10]);
-        data.OUT_Y_A = static_cast<int16_t>(
-            (static_cast<uint16_t>(recv_data[11]) << 8) | recv_data[12]);
-        data.OUT_Z_A = static_cast<int16_t>(
-            (static_cast<uint16_t>(recv_data[13]) << 8) | recv_data[14]);
+        data.OUT_TEMP = static_cast<int16_t>((static_cast<uint16_t>(recv_data[1]) << 8) | recv_data[2]);
+        data.OUT_X_G = static_cast<int16_t>((static_cast<uint16_t>(recv_data[3]) << 8) | recv_data[4]);
+        data.OUT_Y_G = static_cast<int16_t>((static_cast<uint16_t>(recv_data[5]) << 8) | recv_data[6]);
+        data.OUT_Z_G = static_cast<int16_t>((static_cast<uint16_t>(recv_data[7]) << 8) | recv_data[8]);
+        data.OUT_X_A = static_cast<int16_t>((static_cast<uint16_t>(recv_data[9]) << 8) | recv_data[10]);
+        data.OUT_Y_A = static_cast<int16_t>((static_cast<uint16_t>(recv_data[11]) << 8) | recv_data[12]);
+        data.OUT_Z_A = static_cast<int16_t>((static_cast<uint16_t>(recv_data[13]) << 8) | recv_data[14]);
         return true;
     } else {
         return false;
@@ -87,11 +79,11 @@ bool plt::TcpClient::getBatteryVoltage(float& voltage) {
     char send_data[] = {0x00, 0x00, 0x00, 0x01, 0x42};
     ssize_t bytes_sent = send(client_socket, send_data, sizeof(send_data), 0);
     if (bytes_sent == -1) {
-        perror("Error at sending IMU data request\n");
+        perror("Error at sending Battery voltage request\n");
         close(client_socket);
         return false;
     } else if (bytes_sent != sizeof(send_data)) {
-        perror("Error at sending IMU data request in the middle\n");
+        perror("Error at sending Battery voltage request in the middle\n");
         close(client_socket);
         return false;
     }
@@ -99,7 +91,7 @@ bool plt::TcpClient::getBatteryVoltage(float& voltage) {
     char recv_data[128] = {0};
     ssize_t bytes_recv = recv(client_socket, recv_data, sizeof(recv_data), 0);
     if (bytes_recv == -1) {
-        perror("Error at receiving IMU data\n");
+        perror("Error at receiving Battery voltage\n");
         close(client_socket);
         return false;
     }
@@ -107,9 +99,7 @@ bool plt::TcpClient::getBatteryVoltage(float& voltage) {
     printf("%ld bytes received from Battery\n", bytes_recv);
 
     if (bytes_recv == 5) {
-        voltage = static_cast<float>(static_cast<uint32_t>(recv_data[1] << 24) |
-                                     (recv_data[2] << 16) |
-                                     (recv_data[3] << 8) | recv_data[4]);
+        voltage = static_cast<float>(static_cast<uint32_t>(recv_data[1] << 24) | (recv_data[2] << 16) | (recv_data[3] << 8) | recv_data[4]);
         return true;
     } else {
         return false;
@@ -142,9 +132,7 @@ bool plt::TcpClient::getWallSensorData(uint16_t* data) {
     if (bytes_recv == (2 * WALLSENSOR_NUMS + 1)) {
         if (recv_data[0] != 0x40) return false;
         for (int i = 0; i < WALLSENSOR_NUMS; ++i) {
-            data[i] = static_cast<uint16_t>(
-                static_cast<uint16_t>(recv_data[2 * i + 1] << 8) |
-                recv_data[2 * i + 2]);
+            data[i] = static_cast<uint16_t>(static_cast<uint16_t>(recv_data[2 * i + 1] << 8) | recv_data[2 * i + 2]);
         }
         return true;
     } else {
@@ -177,10 +165,8 @@ bool plt::TcpClient::getEncoder(hal::EncoderData& data) {
 
     if (bytes_recv == 5) {
         if (recv_data[0] != 0x43) return false;
-        data.LEFT = static_cast<uint16_t>(
-            static_cast<uint16_t>(recv_data[1] << 8) | recv_data[2]);
-        data.RIGHT = static_cast<uint16_t>(
-            static_cast<uint16_t>(recv_data[3] << 8) | recv_data[4]);
+        data.LEFT = static_cast<uint16_t>(static_cast<uint16_t>(recv_data[1] << 8) | recv_data[2]);
+        data.RIGHT = static_cast<uint16_t>(static_cast<uint16_t>(recv_data[3] << 8) | recv_data[4]);
         return true;
     } else {
         return false;

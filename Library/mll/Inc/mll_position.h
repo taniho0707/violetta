@@ -42,6 +42,18 @@ enum class FirstPersonDirection : uint8_t {
     LEFT,
 };
 
+// マウスの物理位置を定義
+struct MousePhysicalPosition {
+    float x;
+    float y;
+    float angle;
+};
+
+struct MouseVelocity {
+    float translation;
+    float rotation;
+};
+
 // マウスの論理位置を定義
 struct MouseSectionPosition {
     int16_t x;
@@ -110,7 +122,8 @@ struct MouseSectionPosition {
                     --x;
                 }
                 break;
-            case mll::OperationMoveType::PIVOTTURN:
+            case mll::OperationMoveType::PIVOTTURN_LEFT:
+            case mll::OperationMoveType::PIVOTTURN_RIGHT:
                 if (d == CardinalDirection::NORTH) {
                     --y;
                     d = CardinalDirection::SOUTH;
@@ -125,11 +138,8 @@ struct MouseSectionPosition {
                     d = CardinalDirection::EAST;
                 }
                 break;
-            // TODO: 斜め用直進の実装
-            case mll::OperationMoveType::TRAPDIAGO:
-                break;
-            case mll::OperationMoveType::EXTRALENGTH:
             case mll::OperationMoveType::WAIT:
+            case mll::OperationMoveType::CORRECTION_FRONT:
             case mll::OperationMoveType::LENGTH:
             case mll::OperationMoveType::UNDEFINED:
             case mll::OperationMoveType::STOP:

@@ -22,7 +22,9 @@ mpl::MplStatus mpl::Battery::initPort() {
     }
 }
 
-void mpl::Battery::deinitPort() { hal::deinitBatteryPort(); }
+void mpl::Battery::deinitPort() {
+    hal::deinitBatteryPort();
+}
 
 mpl::MplStatus mpl::Battery::scanSync(float& voltage) {
     if (hal::getBatteryVoltageSync(voltage) == hal::HalStatus::SUCCESS) {
@@ -35,6 +37,7 @@ mpl::MplStatus mpl::Battery::scanSync(float& voltage) {
 void mpl::Battery::interruptPeriodic() {
     static auto server = msg::MessageServer::getInstance();
     scanSync(last);
+    scanSync(last);  // 電圧安定化のため 2 回取得
 
     msg_format.battery = last;
     server->sendMessage(msg::ModuleId::BATTERY, &msg_format);

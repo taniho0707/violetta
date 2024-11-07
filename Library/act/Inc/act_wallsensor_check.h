@@ -12,9 +12,9 @@ namespace act {
 class WallsensorCheckActivity : public IActivity {
    private:
    public:
-    void init() override;
+    void init(ActivityParameters &params) override;
     Status run() override;
-    void finalize() override;
+    void finalize(ActivityParameters &params) override;
 };
 
 }  // namespace act

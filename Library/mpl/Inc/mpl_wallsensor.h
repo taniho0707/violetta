@@ -8,7 +8,7 @@
 // STL
 // #include <array>
 
-#include "hal_wallsensor.h"
+#include "hal_conf.h"
 #include "mpl_conf.h"
 #include "msg_format_wallsensor.h"
 #include "msg_server.h"

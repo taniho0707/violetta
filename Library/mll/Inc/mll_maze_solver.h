@@ -32,6 +32,7 @@ class MazeSolver {
 
     FirstPersonDirection getNextDirectionInSearchLeftHand(int8_t current_x, int8_t current_y, CardinalDirection current_angle);
     FirstPersonDirection getNextDirectionInSearchAdachi(int8_t current_x, int8_t current_y, CardinalDirection current_angle);
+    FirstPersonDirection getNextDirectionInSearchDijkstra(int8_t current_x, int8_t current_y, CardinalDirection current_angle);
 
    public:
     // 最新の壁情報
@@ -62,6 +63,10 @@ class MazeSolver {
 
     // 現在の動作の目的地座標
     MultiplePosition destination;
+
+    // 引数 buf は 130 Byte 以上のサイズを確保すること
+    // 引数 n は表示する行番号、0 から 65 まで
+    uint16_t string(char* buf, const uint8_t n);
 
     static MazeSolver* getInstance();
 };

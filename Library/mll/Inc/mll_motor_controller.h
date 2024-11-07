@@ -6,8 +6,10 @@
 #pragma once
 
 #include "cmd_server.h"
+#include "mll_position.h"
 #include "msg_format_localizer.h"
 #include "msg_format_motor_controller.h"
+#include "msg_format_motor_controller_internal.h"
 #include "msg_server.h"
 #include "params.h"
 
@@ -24,9 +26,18 @@ class MotorController {
     // msg::MsgFormatImu msg_imu;
     msg::MsgFormatLocalizer msg_localizer;
     msg::MsgFormatMotorController msg_motor_controller;
+    msg::MsgFormatMotorControllerInternal msg_motor_controller_internal;
 
     misc::MouseParams* params;
 
+    // 位置制御時の目標位置
+    float target_x;
+    float target_y;
+    float target_dif_distance;
+    float target_angle;
+    float target_dif_angle;
+
+    // 速度制御時の目標速度
     float target_velocity_translation;
     float target_velocity_rotation;
 
@@ -41,6 +52,14 @@ class MotorController {
     float last_differential_translation;
     float last_differential_rotation;
 
+    bool enabled_override_control;  // 外部モジュールにモーター制御を委譲する
+
+    // 【目標位置と現在位置の差分を計算】
+    // 目標距離に対して遅れている場合が正
+    float calcDistanceToTarget(float current_x, float current_y, float target_x, float target_y);
+    // 反時計回りが正
+    float calcAngleToTarget(float current_angle, float target_angle);
+
    public:
     void init();
 
@@ -49,10 +68,10 @@ class MotorController {
     // モーター制御を無効化
     void stopControl();
 
-    // 速度・角速度を設定する
-    void setVelocityTransition(float velocity_transition);
-    void setVelocityRotation(float velocity_rotation);
-    void setVelocity(float velocity_transition, float velocity_rotation);
+    // 目標位置を設定する
+    void setTargetPosition(float target_x, float target_y, float target_angle);
+    // 目標速度を設定する
+    void setTargetVelocity(float target_velocity_translation, float target_velocity_rotation);
 
     //////////////////////////////////
     //  制御内部の状態に関する実装  //
@@ -60,6 +79,9 @@ class MotorController {
     void resetIntegralTransition();
     void resetIntegralRotation();
     void resetIntegral();
+
+    void startOverrideControl();
+    void stopOverrideControl();  // モーター制御を外部モジュールに委譲する
 
     // 速度・角速度 0 でモーター制御を開始する
     void setStay();

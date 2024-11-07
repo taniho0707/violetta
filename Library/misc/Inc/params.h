@@ -21,7 +21,7 @@
 
 namespace misc {
 
-constexpr uint8_t SLALOM_PARAMS_VELOCITY_LENGTH = 3;  // 0.3, 0.5, 0.7
+constexpr uint8_t SLALOM_PARAMS_VELOCITY_LENGTH = 4;  // 0.25, 0.3, 0.5, 0.7
 
 // 保存先の種類を示す列挙型
 enum class ParameterDestinationType : uint8_t {
@@ -103,6 +103,15 @@ struct MouseParams {
     float motor_control_rotation_kd;     // モータ制御の回転方向の D ゲイン [1]
     float motor_control_kabe_kp;         // モータ制御の壁制御の P ゲイン [1]
 
+    float complementary_filter_constant;  // 相補フィルタの定数 1.0の場合100%エンコーダ [1] (0.0 ～ 1.0)
+
+    // 壁位置補正
+    float wall_position_front_translation_kp;   // 前壁距離補正の P ゲイン [1]
+    float wall_position_front_rotation_kp;      // 前壁角度補正の P ゲイン [1]
+    float wall_position_front_translation_max;  // 前壁距離補正の最大速度 [mm/s]
+    float wall_position_front_rotation_max;     // 前壁角度補正の最大角速度 [rad/s]
+    uint16_t wallsensor_slalom_front_control;   // スラローム時の前壁制御で使う前壁センサ閾値 [1]
+
     // Wall Sensor
     uint16_t wallsensor_turnon;                  // 壁センサLEDの立ち上がり待ち時間 [ns]
     uint16_t wallsensor_exist_threshold[6];      // 壁センサの壁有無判定閾値 [1]
@@ -113,10 +122,19 @@ struct MouseParams {
     uint16_t encoder_resolution;  // エンコーダの分解能 [1/pulse]
 
     // IMU
-    float imu_sensitivity_acceleration;  // IMU の加速度センサの感度 [m/s^2 / LSB]
-    float imu_offset_acceleration;       // IMU の加速度センサのオフセット [m/s^2]
-    float imu_sensitivity_gyro;          // IMU の角速度センサの感度 [rad/s / LSB]
-    float imu_offset_gyro;               // IMU の角速度センサのオフセット [rad/s]
+    float imu_sensitivity_acceleration_x;  // IMU の加速度センサの感度 [m/s^2 / LSB]
+    float imu_sensitivity_acceleration_y;  // IMU の加速度センサの感度 [m/s^2 / LSB]
+    float imu_sensitivity_acceleration_z;  // IMU の加速度センサの感度 [m/s^2 / LSB]
+    float imu_offset_acceleration_x;       // IMU の加速度センサのオフセット [m/s^2]
+    float imu_offset_acceleration_y;       // IMU の加速度センサのオフセット [m/s^2]
+    float imu_offset_acceleration_z;       // IMU の加速度センサのオフセット [m/s^2]
+
+    float imu_sensitivity_gyro_yaw;    // IMU の角速度センサの感度 [rad/s / LSB]
+    float imu_sensitivity_gyro_pitch;  // IMU の角速度センサの感度 [rad/s / LSB]
+    float imu_sensitivity_gyro_roll;   // IMU の角速度センサの感度 [rad/s / LSB]
+    float imu_offset_gyro_yaw;         // IMU の角速度センサのオフセット [rad/s]
+    float imu_offset_gyro_pitch;       // IMU の角速度センサのオフセット [rad/s]
+    float imu_offset_gyro_roll;        // IMU の角速度センサのオフセット [rad/s]
 
     // Memory
     // ログ用内蔵フラッシュメモリのサイズ [byte]

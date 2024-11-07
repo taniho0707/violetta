@@ -19,6 +19,10 @@
 #endif  // ifdef STM32F411xE
 
 hal::HalStatus hal::initMotorPort() {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_VIOLETTA
@@ -26,6 +30,7 @@ hal::HalStatus hal::initMotorPort() {
 #ifdef MOUSE_LAZULI
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
+    // LL_TIM_BDTR_InitTypeDef TIM_BDTRInitStruct = {0};
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
     LL_ADC_InitTypeDef ADC_InitStruct = {0};
     LL_ADC_REG_InitTypeDef ADC_REG_InitStruct = {0};
@@ -36,28 +41,32 @@ hal::HalStatus hal::initMotorPort() {
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC);
 
-    TIM_InitStruct.Prescaler = 16384 - 1;
+    TIM_InitStruct.Prescaler = 1 - 1;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    // TIM_InitStruct.Autoreload = 4294967295;
+    // TIM_InitStruct.Autoreload = 4294967295; -> kHz 設定のため Prescaler * Autoreload =
     TIM_InitStruct.Autoreload = MOTOR_TIMER_MAXCOUNT - 1;
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+    TIM_InitStruct.RepetitionCounter = 0;
     LL_TIM_Init(TIM2, &TIM_InitStruct);
-    LL_TIM_EnableARRPreload(TIM2);
+    LL_TIM_DisableARRPreload(TIM2);
     LL_TIM_OC_EnablePreload(TIM2, LL_TIM_CHANNEL_CH1);
     LL_TIM_OC_EnablePreload(TIM2, LL_TIM_CHANNEL_CH2);
-    LL_TIM_OC_EnablePreload(TIM2, LL_TIM_CHANNEL_CH4);
+    LL_TIM_OC_EnablePreload(TIM2, LL_TIM_CHANNEL_CH3);
 
     TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
     TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
     TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
-    TIM_OC_InitStruct.CompareValue = 0;
     TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
+    TIM_OC_InitStruct.OCNPolarity = LL_TIM_OCPOLARITY_HIGH;
+    TIM_OC_InitStruct.OCIdleState = LL_TIM_OCIDLESTATE_LOW;
+    TIM_OC_InitStruct.OCNIdleState = LL_TIM_OCIDLESTATE_LOW;
+    TIM_OC_InitStruct.CompareValue = 0;
     LL_TIM_OC_Init(TIM2, LL_TIM_CHANNEL_CH1, &TIM_OC_InitStruct);
     LL_TIM_OC_DisableFast(TIM2, LL_TIM_CHANNEL_CH1);
     LL_TIM_OC_Init(TIM2, LL_TIM_CHANNEL_CH2, &TIM_OC_InitStruct);
     LL_TIM_OC_DisableFast(TIM2, LL_TIM_CHANNEL_CH2);
-    LL_TIM_OC_Init(TIM2, LL_TIM_CHANNEL_CH4, &TIM_OC_InitStruct);
-    LL_TIM_OC_DisableFast(TIM2, LL_TIM_CHANNEL_CH4);
+    LL_TIM_OC_Init(TIM2, LL_TIM_CHANNEL_CH3, &TIM_OC_InitStruct);
+    LL_TIM_OC_DisableFast(TIM2, LL_TIM_CHANNEL_CH3);
     LL_TIM_SetOCRefClearInputSource(TIM2, LL_TIM_OCREF_CLR_INT_NC);
     LL_TIM_DisableExternalClock(TIM2);
     LL_TIM_ConfigETR(TIM2, LL_TIM_ETR_POLARITY_NONINVERTED, LL_TIM_ETR_PRESCALER_DIV1, LL_TIM_ETR_FILTER_FDIV1);
@@ -67,19 +76,18 @@ hal::HalStatus hal::initMotorPort() {
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_OC_SetCompareCH1(TIM2, 0);
     LL_TIM_OC_SetCompareCH2(TIM2, 0);
-    LL_TIM_OC_SetCompareCH4(TIM2, 0);
-    LL_TIM_EnableCounter(TIM2);
+    LL_TIM_OC_SetCompareCH3(TIM2, 0);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH1);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
-    LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH4);
-
-    LL_GPIO_SetOutputPin(GPIOB, MOTOR_L_EN_Pin | MOTOR_R_EN_Pin);
-    LL_GPIO_ResetOutputPin(GPIOB, SUCTION_PWM_Pin);
+    LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH3);
+    LL_TIM_EnableCounter(TIM2);
+    LL_TIM_EnableAllOutputs(TIM2);
+    // LL_TIM_GenerateEvent_UPDATE(TIM2);
 
     /** TIM2 GPIO Configuration
     PA0     ------> TIM2_CH1
     PA1     ------> TIM2_CH2
-    PB11     ------> TIM2_CH4
+    PA2     ------> TIM2_CH3
 
     EN | PH | Function
     ---|----|---------
@@ -87,7 +95,8 @@ hal::HalStatus hal::initMotorPort() {
     1  | 0  | Reverse
     1  | 1  | Forward
     */
-    GPIO_InitStruct.Pin = MOTOR_R_PWM_Pin | MOTOR_L_PWM_Pin;
+    LL_GPIO_ResetOutputPin(GPIOA, MOTOR_L_EN_Pin | MOTOR_R_EN_Pin | SUCTION_PWM_Pin);
+    GPIO_InitStruct.Pin = MOTOR_L_EN_Pin | MOTOR_R_EN_Pin | SUCTION_PWM_Pin;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
     GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -95,15 +104,8 @@ hal::HalStatus hal::initMotorPort() {
     GPIO_InitStruct.Alternate = LL_GPIO_AF_1;
     LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = SUCTION_PWM_Pin;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    GPIO_InitStruct.Alternate = LL_GPIO_AF_1;
-    LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = MOTOR_L_EN_Pin | MOTOR_R_EN_Pin;
+    // MOTOR_L/R_PH
+    GPIO_InitStruct.Pin = LL_GPIO_PIN_1 | LL_GPIO_PIN_2;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
     LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -117,8 +119,7 @@ hal::HalStatus hal::initMotorPort() {
     LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     LL_RCC_SetADCClockSource(LL_RCC_ADC_CLKSOURCE_PLLSAI1);
-    LL_ADC_SetCommonClock(__LL_ADC_COMMON_INSTANCE(ADC1),
-                          LL_ADC_CLOCK_SYNC_PCLK_DIV2);
+    LL_ADC_SetCommonClock(__LL_ADC_COMMON_INSTANCE(ADC1), LL_ADC_CLOCK_SYNC_PCLK_DIV2);
 
     // LL_DMA_SetPeriphRequest(DMA2, LL_DMA_CHANNEL_2, LL_DMAMUX_REQ_ADC1);
     // LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_CHANNEL_2, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
@@ -180,7 +181,7 @@ hal::HalStatus hal::initMotorPort() {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -190,8 +191,7 @@ hal::HalStatus hal::initMotorPort() {
 
     TIM_InitStruct.Prescaler = 0;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct.Autoreload =
-        65536 / 16 - 1;  // TODO: 外部パラメータから設定できるように、暫定 3.2kHz * 2
+    TIM_InitStruct.Autoreload = 65536 / 16 - 1;  // TODO: 外部パラメータから設定できるように、暫定 3.2kHz * 2
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
     LL_TIM_Init(TIM4, &TIM_InitStruct);
 
@@ -241,8 +241,7 @@ hal::HalStatus hal::initMotorPort() {
     0    | 1    | Forward
     1    | 1    | Brake
     */
-    GPIO_InitStruct.Pin =
-        MOT_R_PWM1_Pin | MOT_R_PWM2_Pin | MOT_L_PWM1_Pin | MOT_L_PWM2_Pin;
+    GPIO_InitStruct.Pin = MOT_R_PWM1_Pin | MOT_R_PWM2_Pin | MOT_L_PWM1_Pin | MOT_L_PWM2_Pin;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
     GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
     GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -252,13 +251,13 @@ hal::HalStatus hal::initMotorPort() {
 
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::deinitMotorPort() {
+#ifdef LINUX
+    return hal::HalStatus::SUCCESS;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_VIOLETTA
@@ -270,31 +269,39 @@ hal::HalStatus hal::deinitMotorPort() {
 #ifdef STM32F411xE
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef STM32F411xE
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::setMotorDutyR(float duty) {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_VIOLETTA
 
 #ifdef MOUSE_LAZULI
-    if (duty >= 0.f && duty <= 1.f) {
-        LL_TIM_OC_SetCompareCH1(TIM4, (uint32_t)((1.f - duty) * MOTOR_TIMER_MAXCOUNT));
-        LL_GPIO_SetOutputPin(GPIOB, MOTOR_R_EN_Pin);
+    // NOTE: モーターがギリギリ回転しないDuty (バッテリー満タン) を指定
+    // constexpr float MOTOR_DUTY_MIN = 0.117f;
+    constexpr float MOTOR_DUTY_MIN = 0.117f;
+    constexpr float MOTOR_DUTY_WIDTH = 1.0f - MOTOR_DUTY_MIN;
+    float adjusted_duty = MOTOR_DUTY_WIDTH * duty;
+    if (duty == 0.f) {
+        LL_TIM_OC_SetCompareCH1(TIM2, 0);
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_1);
+    } else if (duty >= 0.f && duty <= 1.f) {
+        LL_TIM_OC_SetCompareCH1(TIM2, (uint32_t)((adjusted_duty + MOTOR_DUTY_MIN) * (MOTOR_TIMER_MAXCOUNT - 1)));
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_1);
     } else if (duty < 0.f && duty >= -1.f) {
-        LL_TIM_OC_SetCompareCH1(TIM4, (uint32_t)((1.f + duty) * MOTOR_TIMER_MAXCOUNT));
-        LL_GPIO_ResetOutputPin(GPIOB, MOTOR_R_EN_Pin);
+        LL_TIM_OC_SetCompareCH1(TIM2, (uint32_t)((-1 * adjusted_duty + MOTOR_DUTY_MIN) * (MOTOR_TIMER_MAXCOUNT - 1)));
+        LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_1);
     } else {
         return hal::HalStatus::INVALID_PARAMS;
     }
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     if (duty >= 0.f && duty <= 1.f) {
         // TODO: 計算式の65535を外部パラメータから読むようにする
         LL_TIM_OC_SetCompareCH4(TIM4, (uint32_t)(4095.f * (1.f - duty)));
@@ -307,31 +314,39 @@ hal::HalStatus hal::setMotorDutyR(float duty) {
     }
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::setMotorDutyL(float duty) {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_VIOLETTA
 
 #ifdef MOUSE_LAZULI
-    if (duty >= 0.f && duty <= 1.f) {
-        LL_TIM_OC_SetCompareCH2(TIM4, (uint32_t)((1.f - duty) * MOTOR_TIMER_MAXCOUNT));
-        LL_GPIO_SetOutputPin(GPIOB, MOTOR_L_EN_Pin);
+    // NOTE: モーターがギリギリ回転しないDuty (バッテリー満タン) を指定
+    // constexpr float MOTOR_DUTY_MIN = 0.105f;
+    constexpr float MOTOR_DUTY_MIN = 0.105f;
+    constexpr float MOTOR_DUTY_WIDTH = 1.0f - MOTOR_DUTY_MIN;
+    float adjusted_duty = MOTOR_DUTY_WIDTH * duty;
+    if (duty == 0.f) {
+        LL_TIM_OC_SetCompareCH2(TIM2, 0);
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_2);
+    } else if (duty >= 0.f && duty <= 1.f) {
+        LL_TIM_OC_SetCompareCH2(TIM2, (uint32_t)((adjusted_duty + MOTOR_DUTY_MIN) * (MOTOR_TIMER_MAXCOUNT - 1)));
+        LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_2);
     } else if (duty < 0.f && duty >= -1.f) {
-        LL_TIM_OC_SetCompareCH2(TIM4, (uint32_t)((1.f + duty) * MOTOR_TIMER_MAXCOUNT));
-        LL_GPIO_ResetOutputPin(GPIOB, MOTOR_L_EN_Pin);
+        LL_TIM_OC_SetCompareCH2(TIM2, (uint32_t)((-1 * adjusted_duty + MOTOR_DUTY_MIN) * (MOTOR_TIMER_MAXCOUNT - 1)));
+        LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_2);
     } else {
         return hal::HalStatus::INVALID_PARAMS;
     }
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     if (duty >= 0.f && duty <= 1.f) {
         // TODO: 計算式の65535を外部パラメータから読むようにする
         LL_TIM_OC_SetCompareCH1(TIM4, (uint32_t)(4095.f * (1.f - duty)));
@@ -344,13 +359,13 @@ hal::HalStatus hal::setMotorDutyL(float duty) {
     }
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::setMotorFloat() {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_VIOLETTA
@@ -361,27 +376,27 @@ hal::HalStatus hal::setMotorFloat() {
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_LAZULI
 
-#ifdef MOUSE_ZIRCONIA2KAI
+#if defined(MOUSE_ZIRCONIA2KAI) && defined(STM32F411xE)
     LL_TIM_OC_SetCompareCH1(TIM4, 0);
     LL_TIM_OC_SetCompareCH2(TIM4, 0);
     LL_TIM_OC_SetCompareCH3(TIM4, 0);
     LL_TIM_OC_SetCompareCH4(TIM4, 0);
     return hal::HalStatus::SUCCESS;
 #endif  // ifdef MOUSE_ZIRCONIA2KAI
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::setMotorDutySuction(float duty) {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef MOUSE_VIOLETTA
 
 #ifdef MOUSE_LAZULI
     if (duty >= 0.f && duty <= 1.f) {
-        LL_TIM_OC_SetCompareCH4(TIM2, (uint32_t)((1.f - duty) * MOTOR_TIMER_MAXCOUNT));
+        LL_TIM_OC_SetCompareCH3(TIM2, (uint32_t)(duty * float(MOTOR_TIMER_MAXCOUNT - 1)));
         return hal::HalStatus::SUCCESS;
     } else {
         return hal::HalStatus::INVALID_PARAMS;
@@ -391,13 +406,13 @@ hal::HalStatus hal::setMotorDutySuction(float duty) {
 #ifdef STM32F411xE
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef STM32F411xE
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }
 
 hal::HalStatus hal::getMotorCurrentSync(float& current_l, float& current_r) {
+#ifdef LINUX
+    return hal::HalStatus::NOIMPLEMENT;
+#endif  // ifdef LINUX
+
 #ifdef MOUSE_VIOLETTA
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef MOUSE_VIOLETTA
@@ -405,27 +420,23 @@ hal::HalStatus hal::getMotorCurrentSync(float& current_l, float& current_r) {
 #ifdef MOUSE_LAZULI
     // Right
     LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_8);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_8,
-                                  LL_ADC_SAMPLINGTIME_24CYCLES_5);
+    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_8, LL_ADC_SAMPLINGTIME_24CYCLES_5);
     LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_8, LL_ADC_SINGLE_ENDED);
 
     LL_ADC_REG_StartConversion(ADC1);
     while (LL_ADC_IsActiveFlag_EOC(ADC1) == RESET);
     LL_ADC_ClearFlag_EOC(ADC1);
-    current_r = LL_ADC_REG_ReadConversionData12(ADC1) /
-                4095.0f /*[12bit]*/ * 3.0f /*[V]*/ / 1000.0f /*[R]*/;
+    current_r = LL_ADC_REG_ReadConversionData12(ADC1) / 4095.0f /*[12bit]*/ * 3.0f /*[V]*/ / 1000.0f /*[R]*/;
 
     // Left
     LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_9);
-    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_9,
-                                  LL_ADC_SAMPLINGTIME_24CYCLES_5);
+    LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_9, LL_ADC_SAMPLINGTIME_24CYCLES_5);
     LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_9, LL_ADC_SINGLE_ENDED);
 
     LL_ADC_REG_StartConversion(ADC1);
     while (LL_ADC_IsActiveFlag_EOC(ADC1) == RESET);
     LL_ADC_ClearFlag_EOC(ADC1);
-    current_l = LL_ADC_REG_ReadConversionData12(ADC1) /
-                4095.0f /*[12bit]*/ * 3.0f /*[V]*/ / 1000.0f /*[R]*/;
+    current_l = LL_ADC_REG_ReadConversionData12(ADC1) / 4095.0f /*[12bit]*/ * 3.0f /*[V]*/ / 1000.0f /*[R]*/;
 
     // FIXME: SamplingTime を調整する
     // TODO: 正確な分圧比をパラメータとして受け取る
@@ -436,8 +447,4 @@ hal::HalStatus hal::getMotorCurrentSync(float& current_l, float& current_r) {
 #ifdef STM32F411xE
     return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef STM32F411xE
-
-#ifdef LINUX
-    return hal::HalStatus::SUCCESS;
-#endif  // ifdef LINUX
 }

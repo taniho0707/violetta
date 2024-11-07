@@ -17,10 +17,10 @@
 // #include "stm32l4xx_ll_tim.h"
 // #endif  // ifdef STM32L4P5xx
 
-// #ifdef LINUX
-// #include <chrono>
-// #include <cstdint>
-// #endif
+#ifdef LINUX
+#include <chrono>
+#include <cstdint>
+#endif
 
 volatile uint32_t mpl::Timer::total = 0;
 uint8_t mpl::Timer::tick_count = 0;
@@ -64,16 +64,11 @@ mpl::MplStatus mpl::Timer::init() {
 }
 
 uint32_t mpl::Timer::getInternalCounter() {
-#ifdef LINUX
-    return 0
-#else
     return hal::getTimerCount();
-#endif
 }
 
 uint32_t mpl::Timer::getNanoTimeFromLastInterrupt() {
-    return getInternalCounter() * hal::TIMER_COUNT_INTERVAL /
-           hal::TIMER_COUNT_MAX;
+    return getInternalCounter() * hal::TIMER_COUNT_INTERVAL / hal::TIMER_COUNT_MAX;
 }
 
 uint32_t mpl::Timer::getMicroTime() {
@@ -92,10 +87,8 @@ uint32_t mpl::Timer::getTimeFromLastReference() {
 }
 
 void mpl::Timer::sleepNs(uint32_t ns) {
-    uint32_t minimum_unit =
-        (1000.f * hal::TIMER_COUNT_INTERVAL / hal::TIMER_COUNT_MAX);  // [ns]
-    uint32_t count_wait = misc::min(getInternalCounter() + ns / minimum_unit,
-                                    hal::TIMER_COUNT_INTERVAL - 2);
+    uint32_t minimum_unit = (1000.f * hal::TIMER_COUNT_INTERVAL / hal::TIMER_COUNT_MAX);  // [ns]
+    uint32_t count_wait = misc::min(getInternalCounter() + ns / minimum_unit, hal::TIMER_COUNT_INTERVAL - 2);
     while (getInternalCounter() < count_wait);
     return;
 }

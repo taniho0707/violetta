@@ -11,10 +11,13 @@ namespace act {
 
 class SearchActivity : public IActivity {
    private:
+    mll::AlgorithmType algorithm;
+    bool oneway;
+
    public:
-    void init() override;
+    void init(ActivityParameters &params) override;
     Status run() override;
-    void finalize() override;
+    void finalize(ActivityParameters &params) override;
 };
 
 }  // namespace act

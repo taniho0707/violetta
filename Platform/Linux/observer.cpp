@@ -7,26 +7,30 @@
 #include "observer.h"
 
 plt::Observer::Observer() {
-    tcp = plt::TcpClient::getInstance();
-    tcp->connectServer();
+    udp = plt::UdpClient::getInstance();
+    udp->connectServer();
 }
 
 plt::Observer::~Observer() {}
 
 bool plt::Observer::getImuData(hal::ImuData& data) {
-    return tcp->getImuData(data);
+    return udp->getImuData(data);
 }
 
 bool plt::Observer::getBatteryVoltage(float& voltage) {
-    return tcp->getBatteryVoltage(voltage);
+    return udp->getBatteryVoltage(voltage);
 }
 
 bool plt::Observer::getWallSensorData(uint16_t* data) {
-    return tcp->getWallSensorData(data);
+    return udp->getWallSensorData(data);
 }
 
 bool plt::Observer::getEncoder(hal::EncoderData& data) {
-    return tcp->getEncoder(data);
+    return udp->getEncoder(data);
+}
+
+bool plt::Observer::sendUartDebug(uint8_t* data, const int len) {
+    return udp->sendUartDebug(data, len);
 }
 
 plt::Observer* plt::Observer::getInstance() {

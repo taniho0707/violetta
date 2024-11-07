@@ -11,8 +11,7 @@
 
 using namespace msg;
 
-msg::MsgFormatWallsensor::MsgFormatWallsensor()
-    : MsgFormat(ModuleId::WALLSENSOR) {}
+msg::MsgFormatWallsensor::MsgFormatWallsensor() : MsgFormat(ModuleId::WALLSENSOR) {}
 
 void MsgFormatWallsensor::copy(void* target) {
     auto* t = static_cast<MsgFormatWallsensor*>(target);
@@ -21,6 +20,9 @@ void MsgFormatWallsensor::copy(void* target) {
     t->time = time;
     t->frontleft = frontleft;
     t->left = left;
+#if defined(MOUSE_LAZULI) || defined(MOUSE_LAZULI_SENSOR)
+    t->center = center;
+#endif
     t->right = right;
     t->frontright = frontright;
 }
@@ -34,6 +36,9 @@ void MsgFormatWallsensor::update(void* from) {
     time = f->time;
     frontleft = f->frontleft;
     left = f->left;
+#if defined(MOUSE_LAZULI) || defined(MOUSE_LAZULI_SENSOR)
+    center = f->center;
+#endif
     right = f->right;
     frontright = f->frontright;
 }

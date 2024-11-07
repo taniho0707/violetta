@@ -69,31 +69,21 @@ hal::HalStatus hal::initUartDebugPort(InitializeType type) {
         LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
         LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
 
-        LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_1,
-                                LL_DMAMUX_REQ_USART1_RX);
-        LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_1,
-                                        LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-        LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_1,
-                                       LL_DMA_PRIORITY_LOW);
+        LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_1, LL_DMAMUX_REQ_USART1_RX);
+        LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_1, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+        LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PRIORITY_LOW);
         LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MODE_CIRCULAR);
-        LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_1,
-                                LL_DMA_PERIPH_NOINCREMENT);
-        LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_1,
-                                LL_DMA_MEMORY_INCREMENT);
+        LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PERIPH_NOINCREMENT);
+        LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT);
         LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_BYTE);
         LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_BYTE);
 
-        LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_2,
-                                LL_DMAMUX_REQ_USART1_TX);
-        LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_2,
-                                        LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
-        LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_2,
-                                       LL_DMA_PRIORITY_LOW);
+        LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_2, LL_DMAMUX_REQ_USART1_TX);
+        LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_2, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+        LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_2, LL_DMA_PRIORITY_LOW);
         LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_2, LL_DMA_MODE_NORMAL);
-        LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_2,
-                                LL_DMA_PERIPH_NOINCREMENT);
-        LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_2,
-                                LL_DMA_MEMORY_INCREMENT);
+        LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_2, LL_DMA_PERIPH_NOINCREMENT);
+        LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_2, LL_DMA_MEMORY_INCREMENT);
         LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_2, LL_DMA_PDATAALIGN_BYTE);
         LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_2, LL_DMA_MDATAALIGN_BYTE);
 
@@ -110,8 +100,7 @@ hal::HalStatus hal::initUartDebugPort(InitializeType type) {
         LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
         LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
 
-        NVIC_SetPriority(USART1_IRQn,
-                         NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 0));
+        NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 0));
         NVIC_EnableIRQ(USART1_IRQn);
 
         GPIO_InitStruct.Pin = LL_GPIO_PIN_9 | LL_GPIO_PIN_10;
@@ -279,18 +268,18 @@ hal::HalStatus hal::deinitUartDebugPort() {
 hal::HalStatus hal::sendUartDebug1Byte(uint8_t data) {
 #if defined(STM32L4P5xx) || defined(STM32F411xE)
     LL_USART_TransmitData8(USART1, data);
-    while (LL_USART_IsActiveFlag_TC(USART1) == 0) {
-    }
+    while (LL_USART_IsActiveFlag_TC(USART1) == 0) {}
     LL_USART_ClearFlag_TC(USART1);
     return hal::HalStatus::SUCCESS;
 #endif  // if defined(STM32L4P5xx) || defined(STM32F411xE)
 
 #ifdef LINUX
-    if (plt::Observer::getInstance()->getImuData(data)) {
-        return hal::HalStatus::SUCCESS;
-    } else {
-        return hal::HalStatus::ERROR;
-    }
+    // if (plt::Observer::getInstance()->getImuData(data)) {
+    //     return hal::HalStatus::SUCCESS;
+    // } else {
+    //     return hal::HalStatus::ERROR;
+    // }
+    return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef LINUX
 }
 
@@ -301,11 +290,12 @@ hal::HalStatus hal::sendUartDebugNByte(const char *data, const int len) {
 #endif  // if defined(STM32L4P5xx) || defined(STM32F411xE)
 
 #ifdef LINUX
-    if (plt::Observer::getInstance()->getImuData(data)) {
-        return hal::HalStatus::SUCCESS;
-    } else {
-        return hal::HalStatus::ERROR;
-    }
+    // if (plt::Observer::getInstance()->getImuData(data)) {
+    //     return hal::HalStatus::SUCCESS;
+    // } else {
+    //     return hal::HalStatus::ERROR;
+    // }
+    return hal::HalStatus::NOIMPLEMENT;
 #endif  // ifdef LINUX
 }
 
@@ -315,10 +305,8 @@ hal::HalStatus hal::sendUartDebugDmaNByte(const char *data, const int len) {
 
     for (int i = 0; i < len; ++i) debugDmaTxBuffer[i] = data[i];
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
-    LL_DMA_ConfigAddresses(
-        DMA1, LL_DMA_CHANNEL_2, (uint32_t)debugDmaTxBuffer,
-        LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_TRANSMIT),
-        LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_2));
+    LL_DMA_ConfigAddresses(DMA1, LL_DMA_CHANNEL_2, (uint32_t)debugDmaTxBuffer, LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_TRANSMIT),
+                           LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_CHANNEL_2));
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, len);
     LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_2, LL_DMAMUX_REQ_USART1_TX);
 
@@ -333,10 +321,8 @@ hal::HalStatus hal::sendUartDebugDmaNByte(const char *data, const int len) {
 
     for (int i = 0; i < len; ++i) debugDmaTxBuffer[i] = data[i];
     LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_7);
-    LL_DMA_ConfigAddresses(
-        DMA2, LL_DMA_STREAM_7, (uint32_t)debugDmaTxBuffer,
-        LL_USART_DMA_GetRegAddr(USART1),
-        LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_STREAM_7));
+    LL_DMA_ConfigAddresses(DMA2, LL_DMA_STREAM_7, (uint32_t)debugDmaTxBuffer, LL_USART_DMA_GetRegAddr(USART1),
+                           LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_STREAM_7));
     LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_7, len);
 
     LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_7);

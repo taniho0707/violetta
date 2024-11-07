@@ -70,6 +70,13 @@ HalStatus getWallSensorSingleSync(uint16_t& data);
 
 HalStatus getWallSensorSingleSync(uint16_t& data, WallSensorNumbers n);
 
+// 対 LazuliSensor 用の関数
+// param: data = WallSensorNum の長さの配列
+HalStatus getWallSensorAllSync(uint16_t* data);
+
+// LazuliSensor 用の関数
+HalStatus sendWallSensorDataSpiSync(uint16_t& data);
+
 // HalStatus getWallSensorAllSync(WallSensorData& data);
 // HalStatus getBatteryVoltageAsync();
 // HalStatus getBatteryVoltageDma();

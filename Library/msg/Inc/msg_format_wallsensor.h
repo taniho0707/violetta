@@ -17,10 +17,18 @@ class MsgFormatWallsensor : public MsgFormat {
 
     void update(void* from) override;
 
+#if defined(MOUSE_LAZULI) || defined(MOUSE_LAZULI_SENSOR)
+    uint16_t frontleft;
+    uint16_t left;
+    uint16_t center;
+    uint16_t right;
+    uint16_t frontright;
+#elif defined(MOUSE_ZIRCONIA2KAI)
     uint16_t frontleft;
     uint16_t left;
     uint16_t right;
     uint16_t frontright;
+#endif
 };
 
 }  // namespace msg

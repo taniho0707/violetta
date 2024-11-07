@@ -44,17 +44,30 @@ void WallAnalyser::interruptPeriodic() {
     incrementSensorBufferIndex();
     sensor_buffer_frontleft[sensor_buffer_index] = msg_wallsensor.frontleft;
     sensor_buffer_left[sensor_buffer_index] = msg_wallsensor.left;
+#if defined(MOUSE_LAZULI)
+    sensor_buffer_center[sensor_buffer_index] = msg_wallsensor.center;
+#endif
     sensor_buffer_right[sensor_buffer_index] = msg_wallsensor.right;
     sensor_buffer_frontright[sensor_buffer_index] = msg_wallsensor.frontright;
 
     // 左右の変位の計算
     int32_t dif_from_center_left = sensor_buffer_left[sensor_buffer_index] - params->wallsensor_exist_threshold[1];
-    int32_t dif_from_center_right = sensor_buffer_right[sensor_buffer_index] - params->wallsensor_exist_threshold[2];
+    int32_t dif_from_center_right = sensor_buffer_right[sensor_buffer_index] - params->wallsensor_exist_threshold[3];
+    int32_t angle_from_front = (sensor_buffer_left[sensor_buffer_index] - params->wallsensor_center[0]) -
+                               (sensor_buffer_right[sensor_buffer_index] - params->wallsensor_center[4]);
+#if defined(MOUSE_ZIRCONIA2KAI)
     int32_t distance_from_front = ((sensor_buffer_frontleft[sensor_buffer_index] - params->wallsensor_center[1]) +
-                                   (sensor_buffer_frontright[sensor_buffer_index] - params->wallsensor_center[3])) /
+                                   (sensor_buffer_frontright[sensor_buffer_index] - params->wallsensor_center[4])) /
                                   2;
+#endif
+#if defined(MOUSE_LAZULI)
+    // int32_t distance_from_front = sensor_buffer_center[sensor_buffer_index] - params->wallsensor_center[2];
+    int32_t distance_from_front = (sensor_buffer_left[sensor_buffer_index] - params->wallsensor_center[0]) +
+                                  (sensor_buffer_right[sensor_buffer_index] - params->wallsensor_center[4]);
+#endif
 
     // 壁切れの判定用変数
+    // FIXME: 1msのみデータが異常値になった場合に誤って壁切れ検知をしないように修正したい
     bool kabekire_left = false;
     bool kabekire_right = false;
     uint8_t previous_index = previousSensorBufferIndex();
@@ -73,11 +86,11 @@ void WallAnalyser::interruptPeriodic() {
         dif_from_center_left = 0;
         // dif_from_center_right *= 2;
     }
-    if (sensor_buffer_right[sensor_buffer_index] > params->wallsensor_exist_threshold[2]) {
+    if (sensor_buffer_right[sensor_buffer_index] > params->wallsensor_exist_threshold[3]) {
         // 右壁あり
         wall.addWall(FirstPersonDirection::RIGHT);
     } else {
-        if (sensor_buffer_right[previous_index] > params->wallsensor_exist_threshold[2] &&
+        if (sensor_buffer_right[previous_index] > params->wallsensor_exist_threshold[3] &&
             sensor_buffer_right[previous_index] - sensor_buffer_right[sensor_buffer_index] > params->wallsensor_kabekire_dif_threshold) {
             kabekire_right = true;
         }
@@ -85,11 +98,20 @@ void WallAnalyser::interruptPeriodic() {
         dif_from_center_right = 0;
         // dif_from_center_left *= 2;
     }
+
+#if defined(MOUSE_ZIRCONIA2KAI)
     if (sensor_buffer_frontleft[sensor_buffer_index] > params->wallsensor_exist_threshold[0] ||
         sensor_buffer_frontright[sensor_buffer_index] > params->wallsensor_exist_threshold[3]) {
         // 前壁あり
         wall.addWall(FirstPersonDirection::FRONT);
     }
+#endif
+#if defined(MOUSE_LAZULI)
+    if (sensor_buffer_center[sensor_buffer_index] > params->wallsensor_exist_threshold[2]) {
+        // 前壁あり
+        wall.addWall(FirstPersonDirection::FRONT);
+    }
+#endif
 
     // FIXME: うまいこといかない
     // 壁制御の有効無効切り替え
@@ -111,6 +133,7 @@ void WallAnalyser::interruptPeriodic() {
     msg_wall_analyser.front_wall = wall;
     msg_wall_analyser.distance_from_center = dif_distance_from_center;
     msg_wall_analyser.distance_from_front = distance_from_front;
+    msg_wall_analyser.angle_from_front = angle_from_front;
     msg_wall_analyser.kabekire_left = kabekire_left;
     msg_wall_analyser.kabekire_right = kabekire_right;
 

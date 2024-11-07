@@ -15,6 +15,14 @@ class CommandServer {
    private:
     CommandServer();
 
+    uint32_t iteNextUiOut;  // 次に追加する位置
+    uint32_t iteLastUiOut;  // 次に読み出す位置
+    CommandFormatUiOut bufferUiOut[COMMAND_BUFFER_SIZE];
+
+    uint32_t iteNextUiIn;
+    uint32_t iteLastUiIn;
+    CommandFormatUiIn bufferUiIn[COMMAND_BUFFER_SIZE];
+
     uint32_t iteNextDebugTx;  // 次に追加する位置
     uint32_t iteLastDebugTx;  // 次に読み出す位置
     CommandFormatDebugTx bufferDebugTx[COMMAND_BUFFER_SIZE];

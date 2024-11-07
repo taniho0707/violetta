@@ -7,8 +7,10 @@
 
 using namespace act;
 
-void ModuleTestActivity::init() {}
+void ModuleTestActivity::init(ActivityParameters &params) {}
 
-Status ModuleTestActivity::run() { return Status::NOIMPLEMENT; }
+Status ModuleTestActivity::run() {
+    return Status::NOIMPLEMENT;
+}
 
-void ModuleTestActivity::finalize() {}
+void ModuleTestActivity::finalize(ActivityParameters &params) {}

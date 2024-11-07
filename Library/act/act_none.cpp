@@ -7,7 +7,7 @@
 
 using namespace act;
 
-void NoneActivity::init() {}
+void NoneActivity::init(ActivityParameters &params) {}
 
 Status NoneActivity::run() {
     while (true) {
@@ -16,4 +16,4 @@ Status NoneActivity::run() {
     return Status::ERROR;
 }
 
-void NoneActivity::finalize() {}
+void NoneActivity::finalize(ActivityParameters &params) {}

@@ -5,7 +5,19 @@
 //******************************************************************************
 #include "mll_trajectory.h"
 
+#if defined(STM32)
+#ifndef STM32C011xx
 #include "arm_math.h"
+#else
+#include "math.h"
+#endif
+#endif
+
+#ifdef LINUX
+#include "arm_math_linux.h"
+using namespace plt;
+#endif
+
 #include "stdint.h"
 #include "util.h"
 
@@ -24,7 +36,8 @@ Trajectory::Trajectory() {
     t_end = 0;
 }
 
-bool Trajectory::availableConstantVelocity() const {
+// FIXME: キャッシュを更新する
+bool Trajectory::availableConstantVelocity() {
     if (form == TrajectoryFormType::TRAPEZOID) {
         if (v_start == v_end) {
             return (v_max * v_max - v_start * v_start) / misc::abs(accel) <= misc::abs(distance);
@@ -36,8 +49,7 @@ bool Trajectory::availableConstantVelocity() const {
     }
 }
 
-void Trajectory::init(TrajectoryCalcType calc, TrajectoryFormType form,
-                      float a, float d, float v_start, float v_max, float v_end) {
+void Trajectory::init(TrajectoryCalcType calc, TrajectoryFormType form, float a, float d, float v_start, float v_max, float v_end) {
     this->calc = calc;
     this->form = form;
 
@@ -58,7 +70,15 @@ void Trajectory::init(TrajectoryCalcType calc, TrajectoryFormType form,
             t_2 = (x_2 / misc::abs(v_max)) * 1000 + t_1;
             t_end = ((v_max - v_end) / accel) * 1000 + t_2;
         } else {
+#if defined(STM32)
+#ifndef STM32C011xx
             arm_sqrt_f32((misc::abs(2 * accel * distance) + v_start * v_start + v_end * v_end) / 2, &this->v_max);
+#else
+            this->v_max = sqrtf((misc::abs(2 * accel * distance) + v_start * v_start + v_end * v_end) / 2);
+#endif
+#elif defined(LINUX)
+            this->v_max = sqrt((misc::abs(2 * accel * distance) + v_start * v_start + v_end * v_end) / 2);
+#endif
             // float x_1 = (v_max * v_max - v_start * v_start) / (2 * accel);
             // float x_3 = (v_max * v_max - v_end * v_end) / (2 * accel);
             t_1 = ((v_max - v_start) / accel) * 1000;
@@ -104,6 +124,11 @@ float Trajectory::getVelocity(const uint32_t t) const {
 float Trajectory::getDistance(const uint32_t t) const {
     // TODO: IMPLEMENT
     return 0.0f;
+}
+
+mll::MousePhysicalPosition Trajectory::getPosition(const mll::MousePhysicalPosition start_position, const uint32_t t) const {
+    // TODO: Implement
+    return mll::MousePhysicalPosition();
 }
 
 bool Trajectory::isEnd(const uint32_t time) const {

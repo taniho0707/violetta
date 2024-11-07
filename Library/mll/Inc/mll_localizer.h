@@ -6,8 +6,11 @@
 #pragma once
 
 #include "mll_position.h"
+#include "params.h"
 
 namespace mll {
+
+constexpr uint16_t ENCODER_BUFFER_LENGTH = 10;
 
 struct LocalizedStatus {
     float accel_translation;
@@ -31,6 +34,15 @@ class Localizer {
     Localizer();
 
     MouseSectionPosition current_section;
+
+    misc::MouseParams* params;
+
+    float encoder_left[ENCODER_BUFFER_LENGTH];
+    float encoder_right[ENCODER_BUFFER_LENGTH];
+    uint16_t encoder_index;
+
+    void updateAveragedEncoder(float left, float right);
+    void getAveragedEncoder(float& left, float& right);
 
    public:
     // 現在の推測内容

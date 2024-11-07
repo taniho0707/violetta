@@ -19,7 +19,8 @@
 #include "mll_localizer.h"
 #include "mll_logger.h"
 #include "mll_motor_controller.h"
-#include "mll_operation_controller.h"
+#include "mll_operation_coordinator.h"
+#include "mll_ui.h"
 #include "mll_wall_analyser.h"
 
 void mpl::Timer::run1() {
@@ -39,11 +40,14 @@ void mpl::Timer::run2() {
 
     static auto battery = mpl::Battery::getInstance();
     battery->interruptPeriodic();
+
+    static auto ui = mll::Ui::getInstance();
+    ui->interruptPeriodic();
 }
 
 void mpl::Timer::run3() {
-    // static auto led = mpl::Led::getInstance();
-    // led->interrupt();
+    static auto led = mpl::Led::getInstance();
+    led->interruptPeriodic();
 
 #ifdef MOUSE_LAZULI
     static auto speaker = mpl::Speaker::getInstance();
@@ -53,8 +57,8 @@ void mpl::Timer::run3() {
     static auto localizer = mll::Localizer::getInstance();
     localizer->interruptPeriodic();
 
-    static auto operationcontroller = mll::OperationController::getInstance();
-    operationcontroller->interruptPeriodic();
+    static auto operationcoordinator = mll::OperationCoordinator::getInstance();
+    operationcoordinator->interruptPeriodic();
 
     static auto motorcontroller = mll::MotorController::getInstance();
     motorcontroller->interruptPeriodic();
