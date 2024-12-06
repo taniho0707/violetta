@@ -96,6 +96,28 @@ void mll::Localizer::setPosition(float x, float y, float theta) {
 //     current_section.d = d;
 // }
 
+float mll::Localizer::distanceFromCrossedLine(mll::IntercardinalDirection d, float x, float y) {
+    float distance = 0;
+    switch (d) {
+        case IntercardinalDirection::NORTH:
+            distance = y - current_section.y;
+            break;
+        case IntercardinalDirection::EAST:
+            distance = x - current_section.x;
+            break;
+        case IntercardinalDirection::SOUTH:
+            distance = current_section.y - y;
+            break;
+        case IntercardinalDirection::WEST:
+            distance = current_section.x - x;
+            break;
+        default:
+            break;
+    }
+    // FIXME: Implement 斜め方向の距離計算
+    return distance;
+}
+
 void mll::Localizer::interruptPeriodic() {
     // エンコーダ、ジャイロ、加速度、壁センサの値を取得
     static auto msg_server = msg::MessageServer::getInstance();

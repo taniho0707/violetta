@@ -23,7 +23,7 @@ enum class CardinalDirection : uint8_t {
 };
 
 // 8方位を定義
-enum class IntercardinalDirectioin : uint8_t {
+enum class IntercardinalDirection : uint8_t {
     NORTH,
     NORTHEAST,
     EAST,
@@ -41,6 +41,20 @@ enum class FirstPersonDirection : uint8_t {
     BACK,
     LEFT,
 };
+
+// 変換関数
+inline IntercardinalDirection convertCardinalDirectionToInterCardinalDirection(CardinalDirection d) {
+    switch (d) {
+        case CardinalDirection::NORTH:
+            return IntercardinalDirection::NORTH;
+        case CardinalDirection::EAST:
+            return IntercardinalDirection::EAST;
+        case CardinalDirection::SOUTH:
+            return IntercardinalDirection::SOUTH;
+        case CardinalDirection::WEST:
+            return IntercardinalDirection::WEST;
+    }
+}
 
 // マウスの物理位置を定義
 struct MousePhysicalPosition {

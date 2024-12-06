@@ -328,6 +328,18 @@ void PositionUpdater::setNextMove(const OperationMoveType move, const float dist
     initMove();
 }
 
+void PositionUpdater::setNextMove(const OperationMoveType move, const float distance, const CardinalDirection dir, const float limit_x,
+                                  const float limit_y, const bool slalom_front_control_flag) {
+    current_move = move;
+    current_move_distance = distance;
+    start_physical_position = target_physical_position;
+    if (slalom_front_control_flag) {
+        slalom_front_control = true;
+    }
+    start_time = mpl::Timer::getMilliTime();
+    initMove();
+}
+
 void PositionUpdater::reset(const MousePhysicalPosition& position) {
     // TODO: trajectory のリセット
     target_physical_position = position;
