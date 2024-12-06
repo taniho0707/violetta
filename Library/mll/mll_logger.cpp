@@ -88,7 +88,7 @@ LoggerResult Logger::read(LogConfig& config, uint32_t ite, void* data) {
     if (config.dest == LogDestinationType::INTERNAL_RAM) {
         switch (config.type) {
             case LogType::ALL:
-                if (Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatAll) * ite >
+                if (Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatAll) * ite >=
                     Logger::address_next[static_cast<uint8_t>(config.type)]) {
                     return LoggerResult::NO_DATA;
                 } else {
@@ -97,7 +97,7 @@ LoggerResult Logger::read(LogConfig& config, uint32_t ite, void* data) {
                     return LoggerResult::SUCCESS;
                 }
             case LogType::SEARCH:
-                if (Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatSearch) * ite >
+                if (Logger::config[static_cast<uint8_t>(config.type)].address + sizeof(LogFormatSearch) * ite >=
                     Logger::address_next[static_cast<uint8_t>(config.type)]) {
                     return LoggerResult::NO_DATA;
                 } else {

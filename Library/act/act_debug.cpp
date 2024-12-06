@@ -22,11 +22,17 @@ Status DebugActivity::run() {
     auto cmd_server = cmd::CommandServer::getInstance();
     cmd::CommandFormatDebugTx cmd_debug_tx = {0};
 
+#ifndef LINUX
     auto logger = mll::Logger::getInstance();
     const uint32_t LOG_ADDRESS = 0x20030000;
     constexpr uint16_t ALL_LOG_LENGTH = 0x20000 / sizeof(mll::LogFormatAll);
     auto logconfig = mll::LogConfig{mll::LogType::ALL, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, (uint32_t)(&LOG_ADDRESS)};
     mll::LogFormatAll log_data = {0};
+
+    auto debug = mpl::Debug::getInstance();
+    cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "[DEBUG]\n");
+    cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    mpl::Timer::sleepMs(1);
 
     auto coordinate_director = mll::CoordinateDirector::getInstance();
     for (uint8_t i = 0; i < 65; i++) {
@@ -35,19 +41,20 @@ Status DebugActivity::run() {
         mpl::Timer::sleepMs(2);
     }
 
-    auto debug = mpl::Debug::getInstance();
     // clang-format off
         cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
-            "time, motorL, motorR, motorCurrentL, motorCurrentR, motorS, wallFL, wallL, wallC, wallR, wallFR,"
-            "encL, encR, distC, distF, kabekireL, kabekireR, targetVT, targetVR, currentVT, currentVR,"
-            "posX, posY, posT, gyroY, accX, accY, accZ, battery\n"
+            "time,motorL,motorR,motorCurrentL,motorCurrentR,motorS,encL,encR,wallFL,wallL,wallC,wallR,wallFR,"
+            "distC,distF,angF,kabekireL,kabekireR,targetVT,targetVR,currentVT,currentVR,"
+            "posX,posY,posT,gyroY,accX,accY,accZ,battery\n"
         );
     // clang-format on
     cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
     mpl::Timer::sleepMs(1);  // TODO: 様子見で削除する
 
     for (int i = 0; i < ALL_LOG_LENGTH; ++i) {
-        logger->read(logconfig, i, &log_data);
+        if (logger->read(logconfig, i, &log_data) == mll::LoggerResult::NO_DATA) {
+            break;
+        }
         // clang-format off
         cmd_debug_tx.len = debug->format(cmd_debug_tx.message,
             "%12d,%6.3f,%6.3f,"
@@ -73,6 +80,11 @@ Status DebugActivity::run() {
         cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
         mpl::Timer::sleepMs(1);  // TODO: 様子見で削除する
     }
+
+    cmd_debug_tx.len = debug->format(cmd_debug_tx.message, "[END]\n");
+    cmd_server->push(cmd::CommandId::DEBUG_TX, &cmd_debug_tx);
+    mpl::Timer::sleepMs(1);
+#endif  // LINUX
 
     // auto logger = mll::Logger::getInstance();
     // const uint32_t LOG_ADDRESS = 0x20030000;
