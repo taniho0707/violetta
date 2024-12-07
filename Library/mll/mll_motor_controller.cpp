@@ -118,6 +118,7 @@ void mll::MotorController::interruptPeriodic() {
     msg_server->receiveMessage(msg::ModuleId::LOCALIZER, &msg_localizer);
     msg_server->receiveMessage(msg::ModuleId::BATTERY, &msg_battery);
     msg_server->receiveMessage(msg::ModuleId::MOTORCONTROLLER, &msg_motor_controller);
+    msg_server->receiveMessage(msg::ModuleId::WALLANALYSER, &msg_wall_analyser);
 
     // OperationController からの指令を処理 (MOTORCONTROLLER)
     if (!enabled && msg_motor_controller.is_controlled) {
@@ -153,9 +154,16 @@ void mll::MotorController::interruptPeriodic() {
                                       params->motor_control_translation_ki * integral_translation +
                                       params->motor_control_translation_kd * error_diff_translation;
 
+    // target_velocity_rotation をベースに、壁制御を簡易的に実装
+    const float target_velocity_rotation_walladjusted =
+        target_velocity_rotation - ((target_velocity_translation >= 0.25f && target_velocity_rotation == 0.0f &&
+                                     !msg_wall_analyser.front_wall.isExistWall(FirstPersonDirection::FRONT))
+                                        ? 0.02f * msg_wall_analyser.distance_from_center
+                                        : 0.f);
+
     // rotation 成分の計算、出力は電流 [mA]
     // const float error_rotation = calcAngleToTarget(msg_localizer.position_theta, target_angle);
-    const float error_rotation = target_velocity_rotation - msg_localizer.velocity_rotation;
+    const float error_rotation = target_velocity_rotation_walladjusted - msg_localizer.velocity_rotation;
 
     integral_rotation += error_rotation;  // FIXME: サンプリング周期をパラメータか固定値から読み出す
     const float error_diff_rotation = error_rotation - last_differential_rotation;

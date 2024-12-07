@@ -27,6 +27,7 @@ Status SearchActivity::run() {
 
     // TODO: モーター制御が止まっていることを確認する
     auto operation_coordinator = mll::OperationCoordinator::getInstance();
+    operation_coordinator->resetPosition(mll::MousePhysicalPosition{45.f, 45.f, 0.f});
     operation_coordinator->enableMotorControl();
     mpl::Timer::sleepMs(1000);
 
@@ -42,7 +43,7 @@ Status SearchActivity::run() {
     constexpr uint16_t ALL_LOG_LENGTH = 0x20000 / sizeof(mll::LogFormatAll);
     auto logconfig = mll::LogConfig{mll::LogType::ALL, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, LOG_ADDRESS};
     logger->init(logconfig);
-    logger->startPeriodic(mll::LogType::ALL, 2);
+    logger->startPeriodic(mll::LogType::ALL, 5);
     // constexpr uint16_t ALL_LOG_LENGTH = 0x20000 / sizeof(mll::LogFormatSearch);
     // auto logconfig = mll::LogConfig{mll::LogType::SEARCH, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, LOG_ADDRESS};
     // logger->init(logconfig);

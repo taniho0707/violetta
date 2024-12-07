@@ -10,6 +10,7 @@
 #include "msg_format_localizer.h"
 #include "msg_format_motor_controller.h"
 #include "msg_format_motor_controller_internal.h"
+#include "msg_format_wall_analyser.h"
 #include "msg_server.h"
 #include "params.h"
 
@@ -27,6 +28,7 @@ class MotorController {
     msg::MsgFormatLocalizer msg_localizer;
     msg::MsgFormatMotorController msg_motor_controller;
     msg::MsgFormatMotorControllerInternal msg_motor_controller_internal;
+    msg::MsgFormatWallAnalyser msg_wall_analyser;
 
     misc::MouseParams* params;
 

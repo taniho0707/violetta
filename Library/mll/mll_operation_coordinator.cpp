@@ -52,7 +52,8 @@ OperationCoordinatorResult OperationCoordinator::runSearch(SearchOptions opt) {
 
     moves_current_index = 0;
     moves_current_length = 1;
-    moves[0] = OperationMoveCombination{OperationMoveType::TRAPACCEL, 45.f};
+    moves[0] = OperationMoveCombination{OperationMoveType::TRAPACCEL, 45.f + 15.f};
+    // NOTE: 区画の中心より後ろからスタートするため、45mm とは異なる
 
     return OperationCoordinatorResult::SUCCESS;
 }

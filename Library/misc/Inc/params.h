@@ -117,6 +117,8 @@ struct MouseParams {
     uint16_t wallsensor_exist_threshold[6];      // 壁センサの壁有無判定閾値 [1]
     uint16_t wallsensor_center[6];               // 区画中央にいるときの壁センサ値 [1]
     uint16_t wallsensor_kabekire_dif_threshold;  // 壁切れ判定する変位のしきい値 [1]
+    uint16_t wallsensor_from_center_disable_threshold;  // 制御周期ごとに中央からの変位がこの値より大きいとき壁制御を無効にする [1]
+    uint16_t wallsensor_from_center_max;  // 中央からの変位の最大値 [1]
 
     // Encoder
     uint16_t encoder_resolution;  // エンコーダの分解能 [1/pulse]

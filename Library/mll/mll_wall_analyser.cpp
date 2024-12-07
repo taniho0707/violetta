@@ -51,8 +51,8 @@ void WallAnalyser::interruptPeriodic() {
     sensor_buffer_frontright[sensor_buffer_index] = msg_wallsensor.frontright;
 
     // 左右の変位の計算
-    int32_t dif_from_center_left = sensor_buffer_left[sensor_buffer_index] - params->wallsensor_exist_threshold[1];
-    int32_t dif_from_center_right = sensor_buffer_right[sensor_buffer_index] - params->wallsensor_exist_threshold[3];
+    int32_t dif_from_center_left = sensor_buffer_left[sensor_buffer_index] - params->wallsensor_center[1];
+    int32_t dif_from_center_right = sensor_buffer_right[sensor_buffer_index] - params->wallsensor_center[3];
     int32_t angle_from_front = (sensor_buffer_left[sensor_buffer_index] - params->wallsensor_center[0]) -
                                (sensor_buffer_right[sensor_buffer_index] - params->wallsensor_center[4]);
 #if defined(MOUSE_ZIRCONIA2KAI)
@@ -65,6 +65,17 @@ void WallAnalyser::interruptPeriodic() {
     int32_t distance_from_front = (sensor_buffer_left[sensor_buffer_index] - params->wallsensor_center[0]) +
                                   (sensor_buffer_right[sensor_buffer_index] - params->wallsensor_center[4]);
 #endif
+
+    // 横壁制御量の調整
+    // 変位量が一定より大きければ 0 にする
+    if (misc::abs(sensor_buffer_left[sensor_buffer_index] - sensor_buffer_left[previousSensorBufferIndex()]) >
+        params->wallsensor_from_center_disable_threshold) {
+        dif_from_center_left = 0;
+    }
+    if (misc::abs(sensor_buffer_right[sensor_buffer_index] - sensor_buffer_right[previousSensorBufferIndex()]) >
+        params->wallsensor_from_center_disable_threshold) {
+        dif_from_center_right = 0;
+    }
 
     // 壁切れの判定用変数
     // FIXME: 1msのみデータが異常値になった場合に誤って壁切れ検知をしないように修正したい
@@ -116,17 +127,34 @@ void WallAnalyser::interruptPeriodic() {
     // FIXME: うまいこといかない
     // 壁制御の有効無効切り替え
     // 変化量が負 (遠ざかる・切れる方向) であれば壁制御量を 0 にする
-    if (sensor_buffer_left[sensor_buffer_index] - sensor_buffer_left[previous_index] < 0) {
-        dif_from_center_left = 0;
-        // dif_from_center_right *= 2;
-    }
-    if (sensor_buffer_right[sensor_buffer_index] - sensor_buffer_right[previous_index] < 0) {
-        dif_from_center_right = 0;
-        // dif_from_center_left *= 2;
-    }
+    // if (sensor_buffer_left[sensor_buffer_index] - sensor_buffer_left[previous_index] < 0) {
+    //     dif_from_center_left = 0;
+    //     // dif_from_center_right *= 2;
+    // }
+    // if (sensor_buffer_right[sensor_buffer_index] - sensor_buffer_right[previous_index] < 0) {
+    //     dif_from_center_right = 0;
+    //     // dif_from_center_left *= 2;
+    // }
 
     // 左右の変位を合成
     int16_t dif_distance_from_center = dif_from_center_left - dif_from_center_right;  // 左寄りが正
+
+    // distance_from_center の最大最小値をもとにクリップする
+    if (dif_distance_from_center > params->wallsensor_from_center_max) {
+        dif_distance_from_center = params->wallsensor_from_center_max;
+    } else if (dif_distance_from_center < -params->wallsensor_from_center_max) {
+        dif_distance_from_center = -params->wallsensor_from_center_max;
+    }
+    // distance_from_center のバッファ格納
+    // TODO: 過去 4 回中に 0 が存在している場合、出力値を 0 にする
+    // TODO: この部分をいい感じに変更したい……柱周辺では壁制御を無効にしたい
+    distance_from_center[sensor_buffer_index] = dif_distance_from_center;
+    for (uint8_t i = 0; i < WALLANALYSER_BUFFER_LENGTH; i++) {
+        if (distance_from_center[i] == 0) {
+            dif_distance_from_center = 0;
+            break;
+        }
+    }
 
     // 壁センサ解析値を格納
     static msg::MsgFormatWallAnalyser msg_wall_analyser;

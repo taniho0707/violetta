@@ -66,18 +66,20 @@ bool Params::load(ParameterDestinationType from) {
             cache.wallsensor_slalom_front_control = 145;       // スラローム時の前壁制御で使う前壁センサ閾値 [1]
             cache.wallsensor_turnon = 10000;
             cache.wallsensor_exist_threshold[0] = 0;   // TODO: ここの番号とセンサ番号をいい感じに一致させたい
-            cache.wallsensor_exist_threshold[1] = 80;  // LEFT
+            cache.wallsensor_exist_threshold[1] = 40;  // LEFT
             cache.wallsensor_exist_threshold[2] = 60;  // CENTER
-            cache.wallsensor_exist_threshold[3] = 50;  // RIGHT
+            cache.wallsensor_exist_threshold[3] = 40;  // RIGHT
             cache.wallsensor_exist_threshold[4] = 0;   // FRONTR
             cache.wallsensor_exist_threshold[5] = 0;
-            cache.wallsensor_center[0] = 490;  // FRONTL
-            cache.wallsensor_center[1] = 123;  // LEFT
-            cache.wallsensor_center[2] = 650;  // CENTER
-            cache.wallsensor_center[3] = 70;   // RIGHT
-            cache.wallsensor_center[4] = 330;  // FRONTR
+            cache.wallsensor_center[0] = 530;  // FRONTL
+            cache.wallsensor_center[1] = 140;  // LEFT
+            cache.wallsensor_center[2] = 730;  // CENTER
+            cache.wallsensor_center[3] = 80;   // RIGHT
+            cache.wallsensor_center[4] = 370;  // FRONTR
             cache.wallsensor_center[5] = 0;
-            cache.wallsensor_kabekire_dif_threshold = 10;
+            cache.wallsensor_kabekire_dif_threshold = 2;
+            cache.wallsensor_from_center_disable_threshold = 2;
+            cache.wallsensor_from_center_max = 50;
             cache.encoder_resolution = 160;
             cache.imu_sensitivity_acceleration_x = 2.39f;  // 0.244 mg/LSB
             cache.imu_sensitivity_acceleration_y = 2.39f;  // 0.244 mg/LSB = 2.39 mm/s^2/LSB
@@ -142,6 +144,7 @@ bool Params::load(ParameterDestinationType from) {
             cache.wallsensor_center[4] = 0;
             cache.wallsensor_center[5] = 0;
             cache.wallsensor_kabekire_dif_threshold = 10;
+            cache.wallsensor_from_center_disable_threshold = 2;
             cache.encoder_resolution = 160;
             cache.imu_sensitivity_acceleration = 244.f;  // 0.244 mg/LSB
             cache.imu_offset_acceleration = 0;

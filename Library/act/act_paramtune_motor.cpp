@@ -52,7 +52,7 @@ Status ParamtuneMotorActivity::run() {
         case act::MotorParameterTuneType::STRAIGHT:
             moves[moves_length++] = mll::OperationMoveCombination{
                 .type = mll::OperationMoveType::TRAPACCEL_STOP,
-                .distance = 90.f * 3,
+                .distance = 90.f * 5,
             };
             break;
         case act::MotorParameterTuneType::PIVOTTURN:
@@ -141,7 +141,7 @@ Status ParamtuneMotorActivity::run() {
     constexpr uint16_t ALL_LOG_LENGTH = 0x20000 / sizeof(mll::LogFormatAll);
     auto logconfig = mll::LogConfig{mll::LogType::ALL, mll::LogDestinationType::INTERNAL_RAM, ALL_LOG_LENGTH, LOG_ADDRESS};
     logger->init(logconfig);
-    logger->startPeriodic(mll::LogType::ALL, 1);
+    logger->startPeriodic(mll::LogType::ALL, 2);
 
     operation_coordinator->runSpecific(moves, moves_length);
 

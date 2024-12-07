@@ -28,6 +28,9 @@ class WallAnalyser {
     uint16_t sensor_buffer_frontright[WALLANALYSER_BUFFER_LENGTH];
     uint8_t sensor_buffer_index;  // 指し示している先が最新、一つ若い数字が一つ前のデータ
 
+    // 過去の distance_from_center を残すバッファ
+    int16_t distance_from_center[WALLANALYSER_BUFFER_LENGTH];
+
     void incrementSensorBufferIndex();
     uint8_t previousSensorBufferIndex();
 
